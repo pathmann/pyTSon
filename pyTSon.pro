@@ -12,6 +12,10 @@ TARGET = pyTSon
 TEMPLATE = lib
 
 DESTDIR = $$PWD/build
+OBJECTS_DIR = $$PWD/build
+MOC_DIR = $$PWD/build
+RCC_DIR = $$PWD/build
+UI_DIR = $$PWD/build
 
 INCLUDEPATH += src
 INCLUDEPATH += includes/pluginsdk/20/include
