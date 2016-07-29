@@ -495,7 +495,7 @@ PyObject* acquireCustomPlaybackData(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "si", &deviceName, &samples))
     return NULL;
 
-  short buffer[samples];
+  short* buffer = new short[samples];
   unsigned int res = ts3_funcs.acquireCustomPlaybackData(deviceName, buffer, samples);
 
   PyObject* pyret;
@@ -511,6 +511,7 @@ PyObject* acquireCustomPlaybackData(PyObject* /*self*/, PyObject* args) {
     Py_DECREF(pybuffer);
   }
   else pyret = Py_BuildValue("(Is)", res, NULL);
+  delete buffer;
 
   return pyret;
 }
