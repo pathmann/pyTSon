@@ -56,6 +56,39 @@ On unload, pyTSon will call stop and delete the instance of your class.
 TeamSpeak 3's library functions are available with the ts3 module (eg err, myid = ts3.getClientID(schid)).
 Constants are available in the ts3defines module (see ts3defines.py in include/ directory).
 
+Below is a small example plugin:
+```
+from ts3plugin import ts3plugin
+
+import ts3, ts3defines
+
+class testplugin(ts3plugin):
+    name = "test"
+    requestAutoload = False
+    version = "1.0"
+    apiVersion = 20
+    author = "Thomas \"PLuS\" Pathmann"
+    description = "This is a testplugin"
+    offersConfigure = True
+    commandKeyword = ""
+    infoTitle = ""
+    menuItems = []#[(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CLIENT, 0, "text", "icon.png")]
+    hotkeys = []#[("keyword", "description")]
+
+    def __init__(self):
+        ts3.printMessageToCurrentTab("Yay, we are running!")
+
+    def stop(self):
+        ts3.printMessageToCurrentTab("Oh no, we were stopped :(")
+
+    def onNewChannelEvent(self, schid, channelID, channelParentID):
+        err, name = ts3.getChannelVariableAsString(schid, channelID, ts3defines.ChannelProperties.CHANNEL_NAME)
+        if err == ts3defines.ERROR_ok:
+            ts3.printMessageToCurrentTab("new channel %s" % name)
+        else:
+            ts3.printMessageToCurrentTab("got error %s" % err)
+```
+
 Platform Notes
 ==============
 Linux
