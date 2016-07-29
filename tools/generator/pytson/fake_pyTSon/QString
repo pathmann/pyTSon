@@ -1,0 +1,7 @@
+#ifndef QSTRING__H_
+#define QSTRING__H_
+
+typedef int QString;
+
+#endif
+
