@@ -46,7 +46,7 @@ INCLUDEPATH += generated/pregen
 
 
 #########PythonQt Settings#########
-PYTHONQT_PATH = /tmp/PythonQt
+PYTHONQT_PATH = $${PWD}/includes/PythonQt
 
 INCLUDEPATH += $${PYTHONQT_PATH}/src \
   $${PYTHONQT_PATH}/extensions/PythonQt_QtAll
