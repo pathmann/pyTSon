@@ -55,7 +55,10 @@ class PluginHost(object):
         cls.setupConfig()
     
         cls.reload()
+        cls.start()
         
+    @classmethod
+    def start(cls):
         #start plugin if config says so, or if new plugin and requestAutoload is True
         for key in cls.plugins:
             load = False

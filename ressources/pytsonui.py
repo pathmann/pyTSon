@@ -204,6 +204,7 @@ class ConfigurationDialog(QDialog):
         
     def onReloadButtonClicked(self):
         self.host.reload()
+        self.host.start()
         self.setupList()   
     
     def onSettingsButtonClicked(self):
