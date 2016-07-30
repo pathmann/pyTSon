@@ -198,15 +198,18 @@ class ConfigurationDialog(QDialog):
             self.host.activate(name)
         elif not checked and name in self.host.active:
             self.host.deactivate(name)
-            
-        self.settingsButton.setEnabled(checked and name in self.host.active)
+        
+        if self.pluginsList.currentItem() == item:    
+            self.settingsButton.setEnabled(checked and name in self.host.active)
         
     def onReloadButtonClicked(self):
         self.host.reload()
         self.setupList()   
     
     def onSettingsButtonClicked(self):
-        self.host.active[cur.data(Qt.UserRole)].configure(self)
+        cur = self.pluginsList.currentItem()
+        if cur:
+            self.host.active[cur.data(Qt.UserRole)].configure(self)
         
     def onBackgroundColorButtonClicked(self):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "backgroundColor")), self, "Console Background Color")
