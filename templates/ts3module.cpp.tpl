@@ -17,11 +17,14 @@
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) (void*)(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) (void*)(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) (void*)(x, y, z)
+#define CPPALLOC(type, size) (void*)(type, size)
+#define delete
 #else
 #define TRANS QObject::tr
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) pyListToArray<type>(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) arrayToPyList<type>(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) {x, y, z}
+#define CPPALLOC(type, size) new type[size]
 #endif
 
 /*

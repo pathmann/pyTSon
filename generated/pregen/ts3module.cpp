@@ -17,11 +17,14 @@
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) (void*)(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) (void*)(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) (void*)(x, y, z)
+#define CPPALLOC(type, size) (void*)(size)
+#define delete
 #else
 #define TRANS QObject::tr
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) pyListToArray<type>(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) arrayToPyList<type>(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) {x, y, z}
+#define CPPALLOC(type, size) new type[size]
 #endif
 
 /*
@@ -495,7 +498,7 @@ PyObject* acquireCustomPlaybackData(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "si", &deviceName, &samples))
     return NULL;
 
-  short* buffer = new short[samples];
+  short* buffer = CPPALLOC(short, samples);
   unsigned int res = ts3_funcs.acquireCustomPlaybackData(deviceName, buffer, samples);
 
   PyObject* pyret;
@@ -675,7 +678,7 @@ PyObject* getConfigPath(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
-  char* path = new char[maxLen];
+  char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getConfigPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
@@ -1698,7 +1701,7 @@ PyObject* getClientDisplayName(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "KI|I", &schid, &clientID, &maxLen))
     return NULL;
 
-  char* result = new char[maxLen];
+  char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getClientDisplayName((uint64)schid, (anyID)clientID, result, maxLen);
 
   PyObject* ret = Py_BuildValue("(Is)", res, result);
@@ -1752,7 +1755,7 @@ PyObject* urlsToBB(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "s|I", &text, &maxLen))
     return NULL;
 
-  char* result = new char[maxLen];
+  char* result = CPPALLOC(char, maxLen);
   ts3_funcs.urlsToBB(text, result, maxLen);
 
   PyObject* ret = Py_BuildValue("s", result);
@@ -2812,8 +2815,8 @@ PyObject* getChannelConnectInfo(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "KK|I", &schid, &channelID, &maxLen))
     return NULL;
 
-  char* path = new char[maxLen];
-  char* password = new char[maxLen];
+  char* path = CPPALLOC(char, maxLen);
+  char* password = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getChannelConnectInfo((uint64)schid, (uint64)channelID, path, password, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("(Iss)", res, path, password);
@@ -2966,7 +2969,7 @@ PyObject* getAppPath(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
-  char* path = new char[maxLen];
+  char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getAppPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
@@ -3508,7 +3511,7 @@ PyObject* getAvatar(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "KI|I", &schid, &clientID, &maxLen))
     return NULL;
 
-  char* result = new char[maxLen];
+  char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getAvatar((uint64)schid, (anyID)clientID, result, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("(Is)", res, result);
@@ -4077,7 +4080,7 @@ PyObject* getResourcesPath(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
-  char* path = new char[maxLen];
+  char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getResourcesPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
@@ -4830,7 +4833,7 @@ PyObject* getDirectories(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "s|I", &path, &maxLen))
     return NULL;
 
-  char* result = new char[maxLen];
+  char* result = CPPALLOC(char, maxLen);
   ts3_funcs.getDirectories(path, result, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", result);
@@ -5333,7 +5336,7 @@ PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
-  char* path = new char[maxLen];
+  char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getPluginPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
@@ -6801,9 +6804,9 @@ PyObject* getServerConnectInfo(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "K|I", &schid, &maxLen))
     return NULL;
 
-  char* host = new char[maxLen];
+  char* host = CPPALLOC(char, maxLen);
   unsigned short port;
-  char* password = new char[maxLen];
+  char* password = CPPALLOC(char, maxLen);
 
   unsigned res = ts3_funcs.getServerConnectInfo((uint64)schid, host, &port, password, (size_t)maxLen);
 
@@ -6933,7 +6936,7 @@ PyObject* createReturnCode(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
-  char* returnCode = new char[maxLen];
+  char* returnCode = CPPALLOC(char, maxLen);
   ts3_funcs.createReturnCode(ts3_pluginid, returnCode, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", returnCode);

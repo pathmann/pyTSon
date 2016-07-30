@@ -179,7 +179,7 @@ class PluginHost(object):
         ret = []
         for key, p in cls.active.items():
             ret.append(p.infoTitle)
-            ret.append(p.infoData(schid, id, atype))
+            ret += p.infoData(schid, id, atype)
             
         return ret
         

@@ -30,10 +30,7 @@ class PluginMount(type):
 
 
 class PluginHost(object):
-    defaultConfig = [("general", [("differentApi", "False")]),
-                    ("plugins", []),
-                    ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"),
-                        ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600")])]
+    defaultConfig = [("general", [("differentApi", "False")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600")])]
 
     @classmethod
     def setupConfig(cls):
@@ -182,7 +179,7 @@ class PluginHost(object):
         ret = []
         for key, p in cls.active.items():
             ret.append(p.infoTitle)
-            ret.append(p.infoData(schid, id, atype))
+            ret += p.infoData(schid, id, atype)
             
         return ret
         
@@ -336,8 +333,8 @@ class ts3plugin(object, metaclass=PluginMount):
     offersConfigure = False
     commandKeyword = "py"
     infoTitle = "pyTSon"
-    menuItems = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CLIENT, 0, "text", "icon.png")]
-    hotkeys = [("keyword", "description")]
+    menuItems = []#[(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CLIENT, 0, "text", "icon.png")]
+    hotkeys = []#[("keyword", "description")]
     """
         
     def __init__(self):
@@ -394,252 +391,252 @@ class ts3plugin(object, metaclass=PluginMount):
     def onCustom3dRolloffCalculationWaveEvent(self, schid, waveHandle, distance, volume):
         return volume
   
-    def onChannelMoveEvent(self, serverConnectionHandlerID, channelID, newChannelParentID, invokerID, invokerName, invokerUniqueIdentifier):
-        pass
-        
-    def onClientSelfVariableUpdateEvent(self, serverConnectionHandlerID, flag, oldValue, newValue):
-        pass
-        
     def onServerGroupClientAddedEvent(self, serverConnectionHandlerID, clientID, clientName, clientUniqueIdentity, serverGroupID, invokerClientID, invokerName, invokerUniqueIdentity):
-        pass
-        
-    def onClientNamefromDBIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
-        pass
-        
-    def onServerGroupPermListFinishedEvent(self, serverConnectionHandlerID, serverGroupID):
-        pass
-        
-    def onAvatarUpdated(self, serverConnectionHandlerID, clientID, avatarPath):
-        pass
-        
-    def onServerGroupListFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onServerGroupClientDeletedEvent(self, serverConnectionHandlerID, clientID, clientName, clientUniqueIdentity, serverGroupID, invokerClientID, invokerName, invokerUniqueIdentity):
-        pass
-        
-    def onClientBanFromServerEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, time, kickMessage):
-        pass
-        
-    def onDelChannelEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
-        pass
-        
-    def onClientMoveMovedEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moverID, moverName, moverUniqueIdentifier, moveMessage):
-        pass
-        
-    def onClientPermListEvent(self, serverConnectionHandlerID, clientDatabaseID, permissionID, permissionValue, permissionNegated, permissionSkip):
-        pass
-        
-    def onChannelClientPermListFinishedEvent(self, serverConnectionHandlerID, channelID, clientDatabaseID):
-        pass
-        
-    def onMenuItemEvent(self, serverConnectionHandlerID, atype, menuItemID, selectedItemID):
-        pass
-        
-    def onClientNamefromUIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
-        pass
-        
-    def onPluginCommandEvent(self, serverConnectionHandlerID, pluginName, pluginCommand):
-        pass
-        
-    def onConnectionInfoEvent(self, serverConnectionHandlerID, clientID):
-        pass
-        
-    def onChannelPasswordChangedEvent(self, serverConnectionHandlerID, channelID):
-        pass
-        
-    def onHotkeyRecordedEvent(self, keyword, key):
-        pass
-        
-    def onClientDBIDfromUIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID):
-        pass
-        
-    def onPlaybackShutdownCompleteEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onPermissionListGroupEndIDEvent(self, serverConnectionHandlerID, groupEndID):
-        pass
-        
-    def onChannelGroupPermListEvent(self, serverConnectionHandlerID, channelGroupID, permissionID, permissionValue, permissionNegated, permissionSkip):
-        pass
-        
-    def onPermissionOverviewFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onNewChannelCreatedEvent(self, serverConnectionHandlerID, channelID, channelParentID, invokerID, invokerName, invokerUniqueIdentifier):
-        pass
-        
-    def onUpdateClientEvent(self, serverConnectionHandlerID, clientID, invokerID, invokerName, invokerUniqueIdentifier):
-        pass
-        
-    def onServerConnectionInfoEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onHotkeyEvent(self, keyword):
-        pass
-        
-    def onServerGroupPermListEvent(self, serverConnectionHandlerID, serverGroupID, permissionID, permissionValue, permissionNegated, permissionSkip):
-        pass
-        
-    def onServerStopEvent(self, serverConnectionHandlerID, shutdownMessage):
-        pass
-        
-    def onClientMoveEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moveMessage):
-        pass
-        
-    def onMessageGetEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, message, timestamp):
-        pass
-        
-    def onServerEditedEvent(self, serverConnectionHandlerID, editerID, editerName, editerUniqueIdentifier):
-        pass
-        
-    def onClientMoveSubscriptionEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility):
-        pass
-        
-    def onUpdateChannelEditedEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
-        pass
-        
-    def onBanListEvent(self, serverConnectionHandlerID, banid, ip, name, uid, creationTime, durationTime, invokerName, invokercldbid, invokeruid, reason, numberOfEnforcements, lastNickName):
         pass
         
     def onClientMoveTimeoutEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, timeoutMessage):
         pass
         
-    def onMessageListEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, timestamp, flagRead):
+    def onPermissionListGroupEndIDEvent(self, serverConnectionHandlerID, groupEndID):
         pass
         
-    def onServerTemporaryPasswordListEvent(self, serverConnectionHandlerID, clientNickname, uniqueClientIdentifier, description, password, timestampStart, timestampEnd, targetChannelID, targetChannelPW):
+    def onPluginCommandEvent(self, serverConnectionHandlerID, pluginName, pluginCommand):
         pass
         
-    def onFileListFinishedEvent(self, serverConnectionHandlerID, channelID, path):
+    def onServerStopEvent(self, serverConnectionHandlerID, shutdownMessage):
         pass
         
-    def onChannelUnsubscribeFinishedEvent(self, serverConnectionHandlerID):
+    def onMessageGetEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, message, timestamp):
         pass
         
-    def onClientServerQueryLoginPasswordEvent(self, serverConnectionHandlerID, loginPassword):
-        pass
-        
-    def onChannelPermListEvent(self, serverConnectionHandlerID, channelID, permissionID, permissionValue, permissionNegated, permissionSkip):
-        pass
-        
-    def onChannelUnsubscribeEvent(self, serverConnectionHandlerID, channelID):
-        pass
-        
-    def onChannelDescriptionUpdateEvent(self, serverConnectionHandlerID, channelID):
-        pass
-        
-    def onClientNeededPermissionsEvent(self, serverConnectionHandlerID, permissionID, permissionValue):
-        pass
-        
-    def onClientIDsEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientID, clientName):
-        pass
-        
-    def onFileListEvent(self, serverConnectionHandlerID, channelID, path, name, size, datetime, atype, incompletesize, returnCode):
-        pass
-        
-    def onNewChannelEvent(self, serverConnectionHandlerID, channelID, channelParentID):
+    def onServerGroupPermListFinishedEvent(self, serverConnectionHandlerID, serverGroupID):
         pass
         
     def onChannelGroupListEvent(self, serverConnectionHandlerID, channelGroupID, name, atype, iconID, saveDB):
         pass
         
-    def onUpdateChannelEvent(self, serverConnectionHandlerID, channelID):
-        pass
-        
-    def onPermissionOverviewEvent(self, serverConnectionHandlerID, clientDatabaseID, channelID, overviewType, overviewID1, overviewID2, permissionID, permissionValue, permissionNegated, permissionSkip):
-        pass
-        
-    def onServerLogEvent(self, serverConnectionHandlerID, logMsg):
-        pass
-        
-    def onClientIDsFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onChannelSubscribeFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onClientNeededPermissionsFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onPermissionListFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onPermissionListEvent(self, serverConnectionHandlerID, permissionID, permissionName, permissionDescription):
-        pass
-        
-    def currentServerConnectionChanged(self, serverConnectionHandlerID):
-        pass
-        
-    def onChannelGroupListFinishedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onServerUpdatedEvent(self, serverConnectionHandlerID):
-        pass
-        
-    def onFileInfoEvent(self, serverConnectionHandlerID, channelID, name, size, datetime):
-        pass
-        
-    def onClientChatClosedEvent(self, serverConnectionHandlerID, clientID, clientUniqueIdentity):
-        pass
-        
-    def onComplainListEvent(self, serverConnectionHandlerID, targetClientDatabaseID, targetClientNickName, fromClientDatabaseID, fromClientNickName, complainReason, timestamp):
-        pass
-        
-    def onClientKickFromChannelEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, kickMessage):
-        pass
-        
-    def onClientDisplayNameChanged(self, serverConnectionHandlerID, clientID, displayName, uniqueClientIdentifier):
-        pass
-        
-    def onServerGroupClientListEvent(self, serverConnectionHandlerID, serverGroupID, clientDatabaseID, clientNameIdentifier, clientUniqueID):
-        pass
-        
-    def onClientChannelGroupChangedEvent(self, serverConnectionHandlerID, channelGroupID, channelID, clientID, invokerClientID, invokerName, invokerUniqueIdentity):
+    def onFileListFinishedEvent(self, serverConnectionHandlerID, channelID, path):
         pass
         
     def onServerGroupByClientIDEvent(self, serverConnectionHandlerID, name, serverGroupList, clientDatabaseID):
         pass
         
-    def onIncomingClientQueryEvent(self, serverConnectionHandlerID, commandText):
-        pass
-        
-    def onClientChatComposingEvent(self, serverConnectionHandlerID, clientID, clientUniqueIdentity):
-        pass
-        
-    def onChannelSubscribeEvent(self, serverConnectionHandlerID, channelID):
-        pass
-        
-    def onSoundDeviceListChangedEvent(self, modeID, playOrCap):
+    def onUpdateChannelEditedEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
         pass
         
     def onClientKickFromServerEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, kickMessage):
         pass
         
-    def onChannelPermListFinishedEvent(self, serverConnectionHandlerID, channelID):
+    def onClientIDsEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientID, clientName):
+        pass
+        
+    def onSoundDeviceListChangedEvent(self, modeID, playOrCap):
+        pass
+        
+    def onClientDBIDfromUIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID):
+        pass
+        
+    def onChannelMoveEvent(self, serverConnectionHandlerID, channelID, newChannelParentID, invokerID, invokerName, invokerUniqueIdentifier):
+        pass
+        
+    def onServerLogEvent(self, serverConnectionHandlerID, logMsg):
+        pass
+        
+    def onClientNeededPermissionsFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onClientNamefromDBIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
+        pass
+        
+    def onNewChannelCreatedEvent(self, serverConnectionHandlerID, channelID, channelParentID, invokerID, invokerName, invokerUniqueIdentifier):
+        pass
+        
+    def onClientKickFromChannelEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, kickMessage):
+        pass
+        
+    def onServerGroupClientDeletedEvent(self, serverConnectionHandlerID, clientID, clientName, clientUniqueIdentity, serverGroupID, invokerClientID, invokerName, invokerUniqueIdentity):
+        pass
+        
+    def onServerGroupPermListEvent(self, serverConnectionHandlerID, serverGroupID, permissionID, permissionValue, permissionNegated, permissionSkip):
+        pass
+        
+    def onPermissionListFinishedEvent(self, serverConnectionHandlerID):
         pass
         
     def onClientPermListFinishedEvent(self, serverConnectionHandlerID, clientDatabaseID):
         pass
         
-    def onTalkStatusChangeEvent(self, serverConnectionHandlerID, status, isReceivedWhisper, clientID):
+    def onHotkeyEvent(self, keyword):
         pass
         
-    def onChannelClientPermListEvent(self, serverConnectionHandlerID, channelID, clientDatabaseID, permissionID, permissionValue, permissionNegated, permissionSkip):
+    def onMenuItemEvent(self, serverConnectionHandlerID, atype, menuItemID, selectedItemID):
         pass
         
-    def onServerLogFinishedEvent(self, serverConnectionHandlerID, lastPos, fileSize):
+    def onChannelUnsubscribeFinishedEvent(self, serverConnectionHandlerID):
         pass
         
-    def onServerGroupListEvent(self, serverConnectionHandlerID, serverGroupID, name, atype, iconID, saveDB):
+    def onServerTemporaryPasswordListEvent(self, serverConnectionHandlerID, clientNickname, uniqueClientIdentifier, description, password, timestampStart, timestampEnd, targetChannelID, targetChannelPW):
         pass
         
     def onConnectStatusChangeEvent(self, serverConnectionHandlerID, newStatus, errorNumber):
         pass
         
-    def onChannelGroupPermListFinishedEvent(self, serverConnectionHandlerID, channelGroupID):
+    def onUpdateChannelEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def onChannelPermListEvent(self, serverConnectionHandlerID, channelID, permissionID, permissionValue, permissionNegated, permissionSkip):
+        pass
+        
+    def onChannelSubscribeFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onChannelClientPermListEvent(self, serverConnectionHandlerID, channelID, clientDatabaseID, permissionID, permissionValue, permissionNegated, permissionSkip):
+        pass
+        
+    def onClientNeededPermissionsEvent(self, serverConnectionHandlerID, permissionID, permissionValue):
+        pass
+        
+    def onTalkStatusChangeEvent(self, serverConnectionHandlerID, status, isReceivedWhisper, clientID):
+        pass
+        
+    def onServerGroupListEvent(self, serverConnectionHandlerID, serverGroupID, name, atype, iconID, saveDB):
+        pass
+        
+    def onChannelDescriptionUpdateEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def onHotkeyRecordedEvent(self, keyword, key):
+        pass
+        
+    def onClientServerQueryLoginPasswordEvent(self, serverConnectionHandlerID, loginPassword):
+        pass
+        
+    def onPermissionListEvent(self, serverConnectionHandlerID, permissionID, permissionName, permissionDescription):
+        pass
+        
+    def onClientDisplayNameChanged(self, serverConnectionHandlerID, clientID, displayName, uniqueClientIdentifier):
+        pass
+        
+    def onClientSelfVariableUpdateEvent(self, serverConnectionHandlerID, flag, oldValue, newValue):
+        pass
+        
+    def onChannelClientPermListFinishedEvent(self, serverConnectionHandlerID, channelID, clientDatabaseID):
+        pass
+        
+    def onServerConnectionInfoEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onServerUpdatedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onIncomingClientQueryEvent(self, serverConnectionHandlerID, commandText):
+        pass
+        
+    def onChannelPasswordChangedEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def onUpdateClientEvent(self, serverConnectionHandlerID, clientID, invokerID, invokerName, invokerUniqueIdentifier):
+        pass
+        
+    def onBanListEvent(self, serverConnectionHandlerID, banid, ip, name, uid, creationTime, durationTime, invokerName, invokercldbid, invokeruid, reason, numberOfEnforcements, lastNickName):
+        pass
+        
+    def onChannelUnsubscribeEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def currentServerConnectionChanged(self, serverConnectionHandlerID):
+        pass
+        
+    def onServerGroupListFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onPermissionOverviewFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onServerGroupClientListEvent(self, serverConnectionHandlerID, serverGroupID, clientDatabaseID, clientNameIdentifier, clientUniqueID):
+        pass
+        
+    def onChannelGroupListFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onServerLogFinishedEvent(self, serverConnectionHandlerID, lastPos, fileSize):
+        pass
+        
+    def onDelChannelEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
+        pass
+        
+    def onAvatarUpdated(self, serverConnectionHandlerID, clientID, avatarPath):
+        pass
+        
+    def onFileInfoEvent(self, serverConnectionHandlerID, channelID, name, size, datetime):
+        pass
+        
+    def onFileListEvent(self, serverConnectionHandlerID, channelID, path, name, size, datetime, atype, incompletesize, returnCode):
+        pass
+        
+    def onComplainListEvent(self, serverConnectionHandlerID, targetClientDatabaseID, targetClientNickName, fromClientDatabaseID, fromClientNickName, complainReason, timestamp):
+        pass
+        
+    def onChannelGroupPermListEvent(self, serverConnectionHandlerID, channelGroupID, permissionID, permissionValue, permissionNegated, permissionSkip):
+        pass
+        
+    def onServerEditedEvent(self, serverConnectionHandlerID, editerID, editerName, editerUniqueIdentifier):
         pass
         
     def onFileTransferStatusEvent(self, transferID, status, statusMessage, remotefileSize, serverConnectionHandlerID):
+        pass
+        
+    def onClientNamefromUIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
+        pass
+        
+    def onNewChannelEvent(self, serverConnectionHandlerID, channelID, channelParentID):
+        pass
+        
+    def onClientChatClosedEvent(self, serverConnectionHandlerID, clientID, clientUniqueIdentity):
+        pass
+        
+    def onMessageListEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, timestamp, flagRead):
+        pass
+        
+    def onClientMoveSubscriptionEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility):
+        pass
+        
+    def onChannelGroupPermListFinishedEvent(self, serverConnectionHandlerID, channelGroupID):
+        pass
+        
+    def onChannelSubscribeEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def onChannelPermListFinishedEvent(self, serverConnectionHandlerID, channelID):
+        pass
+        
+    def onClientMoveMovedEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moverID, moverName, moverUniqueIdentifier, moveMessage):
+        pass
+        
+    def onClientChannelGroupChangedEvent(self, serverConnectionHandlerID, channelGroupID, channelID, clientID, invokerClientID, invokerName, invokerUniqueIdentity):
+        pass
+        
+    def onPlaybackShutdownCompleteEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onConnectionInfoEvent(self, serverConnectionHandlerID, clientID):
+        pass
+        
+    def onPermissionOverviewEvent(self, serverConnectionHandlerID, clientDatabaseID, channelID, overviewType, overviewID1, overviewID2, permissionID, permissionValue, permissionNegated, permissionSkip):
+        pass
+        
+    def onClientIDsFinishedEvent(self, serverConnectionHandlerID):
+        pass
+        
+    def onClientChatComposingEvent(self, serverConnectionHandlerID, clientID, clientUniqueIdentity):
+        pass
+        
+    def onClientBanFromServerEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, time, kickMessage):
+        pass
+        
+    def onClientMoveEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moveMessage):
+        pass
+        
+    def onClientPermListEvent(self, serverConnectionHandlerID, clientDatabaseID, permissionID, permissionValue, permissionNegated, permissionSkip):
         pass
         
