@@ -105,7 +105,7 @@ class PluginHost(object):
         #stop all running modules
         for key, p in cls.active.items():
             p.stop()
-            del cls.active[key]
+        cls.active = {}
         cls.plugins = {}
     
         #import all modules
