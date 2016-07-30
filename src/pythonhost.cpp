@@ -136,8 +136,14 @@ bool PythonHost::init(QString& error) {
   }
 
   Py_NoSiteFlag = 1;
+  Py_FrozenFlag = 1;
+  Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(const_cast<wchar_t*>(L"pyTSon"));
   Py_Initialize();
+  if (PyErr_Occurred()) {
+    PyErr_Print();
+    return false;
+  }
 
   //set syspath
   PyObject* syspath = PyList_New(3);
