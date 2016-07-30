@@ -35,8 +35,8 @@ HEADERS += src/pytson.h \
 
 
 #######PYTHON SETTINGS###############
-INCLUDEPATH += /usr/include/python3.4
-LIBS += /usr/lib64/libpython3.4.a
+INCLUDEPATH += $$PWD/includes/python-343/install/include/python3.4m
+LIBS += $$PWD/includes/python-343/install/lib/libpython3.4m.a
 unix:LIBS += -lpthread -ldl  -lutil -lm
 
 

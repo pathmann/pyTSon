@@ -118,7 +118,6 @@ class PluginHost(object):
                 try:
                     if base in cls.modules:
                         cls.modules[base] = importlib.reload(cls.modules[base])
-                        print("%s reloaded" % base)
                     else:
                         cls.modules[base] = importlib.__import__(base)
                 except:
