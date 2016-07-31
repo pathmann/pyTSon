@@ -200,7 +200,7 @@ class ConfigurationDialog(QDialog):
             self.host.deactivate(name)
         
         if self.pluginsList.currentItem() == item:    
-            self.settingsButton.setEnabled(checked and name in self.host.active)
+            self.settingsButton.setEnabled(checked and name in self.host.active and self.host.active[name].offersConfigure)
         
     def onReloadButtonClicked(self):
         self.host.reload()
