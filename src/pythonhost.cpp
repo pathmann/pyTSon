@@ -139,6 +139,16 @@ bool PythonHost::init(QString& error) {
   Py_FrozenFlag = 1;
   Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(const_cast<wchar_t*>(L"pyTSon"));
+  Py_NoUserSiteDirectory = 1;
+
+  QString libdir = m_includelibdir.absolutePath();
+  wchar_t* wlibdir = new wchar_t[libdir.length() +1];
+  int len = libdir.toWCharArray(wlibdir);
+  wlibdir[len] = '\0';
+
+  Py_SetPath(wlibdir);
+  delete wlibdir;
+
   Py_Initialize();
   if (PyErr_Occurred()) {
     PyErr_Print();
