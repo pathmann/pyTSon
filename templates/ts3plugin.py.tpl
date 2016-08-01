@@ -113,7 +113,7 @@ class PluginHost(object):
     
         #import all modules
         for f in glob.glob(os.path.join(ts3.getPluginPath(), "pyTSon", "scripts", "*.py")):
-            if os.path.isfile(f) and __file__ != f:
+            if os.path.isfile(f) and os.path.basename(f) != "ts3plugin.py":
                 base = os.path.basename(f[:-3])
                 try:
                     if base in cls.modules:
