@@ -193,7 +193,7 @@ class PluginHost(object):
         
         for key, p in cls.active.items():
             for (atype, locid, text, icon) in p.menuItems:
-                ret += (atype, nextid, text, icon)
+                ret.append((atype, nextid, text, icon))
                 cls.menus[nextid] = (p, locid)
                 nextid += 1
             
@@ -215,7 +215,7 @@ class PluginHost(object):
         
         for key, p in cls.active.items():
             for (lockey, description) in p.hotkeys:
-                ret += (str(nextkey), description)
+                ret.append((str(nextkey), description))
                 cls.hotkeys[str(nextkey)] = (p, lockey)
                 nextkey += 1
             
