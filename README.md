@@ -27,7 +27,7 @@ Generating Documentation
 Building
 --------
 * Qt 5.5.1 (which is the version, the TeamSpeak 3 client is currently using)
-* Python 3.4.3
+* Python 3.4.3 (static python with statically builtin modules)
 * [PythonQt](https://github.com/pathmann/PythonQt)
 
 Running
@@ -95,3 +95,7 @@ Platform Notes
 Linux
 -----
 You might need to bypass your TeamSpeak 3's runscript with `LD_PRELOAD=./plugins/libpyTSon.so`
+
+Releases
+========
+Personally I work on my linux amd64 machine, other platforms are only tested for basic running.
