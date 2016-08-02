@@ -379,18 +379,20 @@ void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) 
     if (!tup || !PyTuple_Check(tup) || PyTuple_Size(tup) != 4) {
       ts3logdispatcher::instance()->add(QObject::tr("Calling initMenus failed, no list of tuples(4) returned"), LogLevel_ERROR);
       Py_DECREF(pyret);
-      for (int k = i -1; k >= 0; --i)
+      for (int k = i -1; k >= 0; --k)
         free((*menuItems)[k]);
       free(*menuItems);
+      *menuItems = NULL;
       return;
     }
 
     if (!PyLong_Check(PyTuple_GetItem(tup, 0)) || !PyLong_Check(PyTuple_GetItem(tup, 1)) || !PyUnicode_Check(PyTuple_GetItem(tup, 2)) || !PyUnicode_Check(PyTuple_GetItem(tup, 3))) {
       ts3logdispatcher::instance()->add(QObject::tr("Calling initMenus failed, no list of tuples(long, long, str, str) returned"), LogLevel_ERROR);
       Py_DECREF(pyret);
-      for (int k = i -1; k >= 0; --i)
+      for (int k = i -1; k >= 0; --k)
         free((*menuItems)[k]);
       free(*menuItems);
+      *menuItems = NULL;
       return;
     }
 
