@@ -99,6 +99,16 @@ class PluginHost(object):
     @classmethod
     def deactivate(cls, pname):
         if pname in cls.active:
+            #remove hotkeys
+            for key in cls.hotkeys:
+                if cls.hotkeys[key][0].name == pname:
+                    cls.menus.pop(key)
+            
+            #remove menuItems
+            for key in cls.menus:
+                if cls.menus[key][0].name == pname:
+                    cls.menus.pop(key)
+            
             cls.active[pname].stop()
             del cls.active[pname]
             cls.cfg.set("plugins", pname, "False")
