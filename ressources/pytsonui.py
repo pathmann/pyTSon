@@ -11,6 +11,34 @@ from itertools import takewhile
 import ts3
 
 
+def retrieveWidgets(obj, parent, widgets):
+        if type(parent) is QTabWidget:
+            childs = [parent.widget(i) for i in range(0, parent.count)]
+        else:
+            childs = parent.children()
+            
+        names = [w[0] for w in widgets]
+        stores = [w[1] for w in widgets]
+        grchilds = [w[2] for w in widgets]
+        
+        for c in childs:            
+            if c.objectName in names:
+                i = names.index(c.objectName)
+                if stores[i]:
+                    setattr(obj, names[i], c)
+                    
+                retrieveWidgets(obj, c, grchilds[i])
+                
+                names.pop(i)
+                stores.pop(i)
+                grchilds.pop(i)
+                
+            if len(names) == 0:
+                return 
+                
+        if len(names) != 0:
+            raise Exception("Malformed uifile, widgets not found: %s" % names)
+
 class ConfigurationDialog(QDialog):
     #[(objectName, store, [children])]
     CONF_WIDGETS = [("tabWidget", False, [
@@ -74,39 +102,11 @@ class ConfigurationDialog(QDialog):
         
         self.setWindowTitle("pyTSon - Settings")
         
-        self.retrieveWidgets(ui, self.CONF_WIDGETS)
+        retrieveWidgets(self, ui, self.CONF_WIDGETS)
         
         self.setupValues()
         self.setupSlots()
-        
-    def retrieveWidgets(self, parent, widgets):
-        if type(parent) is QTabWidget:
-            childs = [parent.widget(i) for i in range(0, parent.count)]
-        else:
-            childs = parent.children()
-            
-        names = [w[0] for w in widgets]
-        stores = [w[1] for w in widgets]
-        grchilds = [w[2] for w in widgets]
-        
-        for c in childs:            
-            if c.objectName in names:
-                i = names.index(c.objectName)
-                if stores[i]:
-                    setattr(self, names[i], c)
-                    
-                self.retrieveWidgets(c, grchilds[i])
-                
-                names.pop(i)
-                stores.pop(i)
-                grchilds.pop(i)
-                
-            if len(names) == 0:
-                return 
-                
-        if len(names) != 0:
-            raise Exception("Malformed uifile, widgets not found: %s" % names)
-        
+         
     def setupList(self):
         self.pluginsList.clear()
         
