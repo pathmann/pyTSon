@@ -117,6 +117,8 @@ class ConfigurationDialog(QDialog):
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
                 item.setData(Qt.UserRole, key)
+                
+        self.pluginsList.sortItems()
         
     def setupValues(self):
         self.differentApiButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "differentApi", fallback=False) else Qt.Unchecked)
