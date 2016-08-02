@@ -27,6 +27,12 @@ def retrieveWidgets(obj, parent, widgets):
                 if stores[i]:
                     setattr(obj, names[i], c)
                     
+                #connect slots by name
+                for sig in dir(c):
+                    if type(getattr(c, sig)).__name__ == "builtin_qt_signal":
+                        if hasattr(obj, "on_%s_%s" % (c.objectName, sig.split('(')[0])):
+                            getattr(c, sig).connect(getattr(obj, "on_%s_%s" % (c.objectName, sig.split('(')[0])))                     
+                
                 retrieveWidgets(obj, c, grchilds[i])
                 
                 names.pop(i)
