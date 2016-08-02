@@ -39,6 +39,28 @@ def retrieveWidgets(obj, parent, widgets):
         if len(names) != 0:
             raise Exception("Malformed uifile, widgets not found: %s" % names)
 
+def setupUi(obj, uipath, widgets):
+    if os.path.isfile(uipath):
+        f = QFile(uipath)
+        if f.open(QIODevice.ReadOnly):
+            loader = QUiLoader()
+            ui = loader.load(f, obj)
+            f.close()
+            
+            if not ui:
+                raise Exception("Error creating widget from uifile")
+        else:
+            raise Exception("Could not open uifile")        
+    else:
+        raise Exception("Could not find uifile")
+        
+    retrieveWidgets(obj, ui, widgets)
+    
+    layout = QHBoxLayout(obj)
+    layout.addWidget(ui)
+    obj.setLayout(layout)
+    
+
 class ConfigurationDialog(QDialog):
     #[(objectName, store, [children])]
     CONF_WIDGETS = [("tabWidget", False, [
@@ -81,28 +103,9 @@ class ConfigurationDialog(QDialog):
         self.cfg = cfg
         self.host = host
         
-        uipath = os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui")
-        if os.path.isfile(uipath):
-            f = QFile(uipath)
-            if f.open(QIODevice.ReadOnly):
-                loader = QUiLoader()
-                ui = loader.load(f, self)
-                f.close()
-                
-                if not ui:
-                    raise Exception("Error creating widget from uifile")
-            else:
-                raise Exception("Could not find uifile")        
-        else:
-            raise Exception("Could not find uifile")
-        
-        layout = QHBoxLayout(self)
-        layout.addWidget(ui)
-        self.setLayout(layout)
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), self.CONF_WIDGETS)
         
         self.setWindowTitle("pyTSon - Settings")
-        
-        retrieveWidgets(self, ui, self.CONF_WIDGETS)
         
         self.setupValues()
         self.setupSlots()
