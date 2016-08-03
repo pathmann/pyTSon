@@ -6804,9 +6804,16 @@ PyObject* getServerConnectInfo(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "K|I", &schid, &maxLen))
     return NULL;
 
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
+
   char* host = CPPALLOC(char, maxLen);
+  host[0] = '\0';
   unsigned short port;
   char* password = CPPALLOC(char, maxLen);
+  password[0] = '\0';
 
   unsigned res = ts3_funcs.getServerConnectInfo((uint64)schid, host, &port, password, (size_t)maxLen);
 
