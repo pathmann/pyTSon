@@ -78,7 +78,11 @@ class PluginHost(object):
 
     @classmethod
     def shutdown(cls):
+        if cls.shell:
+            cls.shell.delete()
         cls.shell = None
+        if cls.confdlg:
+            cls.confdlg.delete()
         cls.confdlg = None
         
         #store config
