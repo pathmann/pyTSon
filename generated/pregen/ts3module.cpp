@@ -678,6 +678,11 @@ PyObject* getConfigPath(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
 
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
+
   char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getConfigPath(path, (size_t)maxLen);
 
@@ -1701,6 +1706,11 @@ PyObject* getClientDisplayName(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "KI|I", &schid, &clientID, &maxLen))
     return NULL;
 
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
+
   char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getClientDisplayName((uint64)schid, (anyID)clientID, result, maxLen);
 
@@ -1754,6 +1764,11 @@ PyObject* urlsToBB(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "s|I", &text, &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* result = CPPALLOC(char, maxLen);
   ts3_funcs.urlsToBB(text, result, maxLen);
@@ -2815,6 +2830,11 @@ PyObject* getChannelConnectInfo(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "KK|I", &schid, &channelID, &maxLen))
     return NULL;
 
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
+
   char* path = CPPALLOC(char, maxLen);
   char* password = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getChannelConnectInfo((uint64)schid, (uint64)channelID, path, password, (size_t)maxLen);
@@ -2968,6 +2988,11 @@ PyObject* getAppPath(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getAppPath(path, (size_t)maxLen);
@@ -3510,6 +3535,11 @@ PyObject* getAvatar(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "KI|I", &schid, &clientID, &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getAvatar((uint64)schid, (anyID)clientID, result, (size_t)maxLen);
@@ -4079,6 +4109,11 @@ PyObject* getResourcesPath(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getResourcesPath(path, (size_t)maxLen);
@@ -4833,6 +4868,11 @@ PyObject* getDirectories(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, "s|I", &path, &maxLen))
     return NULL;
 
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
+
   char* result = CPPALLOC(char, maxLen);
   ts3_funcs.getDirectories(path, result, (size_t)maxLen);
 
@@ -5335,6 +5375,11 @@ PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* path = CPPALLOC(char, maxLen);
   ts3_funcs.getPluginPath(path, (size_t)maxLen);
@@ -6942,6 +6987,11 @@ PyObject* createReturnCode(PyObject* /*self*/, PyObject* args) {
 
   if (!PyArg_ParseTuple(args, "|I", &maxLen))
     return NULL;
+
+  if (maxLen == 0) {
+    PyErr_SetString(PyExc_AttributeError, TRANS("maxLen must be greater than zero").toUtf8().data());
+    return NULL;
+  }
 
   char* returnCode = CPPALLOC(char, maxLen);
   ts3_funcs.createReturnCode(ts3_pluginid, returnCode, (size_t)maxLen);
