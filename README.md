@@ -90,12 +90,6 @@ class testplugin(ts3plugin):
 ```
 Some demo plugins are available in [this repository](https://github.com/pathmann/pyTSon_plugins).
 
-Platform Notes
-==============
-Linux
------
-You might need to bypass your TeamSpeak 3's runscript with `LD_PRELOAD=./plugins/libpyTSon.so`
-
 Releases
 ========
 Personally I work on my linux amd64 machine, other platforms are only tested for basic running.
