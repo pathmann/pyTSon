@@ -5,17 +5,12 @@ unix {
 }
 
 win32 {
-    contains(QMAKE_TARGET.arch, x64_64) {
-        PYTHON_PATH = C:/python-352/64bit
+    contains(QMAKE_TARGET.arch, x86_64) {
+    LIBS += C:\python-352\64bit\libs\python35.lib
+    INCLUDEPATH += C:\python-352\64bit\include
     }
     else {
-        PYTHON_PATH = C:/python-352/32bit
-    }
-    
-    INCLUDEPATH += $$PYTHON_PATH/Include
-    
-    IMPORT_LIBS = $$files($$PYTHON_PATH/*.lib)
-    for(FILE, IMPORT_LIBS) {
-        LIBS += $$FILE
+        LIBS += C:\python-352\32bit\libs\python35.lib
+    INCLUDEPATH += C:\python-352\32bit\include
     }
 }
