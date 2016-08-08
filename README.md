@@ -2,7 +2,7 @@
 pyTSon is a plugin for the TeamSpeak 3 client, it offers a python3 interface for the plugin sdk.
 pyTSon has a minimum C/C++ part, so that the main plugin runs in embedded python.
 
-Current used python version is Python 3.4.3.
+Current used python version is Python 3.5.2.
 
 Batteries included
 ==================
@@ -27,7 +27,7 @@ Generating Documentation
 Building
 --------
 * Qt 5.5.1 (which is the version, the TeamSpeak 3 client is currently using)
-* Python 3.4.3 (static python with statically builtin modules)
+* Python 3.5.2 (configure with --enable-shared)
 * [PythonQt](https://github.com/pathmann/PythonQt)
 
 Running
