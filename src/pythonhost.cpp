@@ -78,6 +78,18 @@ bool PythonHost::setupDirectories(QString &error) {
     }
   }
 
+  m_dynloaddir = m_includelibdir;
+  if (!m_dynloaddir.cd("lib-dynload")) {
+    if (!m_dynloaddir.mkdir("lib-dynload")) {
+      error = QObject::tr("Error creating include/Lib/lib-dynload directory");
+      return false;
+    }
+    else if (!m_dynloaddir.cd("lib-dynload")) {
+      error = QObject::tr("Error changing directory to new created include/Lib/lib-dynload directory");
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -142,6 +154,13 @@ bool PythonHost::init(QString& error) {
   Py_NoUserSiteDirectory = 1;
 
   QString libdir = m_includelibdir.absolutePath();
+#ifdef Q_WS_WIN
+  libdir += ";";
+#else
+  libdir += ":";
+#endif
+  libdir += m_dynloaddir.absolutePath();
+
   wchar_t* wlibdir = new wchar_t[libdir.length() +1];
   int len = libdir.toWCharArray(wlibdir);
   wlibdir[len] = '\0';
@@ -156,7 +175,7 @@ bool PythonHost::init(QString& error) {
   }
 
   //set syspath
-  PyObject* syspath = PyList_New(3);
+  PyObject* syspath = PyList_New(4);
   if (!syspath) {
     error = QObject::tr("Memory error");
     return false;
@@ -201,7 +220,22 @@ bool PythonHost::init(QString& error) {
   }
 
   if (PyList_SetItem(syspath, 2, pypath) != 0) {
-    error = QObject::tr("Error adding scriptsdir to sys.path");
+    error = QObject::tr("Error adding include/Lib to sys.path");
+    Py_DECREF(pypath);
+    Py_DECREF(syspath);
+    return false;
+  }
+
+  //add includelibpath to sys.path
+  pypath = Py_BuildValue("s", m_dynloaddir.absolutePath().toUtf8().data());
+  if (!pypath) {
+    error = QObject::tr("Error creating python directory string from include/Lib/lib-dynload path");
+    Py_DECREF(syspath);
+    return false;
+  }
+
+  if (PyList_SetItem(syspath, 3, pypath) != 0) {
+    error = QObject::tr("Error adding include/Lib/lib-dynload to sys.path");
     Py_DECREF(pypath);
     Py_DECREF(syspath);
     return false;

@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-07-01T20:35:29
-#
-#-------------------------------------------------
-
 QT       += gui widgets network uitools sql
 
 CONFIG += c++11
@@ -33,11 +27,8 @@ HEADERS += src/pytson.h \
     src/ts3logdispatcher.h \
     src/pyconversion.h
 
-
-#######PYTHON SETTINGS###############
-INCLUDEPATH += $$PWD/includes/python-343/install/include/python3.4m
-LIBS += $$PWD/includes/python-343/install/lib/libpython3.4m.a
-unix:LIBS += -lpthread -ldl  -lutil -lm
+########PYTHON SETTINGS############
+include ($$PWD/python.pri)
 
 
 #########GENERATED SOURCES#########

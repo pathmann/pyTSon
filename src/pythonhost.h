@@ -48,6 +48,7 @@ class PythonHost: public singleton<PythonHost> {
     QDir m_scriptsdir;
     QDir m_includedir;
     QDir m_includelibdir;
+    QDir m_dynloaddir;
     PyObject* m_pmod;
     PyObject* m_pyhost;
     PyObject* m_callmeth;
