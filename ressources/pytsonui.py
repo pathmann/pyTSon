@@ -494,7 +494,11 @@ class PythonConsole(QPlainTextEdit):
                     if len(l) == 1:
                         self.removeCurrentLine()
                         self.writePrompt(False)
-                        self.textCursor().insertText(" ".join(tokens[:-1]) + " " + l[0])
+                        before = " ".join(tokens[:-1])
+                        if before == "":
+                            self.textCursor().insertText(l[0])
+                        else:
+                            self.textCursor().insertText(" ".join(tokens[:-1]) + " " + l[0])
                     else:
                         self.appendLine("\t\t".join(l))
                         self.writePrompt(True)
