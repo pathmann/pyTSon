@@ -32,7 +32,7 @@ Building
 
 Running
 -------
-* None!
+* None! (At least none you have to care about, python is deployed with the plugin)
 
 How to build
 ============
