@@ -373,7 +373,7 @@ class PythonConsole(QPlainTextEdit):
         elif (key == Qt.Key_Tab and mods == Qt.ShiftModifier) or key == Qt.Key_Backtab:
             self.doUntab()
         elif key == Qt.Key_Home and mods == Qt.NoModifier:
-            self.setTextCursor(promptCursor())
+            self.setTextCursor(self.promptCursor())
         else:            
             QPlainTextEdit.keyPressEvent(self, e)
 
