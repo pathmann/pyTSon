@@ -30,7 +30,7 @@ static struct TS3Functions ts3Functions;
 #define _strcpy(dest, destSize, src) { strncpy(dest, src, destSize-1); (dest)[destSize-1] = '\0'; }
 #endif
 
-#define PLUGIN_API_VERSION 20
+#define PLUGIN_API_VERSION 21
 
 #define PATH_BUFSIZE 512
 #define COMMAND_BUFSIZE 128
@@ -121,7 +121,7 @@ int ts3plugin_init() {
     ts3Functions.getAppPath(appPath, PATH_BUFSIZE);
     ts3Functions.getResourcesPath(resourcesPath, PATH_BUFSIZE);
     ts3Functions.getConfigPath(configPath, PATH_BUFSIZE);
-	ts3Functions.getPluginPath(pluginPath, PATH_BUFSIZE);
+	ts3Functions.getPluginPath(pluginPath, PATH_BUFSIZE, pluginID);
 
 	printf("PLUGIN: App path: %s\nResources path: %s\nConfig path: %s\nPlugin path: %s\n", appPath, resourcesPath, configPath, pluginPath);
 

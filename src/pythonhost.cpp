@@ -23,7 +23,7 @@ PythonHost::~PythonHost() {
 
 bool PythonHost::setupDirectories(QString &error) {
   char path[256];
-  ts3_funcs.getPluginPath(path, 256);
+  ts3_funcs.getPluginPath(path, 256, ts3_pluginid);
 
   m_scriptsdir.setPath(path);
   if (!m_scriptsdir.exists()) {

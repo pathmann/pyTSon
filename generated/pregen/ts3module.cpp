@@ -5382,7 +5382,7 @@ PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
   }
 
   char* path = CPPALLOC(char, maxLen);
-  ts3_funcs.getPluginPath(path, (size_t)maxLen);
+  ts3_funcs.getPluginPath(path, (size_t)maxLen, ts3_pluginid);
 
   PyObject* ret = Py_BuildValue("s", path);
   delete path;

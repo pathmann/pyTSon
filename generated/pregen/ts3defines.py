@@ -59,6 +59,8 @@ ERROR_file_transfer_reset = 0x0816
 
 ERROR_no_network_port_available = 0x0102
 
+ERROR_port_already_in_use = 0x0103
+
 ERROR_dont_notify = 0x0004
 
 ERROR_voip_invalid_connectionId = 0x1005
@@ -118,6 +120,8 @@ ERROR_sound_open_wave = 0x090d
 ERROR_file_invalid_path = 0x0806
 
 ERROR_whisper_no_targets = 0x070c
+
+ERROR_connection_ip_protocol_missing = 0x070d
 
 ERROR_accounting_slot_limit_reached = 0x0b01
 

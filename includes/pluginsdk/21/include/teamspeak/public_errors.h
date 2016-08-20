@@ -15,6 +15,7 @@ const unsigned int ERROR_lib_time_limit_reached                 = 0x0005;
 const unsigned int ERROR_command_not_found                      = 0x0100;
 const unsigned int ERROR_unable_to_bind_network_port            = 0x0101;
 const unsigned int ERROR_no_network_port_available              = 0x0102;
+const unsigned int ERROR_port_already_in_use                    = 0x0103;
 
 //client
 const unsigned int ERROR_client_invalid_id                      = 0x0200;
@@ -85,6 +86,7 @@ const unsigned int ERROR_clientlibrary_not_initialised          = 0x0709;
 const unsigned int ERROR_serverlibrary_not_initialised          = 0x070a;
 const unsigned int ERROR_whisper_too_many_targets               = 0x070b;
 const unsigned int ERROR_whisper_no_targets                     = 0x070c;
+const unsigned int ERROR_connection_ip_protocol_missing         = 0x070d;
 
 //file transfer
 const unsigned int ERROR_file_invalid_name                      = 0x0800;

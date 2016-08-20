@@ -12,7 +12,7 @@ RCC_DIR = $$PWD/build
 UI_DIR = $$PWD/build
 
 INCLUDEPATH += src
-INCLUDEPATH += includes/pluginsdk/20/include
+INCLUDEPATH += includes/pluginsdk/21/include
 
 SOURCES += src/pytson.cpp \
     src/pythonhost.cpp \
