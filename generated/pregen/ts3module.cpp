@@ -5359,7 +5359,7 @@ PyObject* requestChannelUnsubscribeAll(PyObject* /*self*/, PyObject* args) {
 }
 
 PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
-  //void getPluginPath(char *path, size_t maxLen)
+  //void getPluginPath(char *path, size_t maxLen, const char *pluginID);
   /*
     @staticmethod
     def getPluginPath(maxLen = 256):
