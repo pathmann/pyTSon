@@ -187,7 +187,7 @@ bool PythonHost::init(QString& error) {
   wlibdir[len] = '\0';
 
   Py_SetPath(wlibdir);
-  delete wlibdir;
+  delete[] wlibdir;
 
   Py_Initialize();
   if (PyErr_Occurred()) {
