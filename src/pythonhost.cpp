@@ -13,6 +13,27 @@
 #include "ts3logdispatcher.h"
 #include "ts3module.h"
 
+#if defined(Q_OS_LINUX)
+  #if defined(__x86_64__)
+    //linux64
+    #define LIBDIR "Lib_linux64"
+  #else
+    //linux32
+    #define LIBDIR "Lib_linux32"
+  #endif
+#elif defined(Q_OS_WIN)
+  #if defined(Q_OS_WIN64)
+    //win64
+    #define LIBDIR "Lib_win64"
+  #else
+    //win32
+    #define LIBDIR "Lib_win32"
+  #endif
+#else
+  //mac
+  #define LIBDIR "Lib"
+#endif
+
 PythonHost::PythonHost(): m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
 
 }
@@ -67,12 +88,12 @@ bool PythonHost::setupDirectories(QString &error) {
   }
 
   m_includelibdir = m_includedir;
-  if (!m_includelibdir.cd("Lib")) {
-    if (!m_includelibdir.mkdir("Lib")) {
+  if (!m_includelibdir.cd(LIBDIR)) {
+    if (!m_includelibdir.mkdir(LIBDIR)) {
       error = QObject::tr("Error creating include/Lib directory");
       return false;
     }
-    else if (!m_includelibdir.cd("Lib")) {
+    else if (!m_includelibdir.cd(LIBDIR)) {
       error = QObject::tr("Error changing directory to new created include/Lib directory");
       return false;
     }
