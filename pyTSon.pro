@@ -27,6 +27,13 @@ HEADERS += src/pytson.h \
     src/ts3logdispatcher.h \
     src/pyconversion.h
 
+macx {
+    QT_MODULES = Core Gui Widgets Network Sql
+    for(m, QT_MODULES) {
+        QMAKE_POST_LINK += install_name_tool -change @rpath/libQt5$${m}.5.dylib @executable_path/../Frameworks/libQt5$${m}.dylib ${DESTDIR}${TARGET} &
+    }
+}
+
 ########PYTHON SETTINGS############
 include ($$PWD/python.pri)
 
