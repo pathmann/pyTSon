@@ -89,7 +89,7 @@ def main(sdkdir, tpldir, outdir, ignore, excludes):
     env = Environment(trim_blocks=True, lstrip_blocks=True, loader=FileSystemLoader(tpldir), undefined=StrictUndefined)
 
     for tmp in env.list_templates(extensions=['tpl']):
-        if tmp in excludes:
+        if excludes and tmp in excludes:
             log.debug("Ignoring template %s" % tmp)
             continue
 
