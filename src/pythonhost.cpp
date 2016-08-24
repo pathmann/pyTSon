@@ -154,7 +154,7 @@ bool PythonHost::init(QString& error) {
   Py_NoUserSiteDirectory = 1;
 
   QString libdir = m_includelibdir.absolutePath();
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
   libdir += ";";
 #else
   libdir += ":";
