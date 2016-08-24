@@ -39,6 +39,7 @@ class ts3:
 
 #ifndef PYTSON_PARSER
 static PyMethodDef ts3modfuncs[] = {
+  {"getPluginID", getPluginID, METH_VARARGS, "Get pyTSon's pluginID"},
 {% for name in functions %}
   {"{{name}}", {{name}}, METH_VARARGS, "Call {{name}} of the ts3 client plugin sdk"},
 {% endfor %}
@@ -61,6 +62,22 @@ PyMODINIT_FUNC PyInit_ts3(void) {
  return PyModule_Create(&mdef);
 }
 #endif
+
+PyObject* getPluginID(PyObject* /*self*/, PyObject* args) {
+  /*
+  @staticmethod
+  def getPluginID():
+      """
+      Returns pyTSon's plugin id
+      @return: the plugin id
+      @rtype: string
+      """
+  */
+  if (!PyArg_ParseTuple(args, ""))
+    return NULL;
+
+  return Py_BuildValue("s", ts3_pluginid);
+}
 
 {% for name, f in functions.items() %}
 PyObject* {{f.name}}(PyObject* /*self*/, PyObject* args) {

@@ -39,6 +39,7 @@ class ts3:
 
 #ifndef PYTSON_PARSER
 static PyMethodDef ts3modfuncs[] = {
+  {"getPluginID", getPluginID, METH_VARARGS, "Get pyTSon's pluginID"},
   {"getProfileList", getProfileList, METH_VARARGS, "Call getProfileList of the ts3 client plugin sdk"},
   {"getPreProcessorInfoValueFloat", getPreProcessorInfoValueFloat, METH_VARARGS, "Call getPreProcessorInfoValueFloat of the ts3 client plugin sdk"},
   {"requestFileList", requestFileList, METH_VARARGS, "Call requestFileList of the ts3 client plugin sdk"},
@@ -266,6 +267,22 @@ PyMODINIT_FUNC PyInit_ts3(void) {
  return PyModule_Create(&mdef);
 }
 #endif
+
+PyObject* getPluginID(PyObject* /*self*/, PyObject* args) {
+  /*
+  @staticmethod
+  def getPluginID():
+      """
+      Returns pyTSon's plugin id
+      @return: the plugin id
+      @rtype: string
+      """
+  */
+  if (!PyArg_ParseTuple(args, ""))
+    return NULL;
+
+  return Py_BuildValue("s", ts3_pluginid);
+}
 
 PyObject* getProfileList(PyObject* /*self*/, PyObject* args) {
   //unsigned int getProfileList(enum PluginGuiProfile profile, int *defaultProfileIdx, char ***result)

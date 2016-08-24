@@ -7,6 +7,7 @@
 PyMODINIT_FUNC PyInit_ts3(void);
 #endif
 
+PyObject* getPluginID(PyObject* self, PyObject* args);
 {% for name, f in functions.items() %}
 PyObject* {{f.name}}(PyObject* self, PyObject* args);
 {% endfor %}

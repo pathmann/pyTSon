@@ -7,6 +7,7 @@
 PyMODINIT_FUNC PyInit_ts3(void);
 #endif
 
+PyObject* getPluginID(PyObject* self, PyObject* args);
 PyObject* getProfileList(PyObject* self, PyObject* args);
 PyObject* getPreProcessorInfoValueFloat(PyObject* self, PyObject* args);
 PyObject* requestFileList(PyObject* self, PyObject* args);
