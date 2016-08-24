@@ -8,6 +8,8 @@ macx {
     INCLUDEPATH += $$PWD/includes/python-352/install/include/python3.5m
     LIBS += $$PWD/includes/python-352/install/lib/libpython3.5m.dylib
     LIBS += -lpthread -ldl  -lutil
+
+    QMAKE_POST_LINK += install_name_tool -change $$PWD/includes/python-352/install/lib/libpython3.5m.dylib @loader_path/pyTSon/libpython3.5m.dylib ${DESTDIR}${TARGET} &
 }
 
 win32 {
