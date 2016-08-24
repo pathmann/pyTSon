@@ -19,12 +19,14 @@
 #define VECTOR(x, y, z) (void*)(x, y, z)
 #define CPPALLOC(type, size) (void*)(type, size)
 #define delete
+#define CPPDELARR(arr) (void*)(arr)
 #else
 #define TRANS QObject::tr
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) pyListToArray<type>(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) arrayToPyList<type>(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) {x, y, z}
 #define CPPALLOC(type, size) new type[size]
+#define CPPDELARR(arr) delete[] arr
 #endif
 
 /*

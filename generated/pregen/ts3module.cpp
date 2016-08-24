@@ -19,12 +19,14 @@
 #define VECTOR(x, y, z) (void*)(x, y, z)
 #define CPPALLOC(type, size) (void*)(size)
 #define delete
+#define CPPDELARR(arr) (void*)(arr)
 #else
 #define TRANS QObject::tr
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) pyListToArray<type>(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) arrayToPyList<type>(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) {x, y, z}
 #define CPPALLOC(type, size) new type[size]
+#define CPPDELARR(arr) delete[] arr
 #endif
 
 /*
@@ -531,7 +533,7 @@ PyObject* acquireCustomPlaybackData(PyObject* /*self*/, PyObject* args) {
     Py_DECREF(pybuffer);
   }
   else pyret = Py_BuildValue("(Is)", res, NULL);
-  delete buffer;
+  CPPDELARR(buffer);
 
   return pyret;
 }
@@ -704,7 +706,7 @@ PyObject* getConfigPath(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.getConfigPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
-  delete path;
+  CPPDELARR(path);
 
   return ret;
 }
@@ -1732,7 +1734,7 @@ PyObject* getClientDisplayName(PyObject* /*self*/, PyObject* args) {
   unsigned int res = ts3_funcs.getClientDisplayName((uint64)schid, (anyID)clientID, result, maxLen);
 
   PyObject* ret = Py_BuildValue("(Is)", res, result);
-  delete result;
+  CPPDELARR(result);
 
   return ret;
 }
@@ -1791,7 +1793,7 @@ PyObject* urlsToBB(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.urlsToBB(text, result, maxLen);
 
   PyObject* ret = Py_BuildValue("s", result);
-  delete result;
+  CPPDELARR(result);
 
   return ret;
 }
@@ -2857,8 +2859,8 @@ PyObject* getChannelConnectInfo(PyObject* /*self*/, PyObject* args) {
   unsigned int res = ts3_funcs.getChannelConnectInfo((uint64)schid, (uint64)channelID, path, password, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("(Iss)", res, path, password);
-  delete path;
-  delete password;
+  CPPDELARR(path);
+  CPPDELARR(password);
 
   return ret;
 }
@@ -3015,7 +3017,7 @@ PyObject* getAppPath(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.getAppPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
-  delete path;
+  CPPDELARR(path);
 
   return ret;
 }
@@ -3562,7 +3564,7 @@ PyObject* getAvatar(PyObject* /*self*/, PyObject* args) {
   unsigned int res = ts3_funcs.getAvatar((uint64)schid, (anyID)clientID, result, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("(Is)", res, result);
-  delete result;
+  CPPDELARR(result);
 
   return ret;
 }
@@ -4136,7 +4138,7 @@ PyObject* getResourcesPath(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.getResourcesPath(path, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", path);
-  delete path;
+  CPPDELARR(path);
 
   return ret;
 }
@@ -4894,7 +4896,7 @@ PyObject* getDirectories(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.getDirectories(path, result, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", result);
-  delete result;
+  CPPDELARR(result);
 
   return ret;
 }
@@ -5402,7 +5404,7 @@ PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.getPluginPath(path, (size_t)maxLen, ts3_pluginid);
 
   PyObject* ret = Py_BuildValue("s", path);
-  delete path;
+  CPPDELARR(path);
 
   return ret;
 }
@@ -6880,8 +6882,8 @@ PyObject* getServerConnectInfo(PyObject* /*self*/, PyObject* args) {
   unsigned res = ts3_funcs.getServerConnectInfo((uint64)schid, host, &port, password, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("(IsHs)", res, host, port, password);
-  delete host;
-  delete password;
+  CPPDELARR(host);
+  CPPDELARR(password);
 
   return ret;
 }
@@ -7014,7 +7016,7 @@ PyObject* createReturnCode(PyObject* /*self*/, PyObject* args) {
   ts3_funcs.createReturnCode(ts3_pluginid, returnCode, (size_t)maxLen);
 
   PyObject* ret = Py_BuildValue("s", returnCode);
-  delete returnCode;
+  CPPDELARR(returnCode);
 
   return ret;
 }
