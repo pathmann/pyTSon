@@ -27,6 +27,10 @@ HEADERS += src/pytson.h \
     src/ts3logdispatcher.h \
     src/pyconversion.h
 
+unix:!mac {
+    QMAKE_POST_LINK += patchelf --set-rpath '$ORIGIN/pyTSon' ${DESTDIR}${TARGET} &
+}
+
 macx {
     QT_MODULES = Core Gui Widgets Network Sql
     for(m, QT_MODULES) {
