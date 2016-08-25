@@ -1,7 +1,14 @@
 unix:!mac {
     INCLUDEPATH += $$PWD/includes/python-352/install/include/python3.5m
-    LIBS += $$PWD/includes/python-352/install/lib/libpython3.5m.so.1.0
-    LIBS += -lpthread -ldl  -lutil
+    LIBS += $$PWD/includes/python-352/install/lib/libpython3.5m.so
+    LIBS += -lpthread -ldl -lutil
+
+    contains(QMAKE_HOST.arch, x86_64) {
+        QMAKE_POST_LINK += patchelf --replace-needed libpython3.5m.so.1.0 libpython3.5m_64.so ${DESTDIR}${TARGET} &
+    }
+    else {
+        QMAKE_POST_LINK += patchelf --replace-needed libpython3.5m.so.1.0 libpython3.5m_32.so ${DESTDIR}${TARGET} &
+    }
 }
 
 macx {

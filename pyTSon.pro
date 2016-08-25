@@ -28,7 +28,7 @@ HEADERS += src/pytson.h \
     src/pyconversion.h
 
 unix:!mac {
-    QMAKE_POST_LINK += patchelf --set-rpath '$ORIGIN/pyTSon' ${DESTDIR}${TARGET} &
+    QMAKE_RPATHDIR += $ORIGIN/pyTSon
 }
 
 macx {
