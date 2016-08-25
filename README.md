@@ -29,7 +29,7 @@ Building
 * Qt 5.5.1 (which is the version, the TeamSpeak 3 client is currently using)
 * Python 3.5.2 (configure with --enable-shared)
 * [PythonQt](https://github.com/pathmann/PythonQt)
-* patchelf (linux)
+* patchelf (linux; Version >= 0.9)
 
 Running
 -------
