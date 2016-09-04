@@ -1,6 +1,6 @@
 import sys, os
 
-from PythonQt.QtGui import QPlainTextEdit, QPalette, QColor, QFont, QFontMetrics, QTextCursor, QTextCharFormat, QDialog, QHBoxLayout, QTabWidget, QListWidgetItem, QColorDialog
+from PythonQt.QtGui import QPlainTextEdit, QPalette, QColor, QFont, QFontMetrics, QTextCursor, QTextCharFormat, QDialog, QHBoxLayout, QTabWidget, QListWidgetItem, QColorDialog, QApplication
 from PythonQt.QtCore import Qt, QFile, QIODevice
 from PythonQt.QtUiTools import QUiLoader
 
@@ -399,7 +399,11 @@ class PythonConsole(QPlainTextEdit):
             self.seltext = self.textCursor().selectedText()
             self.setTextCursor(self.selcursor)
         elif e.button() == Qt.RightButton:
-            self.textCursor().insertText(self.seltext)
+            if self.seltext == "":
+                self.textCursor().insertText(QApplication.clipboard().text())
+            else:
+                self.textCursor().insertText(self.seltext)
+                QApplication.clipboard().setText(self.seltext)
     
     def doKeyboardInterrupt(self):
         self.moveCursor(QTextCursor.End)
