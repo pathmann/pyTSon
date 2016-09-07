@@ -157,6 +157,8 @@ class PluginHost(object):
             cls.confdlg = ConfigurationDialog(cls.cfg, cls, mainwindow)
             
         cls.confdlg.show()
+        cls.confdlg.raise_()
+        cls.confdlg.activateWindow()
 
     @classmethod
     def callMethod(cls, name, *args):
