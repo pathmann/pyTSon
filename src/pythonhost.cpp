@@ -942,7 +942,7 @@ void PythonHost::onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int 
 void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume) {
   PyObject* pyret;
   QString errstr;
-  if (!callMethod(&pyret, errstr, "(sKIdff)", "onCustom3dRolloffCalculationClientEvent", (unsigned long long)schid, (unsigned int)clientID, distance, *volume)) {
+  if (!callMethod(&pyret, errstr, "(sKIff)", "onCustom3dRolloffCalculationClientEvent", (unsigned long long)schid, (unsigned int)clientID, distance, *volume)) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling onCustom3dRolloffCalculationClientEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
     return;
   }
@@ -960,7 +960,7 @@ void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID cli
 void PythonHost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
   PyObject* pyret;
   QString errstr;
-  if (!callMethod(&pyret, errstr, "(sKKdff)", "onCustom3dRolloffCalculationWaveEvent", (unsigned long long)schid, (unsigned long long)waveHandle, distance, *volume)) {
+  if (!callMethod(&pyret, errstr, "(sKKff)", "onCustom3dRolloffCalculationWaveEvent", (unsigned long long)schid, (unsigned long long)waveHandle, distance, *volume)) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling onCustom3dRolloffCalculationWaveEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
     return;
   }
