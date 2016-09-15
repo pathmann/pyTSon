@@ -94,3 +94,5 @@ Some demo plugins are available in [this repository](https://github.com/pathmann
 Releases
 ========
 Personally I work on my linux amd64 machine, other platforms are only tested for basic running.
+
+[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=thomas.pathmann%40gmail%2ecom&lc=GB&item_name=pyTSon&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
