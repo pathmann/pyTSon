@@ -940,6 +940,7 @@ void PythonHost::onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int 
 }
 
 void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume) {
+  return;
   PyObject* pyret;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKIff)", "onCustom3dRolloffCalculationClientEvent", (unsigned long long)schid, (unsigned int)clientID, distance, *volume)) {
@@ -958,6 +959,7 @@ void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID cli
 }
 
 void PythonHost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
+  return;
   PyObject* pyret;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKKff)", "onCustom3dRolloffCalculationWaveEvent", (unsigned long long)schid, (unsigned long long)waveHandle, distance, *volume)) {
