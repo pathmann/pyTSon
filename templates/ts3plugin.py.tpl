@@ -196,8 +196,9 @@ class PluginHost(object):
     def infoData(cls, schid, id, atype):
         ret = []
         for key, p in cls.active.items():
-            ret.append(p.infoTitle)
-            ret += p.infoData(schid, id, atype)
+            if p.infoTitle is not None:
+                ret.append(p.infoTitle)
+                ret += p.infoData(schid, id, atype)
             
         return ret
         
@@ -350,7 +351,7 @@ class ts3plugin(object, metaclass=PluginMount):
     description = "This is the baseclass for all ts3 python plugins"
     offersConfigure = False
     commandKeyword = "py"
-    infoTitle = "pyTSon"
+    infoTitle = "pyTSon" #pass None to not show any info
     menuItems = []#[(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CLIENT, 0, "text", "icon.png")]
     hotkeys = []#[("keyword", "description")]
     """
