@@ -38,6 +38,8 @@ void ts3plugin_registerPluginID(const char* id) {
 }
 
 int ts3plugin_init() {
+  qRegisterMetaType<quintptr>("quintptr");
+
   ts3logdispatcher::instance()->init("pyTSon");
 
   QString error;
