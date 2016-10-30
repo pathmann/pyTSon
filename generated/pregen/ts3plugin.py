@@ -48,6 +48,9 @@ class PluginHost(object):
         cls.confdlg = None
         
         cls.modules = {}
+        
+        cls.menus = {}
+        cls.hotkeys = {}
     
         cls.cfg = ConfigParser()
         cls.cfg.read(os.path.join(ts3.getConfigPath(), "pyTSon.conf"))
@@ -75,6 +78,16 @@ class PluginHost(object):
                         
                 cls.active[key] = cls.plugins[key]()
                 cls.cfg.set("plugins", key, "True")
+                
+        #restore reloaded menus 
+        for globid, (p, locid) in cls.menus.items():
+            if p in cls.active:
+                cls.menus[globid] = (cls.active[p], locid)
+             
+        #restore reloaded hotkeys   
+        for keyword, (p, lockey) in cls.hotkeys.items():
+            if p in cls.active:
+                cls.hotkeys[keyword] = (cls.active[p], lockey)
 
     @classmethod
     def shutdown(cls):
@@ -93,12 +106,31 @@ class PluginHost(object):
         for key, p in cls.active.items():
             p.stop()
         cls.active = {}
+        
+        #save local menu ids
+        for globid, (p, locid) in cls.menus.items():
+            #previously reloaded?
+            if not type(p) is str:
+                cls.menus[globid] = (p.name, locid)
+           
+        #save local hotkeys
+        for keyword, (p, lockey) in cls.hotkeys.items():
+            if not type(p) is str:
+                cls.hotkeys[keyword] = (p.name, lockey)   
           
     @classmethod
     def activate(cls, pname):
         if pname in cls.plugins:
             cls.active[pname] = cls.plugins[pname]()
             cls.cfg.set("plugins", pname, "True")
+            
+            for globid, (p, locid) in cls.menus.items():
+                if type(p) is str and p == pname:
+                    cls.menus[globid] = (cls.active[p], locid)
+                    
+            for keyword, (p, lockey) in cls.hotkeys.items():
+                if type(p) is str and p == pname:
+                    cls.hotkeys[keyword] = (cls.active[p], lockey)
         
     @classmethod
     def deactivate(cls, pname):
@@ -106,12 +138,12 @@ class PluginHost(object):
             #remove hotkeys
             for key in cls.hotkeys:
                 if cls.hotkeys[key][0].name == pname:
-                    cls.menus.pop(key)
+                    cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
             
             #remove menuItems
             for key in cls.menus:
                 if cls.menus[key][0].name == pname:
-                    cls.menus.pop(key)
+                    cls.menus[key] = (pname, cls.menus[key][1])
             
             cls.active[pname].stop()
             del cls.active[pname]
@@ -138,6 +170,17 @@ class PluginHost(object):
                     err = ts3.logMessage("Error loading python plugin from %s: %s" % (os.path.basename(f), traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error loading python plugin from %s: %s" % (os.path.basename(f), traceback.format_exc()))
+                        
+        #save local menu ids
+        for globid, (p, locid) in cls.menus.items():
+            #previously reloaded?
+            if not type(p) is str:
+                cls.menus[globid] = (p.name, locid)
+           
+        #save local hotkeys
+        for keyword, (p, lockey) in cls.hotkeys.items():
+            if not type(p) is str:
+                cls.hotkeys[keyword] = (p.name, lockey)
             
     @classmethod
     def showScriptingConsole(cls):
@@ -199,7 +242,7 @@ class PluginHost(object):
             if p.infoTitle is not None:
                 ret.append(p.infoTitle)
                 ret += p.infoData(schid, aid, atype)
-
+            
         return ret
         
     @classmethod
@@ -250,9 +293,8 @@ class PluginHost(object):
         
         if menuItemID in cls.menus:
             (plugin, locid) = cls.menus[menuItemID]
-            if callable(locid):
-                locid(schid, atype, selectedItemID)
-            else:
+            if type(plugin) is not str:
+                #if plugin was reloaded, but menuItem does not exist anymore
                 plugin.onMenuItemEvent(schid, atype, locid, selectedItemID)
       
     @classmethod
@@ -274,9 +316,7 @@ class PluginHost(object):
     
         if keyword in cls.hotkeys:
             (plugin, lockey) = cls.hotkeys[keyword]
-            if callable(lockey):
-                lockey()
-            else:
+            if type(plugin) is not str:
                 plugin.onHotkeyEvent(lockey)
                 
     @classmethod
