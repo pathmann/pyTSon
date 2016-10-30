@@ -15,29 +15,37 @@ pyTSon has multiple layers of dependencies listed below.
 
 Generating Code
 ---------------
-* Python3
+* [Python3](https://www.python.org/download/releases/3.0/)
 * [pycparser](https://github.com/eliben/pycparser/)
-* jinja2
+* [jinja2](http://jinja.pocoo.org)
 
 Generating Documentation
 ------------------------
-* Python3
-* epydoc (which is only available for Python2, so we'll switch to another doctool in the future)
+* [Python3](https://www.python.org/download/releases/3.0/)
+* [epydoc](http://epydoc.sourceforge.net) (which is only available for Python2, so we'll switch to another doctool in the future)
 
 Building
 --------
-* Qt 5.5.1 (which is the version, the TeamSpeak 3 client is currently using)
-* Python 3.5.2 (configure with --enable-shared)
+* [Qt 5.5.1](https://download.qt.io/archive/qt/5.5/5.5.1/) (which is the version, the TeamSpeak 3 client is currently using)
+* [Python 3.5.2](https://www.python.org/downloads/release/python-352/#Files) (configure with --enable-shared)
 * [PythonQt](https://github.com/pathmann/PythonQt)
-* patchelf (linux; Version >= 0.9)
+* [patchelf](http://nixos.org/patchelf.html) (linux; Version >= 0.9)
 
 Running
 -------
 * None! (At least none you have to care about, python is deployed with the plugin)
 
+How to use
+==========
+1. Get the latest release for your Teamspeak client [here](https://github.com/pathmann/pyTSon/releases/) or compile the source yourself.
+2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This will be automatic later on.])
+3. Restart your Teamspeak Client.
+4. Download any pyTSon script and place it in the `%APPDATA%\TS3Client\plugins\pyTSon\scripts\` folder.
+5. In your client click on "Plugins" => "pyTSon" => "Settings" and on the settings dialog click on "Reload All" and check the plugins checkbox if it's not checked already.
+
 How to build
 ============
-* Adjust the python include and lib path in pyTSon.pro
+* Adjust the python include and lib path in [pyTSon.pro](https://github.com/pathmann/pyTSon/blob/master/pyTSon.pro)
 * Download/Clone PythonQt from [here](https://github.com/pathmann/PythonQt) to includes/
 ```
 qmake
