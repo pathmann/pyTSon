@@ -64,6 +64,8 @@ def getValues(parent, title, params, doneclb):
     @type params: dict{str: tuple(ValueType, str, int/double/str/tuple(list[str], list[int]), int/double, int/double)}
     @param doneclb: a callable which gets the dialogs return code (see QDialog.DialogCode) and on success, a dict with the resulting values, referenced by the key.
     @type doneclb: callable(int, dict{str: int/str/bool/[str]})
+    @return: Returns a dict containing the used input widgets plus the dialog and the QDialogButtonBox
+    @rtype: dict{str: QWidget}
     
     """
     ret = {}
