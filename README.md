@@ -26,7 +26,7 @@ Generating Documentation
 
 Building
 --------
-* [Qt 5.5.1](https://download.qt.io/archive/qt/5.5/5.5.1/) (which is the version, the TeamSpeak 3 client is currently using)
+* [Qt 5.6.1](https://download.qt.io/archive/qt/5.6/5.6.1/) (which is the version, the TeamSpeak 3 client is currently using)
 * [Python 3.5.2](https://www.python.org/downloads/release/python-352/#Files) (configure with --enable-shared)
 * [PythonQt](https://github.com/pathmann/PythonQt)
 * [patchelf](http://nixos.org/patchelf.html) (linux; Version >= 0.9)
@@ -38,14 +38,14 @@ Running
 How to use
 ==========
 1. Get the latest release for your Teamspeak client [here](https://github.com/pathmann/pyTSon/releases/) or compile the source yourself.
-2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This will be automatic later on.])
+2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This is only needed once per python version.])
 3. Restart your Teamspeak Client.
-4. Download any pyTSon script and place it in the `%APPDATA%\TS3Client\plugins\pyTSon\scripts\` folder.
+4. Download or write any pyTSon script and place it in `%APPDATA%\TS3Client\plugins\pyTSon\scripts\` on windows resp. `~/.ts3client/plugins/pyTSon/scripts/` on unix.
 5. In your client click on "Plugins" => "pyTSon" => "Settings" and on the settings dialog click on "Reload All" and check the plugins checkbox if it's not checked already.
 
 How to build
 ============
-* Adjust the python include and lib path in [pyTSon.pro](https://github.com/pathmann/pyTSon/blob/master/pyTSon.pro)
+* Adjust the python include and lib path in [python.pri](https://github.com/pathmann/pyTSon/blob/master/python.pri)
 * Download/Clone PythonQt from [here](https://github.com/pathmann/PythonQt) to includes/
 ```
 qmake
