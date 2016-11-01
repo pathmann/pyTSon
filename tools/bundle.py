@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 #docs
 
 
-FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("docs/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf")]
+FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("docs/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf"), ("ressources/answercontacts.py", "plugins/pyTSon/scripts/answercontacts.py"), ("ressources/autopoke.py", "plugins/pyTSon/scripts/autopoke.py"), ("ressources/autoreply.py", "plugins/pyTSon/scripts/autoreply.py"), ("ressources/cmdtest.py", "plugins/pyTSon/scripts/cmdtest.py"), ("ressources/tweakui.py", "plugins/pyTSon/scripts/tweakui.py")]
 
 ARCHFILES = {'win32' : [("build/pyTSon.dll", "plugins/pyTSon_win32.dll")], 'win64' : [("build/pyTSon.dll", "plugins/pyTSon_win64.dll")], 'linux_x86' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_x86.so")], 'linux_amd64' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_amd64.so")], 'mac' : [("build/libpyTSon.1.0.0.dylib", "plugins/libpyTSon_mac.dylib")]}
 
