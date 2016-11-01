@@ -101,6 +101,7 @@ class PluginHost(object):
                 cls.shell.hide()
             except:
                 #shell is null, calling delete would crash the client
+                pass
             cls.shell.delete()
         cls.shell = None
         
