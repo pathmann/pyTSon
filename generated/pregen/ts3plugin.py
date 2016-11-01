@@ -229,6 +229,9 @@ class PluginHost(object):
     def processCommand(cls, schid, command):
         tokens = command.split(' ')
         
+        if len(tokens) == 0 or tokens[0] == "":
+            return False
+        
         for key, p in cls.active.items():
             if p.commandKeyword == tokens[0]:
                 return p.processCommand(schid, " ".join(tokens[1:]))

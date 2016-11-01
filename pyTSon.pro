@@ -18,14 +18,16 @@ SOURCES += src/pytson.cpp \
     src/pythonhost.cpp \
     src/global_shared.cpp \
     src/ts3logdispatcher.cpp \
-    src/pyconversion.cpp
+    src/pyconversion.cpp \
+    pythonqt_extra_wrappers.cpp
 
 HEADERS += src/pytson.h \
     src/pythonhost.h \
     src/singleton.h \
     src/global_shared.h \
     src/ts3logdispatcher.h \
-    src/pyconversion.h
+    src/pyconversion.h \
+    pythonqt_extra_wrappers.h
 
 unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon
