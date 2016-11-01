@@ -102,7 +102,8 @@ class PluginHost(object):
             except:
                 #shell is null, calling delete would crash the client
                 pass
-            cls.shell.delete()
+            else:
+                cls.shell.delete()
         cls.shell = None
         
         if cls.confdlg:
