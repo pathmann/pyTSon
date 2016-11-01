@@ -97,23 +97,10 @@ class PluginHost(object):
     @classmethod
     def shutdown(cls):
         if cls.shell:
-            try:
-                cls.shell.hide()
-            except:
-                #shell is null, calling delete would crash the client
-                pass
-            else:
-                cls.shell.delete()
+            cls.shell.delete()
         cls.shell = None
-        
         if cls.confdlg:
-            try:
-                cls.confgdlg.hide()
-            except:
-                #confdlg is null, calling delete would crash the client
-                pass
-            else:
-                cls.confdlg.delete()
+            cls.confdlg.delete()
         cls.confdlg = None
         
         #store config
