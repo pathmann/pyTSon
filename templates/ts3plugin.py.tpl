@@ -112,9 +112,7 @@ class PluginHost(object):
             try:
                 p.stop()
             except:
-                err = ts3.logMessage("Error stopping python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.shutdown", 0)
-                if err != ts3defines.ERROR_ok:
-                    print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
+                print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
                     
         cls.active = {}
         
@@ -244,7 +242,7 @@ class PluginHost(object):
                 try:
                     ret.append(meth(*args))
                 except:
-                    ts3.logMessage(traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ts3plugin.%s" % key, 0)
+                    print("Error calling method of plugin %s: %s" % (key, traceback.format_exc()))
           
         for r in ret:
             if r:
