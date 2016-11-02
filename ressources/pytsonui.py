@@ -417,9 +417,14 @@ class StdRedirector:
             self.callback(text.rstrip())
         self.no = not self.no
 
+def defaultFont():
+    if sys.platform.startswith("win"):
+        return QFont("Courier", 12)
+    else:
+        return QFont("Monospace", 12)
 
 class PythonConsole(QPlainTextEdit):
-    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=QFont("Monospace", 12), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, parent=None):
+    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, parent=None):
         super(QPlainTextEdit, self).__init__(parent)
         
         self.setAttribute(Qt.WA_DeleteOnClose)
