@@ -1,6 +1,8 @@
 [![Gitter chat](https://badges.gitter.im/ts3-pyTSon/gitter.png)](https://gitter.im/ts3-pyTSon/Lobby) [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=thomas.pathmann%40gmail%2ecom&lc=GB&item_name=pyTSon&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
 
 # pyTSon
+
+[![Join the chat at https://gitter.im/ts3pyTSon/Lobby](https://badges.gitter.im/ts3pyTSon/Lobby.svg)](https://gitter.im/ts3pyTSon/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 pyTSon is a plugin for the TeamSpeak 3 client, it offers a python3 interface for the plugin sdk.
 pyTSon has a minimum C/C++ part, so that the main plugin runs in embedded python.
 
