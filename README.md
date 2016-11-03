@@ -103,5 +103,5 @@ Some demo plugins are available in [this repository](https://github.com/pathmann
 
 Releases
 ========
-Personally I work on my linux amd64 machine, other platforms are only tested for basic running.
+Personally I work on my linux amd64 machine, other platforms are only tested for basic running, but of course feel free to open an issue, if there is something wrong on your platform and I'll have a look into it.
 
