@@ -96,7 +96,8 @@ class PluginHost(object):
 
     @classmethod
     def shutdown(cls):
-        _msg = "Shutting down pyTSon's PluginHost"; _invoker = "pyTSon.PluginHost.shutdown"
+        _msg = "Shutting down pyTSon's PluginHost"
+        _invoker = "pyTSon.PluginHost.shutdown"
         err = ts3.logMessage(_msg, ts3defines.LogLevel.LogLevel_INFO, _invoker, 0)
         if err != ts3defines.ERROR_ok:
             print(_invoker+": "+_msg)
@@ -152,7 +153,8 @@ class PluginHost(object):
 
     @classmethod
     def deactivate(cls, pname):
-        _msg = "Deactivating plugin \"%s\"" % pname; _invoker = "pyTSon.PluginHost.deactivate"
+        _msg = "Deactivating plugin \"%s\"" % pname
+        _invoker = "pyTSon.PluginHost.deactivate"
         err = ts3.logMessage(_msg, ts3defines.LogLevel.LogLevel_INFO, _invoker, 0)
         if err != ts3defines.ERROR_ok:
             print(_invoker+": "+_msg)
@@ -178,7 +180,8 @@ class PluginHost(object):
 
     @classmethod
     def reload(cls):
-        _msg = "(Re)loading all plugins"; _invoker = "pyTSon.PluginHost.reload"
+        _msg = "(Re)loading all plugins"
+        _invoker = "pyTSon.PluginHost.reload"
         err = ts3.logMessage(_msg, ts3defines.LogLevel.LogLevel_INFO, _invoker, 0)
         if err != ts3defines.ERROR_ok:
             print(_invoker+": "+_msg)
