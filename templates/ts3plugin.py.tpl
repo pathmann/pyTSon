@@ -112,7 +112,7 @@ class PluginHost(object):
             try:
                 p.stop()
             except:
-                print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
+                print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
                     
         cls.active = {}
         
@@ -142,7 +142,7 @@ class PluginHost(object):
                     if type(p) is str and p == pname:
                         cls.hotkeys[keyword] = (cls.active[p], lockey)
             except:
-                err = ts3.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
+                err = ts3.logMessage("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()))
         
