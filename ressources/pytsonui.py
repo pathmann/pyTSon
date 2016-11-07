@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, socket
 
 from enum import Enum, unique
 
@@ -445,6 +445,7 @@ class PythonConsole(QPlainTextEdit):
     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, startup="", silentStartup=False, parent=None):
         super(QPlainTextEdit, self).__init__(parent)
         self.username = os.getlogin()
+        self.hostname = socket.gethostname()
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.tabcomplete = tabcomplete
@@ -491,7 +492,7 @@ class PythonConsole(QPlainTextEdit):
         self.setTabStopWidth(fm.width("X") * self.tabwidth)
 
     def prompt(self):
-        return self.username+"> " if not self.inmulti else "... "
+        return self.username+"@"+self.hostname+"> " if not self.inmulti else "... "
 
     def promptLength(self):
         return len(self.prompt())
