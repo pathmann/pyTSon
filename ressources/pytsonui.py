@@ -287,14 +287,9 @@ class ConfigurationDialog(QDialog):
         self.settingsButton.setEnabled(False)
         self.requiredApiEdit.setText(20)
         
-        p = self.backgroundColorButton.palette
-        p.setColor(QPalette.Button, QColor(self.cfg.get("console", "backgroundColor")))
-        self.backgroundColorButton.palette = p
-        
-        p = self.textColorButton.palette
-        p.setColor(QPalette.Button, QColor(self.cfg.get("console", "textColor")))
-        self.textColorButton.palette = p
-    
+        self.backgroundColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "backgroundColor")).name())
+        self.textColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "textColor")).name())
+
         f = QFont(self.cfg.get("console", "fontFamily"))
         self.fontFamilyCombo.setCurrentFont(f)
         self.fontSizeSpin.setValue(self.cfg.getint("console", "fontSize"))
@@ -383,17 +378,13 @@ class ConfigurationDialog(QDialog):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "backgroundColor")), self, "Console Background Color")
         if c.isValid():
             self.cfg.set("console", "backgroundColor", c.name())
-            p = self.backgroundColorButton.palette
-            p.setColor(QPalette.Button, c)
-            self.backgroundColorButton.palette = p
+            self.backgroundColorButton.setStyleSheet("background-color: %s;" % c.name())
         
     def onTextColorButtonClicked(self):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "textColor")), self, "Console Text Color")
         if c.isValid():
             self.cfg.set("console", "textColor", c.name())
-            p = self.textColorButton.palette
-            p.setColor(QPalette.Button, c)
-            self.textColorButton.palette = p
+            self.textColorButton.setStyleSheet("background-color: %s;" % c.name())
         
     def onFontFamilyComboChanged(self, font):
         self.cfg.set("console", "fontFamily", font.family())
