@@ -27,6 +27,13 @@ HEADERS += src/pytson.h \
     src/ts3logdispatcher.h \
     src/pyconversion.h
 
+OTHER_FILES += templates/ts3module.h.tpl \
+    templates/ts3module.cpp.tpl \
+    templates/plugin.h.tpl \
+    templates/plugin.cpp.tpl \
+    templates/ts3defines.py.tpl \
+    templates/ts3plugin.py.tpl
+
 unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon
 }
