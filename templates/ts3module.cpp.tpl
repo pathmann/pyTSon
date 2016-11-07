@@ -67,13 +67,13 @@ PyMODINIT_FUNC PyInit_ts3(void) {
 
 PyObject* getPluginID(PyObject* /*self*/, PyObject* args) {
   /*
-  @staticmethod
-  def getPluginID():
-      """
-      Returns pyTSon's plugin id
-      @return: the plugin id
-      @rtype: string
-      """
+    @staticmethod
+    def getPluginID():
+        """
+        Returns pyTSon's plugin id
+        @return: the plugin id
+        @rtype: string
+        """
   */
   if (!PyArg_ParseTuple(args, ""))
     return NULL;

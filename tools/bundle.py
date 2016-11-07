@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 #docs
 
 
-FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("docs/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf")]
+FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("generated/pregen/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf"), ("ressources/answercontacts.py", "plugins/pyTSon/scripts/answercontacts.py"), ("ressources/autopoke.py", "plugins/pyTSon/scripts/autopoke.py"), ("ressources/autoreply.py", "plugins/pyTSon/scripts/autoreply.py"), ("ressources/cmdtest.py", "plugins/pyTSon/scripts/cmdtest.py"), ("ressources/tweakui.py", "plugins/pyTSon/scripts/tweakui.py")]
 
 ARCHFILES = {'win32' : [("build/pyTSon.dll", "plugins/pyTSon_win32.dll")], 'win64' : [("build/pyTSon.dll", "plugins/pyTSon_win64.dll")], 'linux_x86' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_x86.so")], 'linux_amd64' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_amd64.so")], 'mac' : [("build/libpyTSon.1.0.0.dylib", "plugins/libpyTSon_mac.dylib")]}
 
@@ -27,10 +27,19 @@ PYTHONFILES = {'win32' : [("python35.dll", "plugins/pyTSon/python35.dll"), ("Lib
 INIBASE = """
 Name = pyTSon
 Type = Plugin
-Author = Thomas "PLuS" Pathmann
-Version = 1.0.3
+Author = Thomas \\"PLuS\\" Pathmann
+Version = 1.0.4
 Platforms = %s
 Description = "pyTSon - A python plugin to enhance the TS3 client with python scripts"
+"""
+
+INIBASE_WIN = """
+Name = pyTSon
+Type = Plugin
+Author = Thomas \\"PLuS\\" Pathmann
+Version = 1.0.4
+Platforms = %s
+Description = "pyTSon - A python plugin to enhance the TS3 client with python scripts. In order to work, you have to move python35.dll manually from %%APPDATA%%\\\\TS3Client\\\\plugins\\\\pyTSon\\\\ to %%PROGRAMFILES%%\\\\Teamspeak 3 Client\\\\ once"
 """
 
 
@@ -60,7 +69,10 @@ def main(root, pythondir, outdir, arches):
                             fn = os.path.join(base, f)
                             zip.write(fn, inzip + fn[len(locpath):])
             
-        zip.writestr("package.ini", INIBASE % a)
+        if a.startswith("win"):
+            zip.writestr("package.ini", INIBASE_WIN % a)
+        else:
+            zip.writestr("package.ini", INIBASE % a)
         zip.close()
 
 if __name__ == "__main__":

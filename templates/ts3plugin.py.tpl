@@ -75,9 +75,14 @@ class PluginHost(object):
                 if cls.plugins[key].apiVersion != 20:
                     if not cls.cfg.getboolean("general", "differentApi", fallback=False):
                         continue
-                        
-                cls.active[key] = cls.plugins[key]()
-                cls.cfg.set("plugins", key, "True")
+                       
+                try: 
+                    cls.active[key] = cls.plugins[key]()
+                    cls.cfg.set("plugins", key, "True")
+                except:
+                    err = ts3.logMessage("Error starting python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.start", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
                 
         #restore reloaded menus 
         for globid, (p, locid) in cls.menus.items():
@@ -104,7 +109,11 @@ class PluginHost(object):
 
         #stop all plugins
         for key, p in cls.active.items():
-            p.stop()
+            try:
+                p.stop()
+            except:
+                print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
+                    
         cls.active = {}
         
         #save local menu ids
@@ -121,39 +130,55 @@ class PluginHost(object):
     @classmethod
     def activate(cls, pname):
         if pname in cls.plugins:
-            cls.active[pname] = cls.plugins[pname]()
-            cls.cfg.set("plugins", pname, "True")
-            
-            for globid, (p, locid) in cls.menus.items():
-                if type(p) is str and p == pname:
-                    cls.menus[globid] = (cls.active[p], locid)
-                    
-            for keyword, (p, lockey) in cls.hotkeys.items():
-                if type(p) is str and p == pname:
-                    cls.hotkeys[keyword] = (cls.active[p], lockey)
+            try:
+                cls.active[pname] = cls.plugins[pname]()
+                cls.cfg.set("plugins", pname, "True")
+                
+                for globid, (p, locid) in cls.menus.items():
+                    if type(p) is str and p == pname:
+                        cls.menus[globid] = (cls.active[p], locid)
+                        
+                for keyword, (p, lockey) in cls.hotkeys.items():
+                    if type(p) is str and p == pname:
+                        cls.hotkeys[keyword] = (cls.active[p], lockey)
+            except:
+                err = ts3.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
+                if err != ts3defines.ERROR_ok:
+                    print("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()))
         
     @classmethod
     def deactivate(cls, pname):
         if pname in cls.active:
-            #remove hotkeys
-            for key in cls.hotkeys:
-                if cls.hotkeys[key][0].name == pname:
-                    cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
-            
-            #remove menuItems
-            for key in cls.menus:
-                if cls.menus[key][0].name == pname:
-                    cls.menus[key] = (pname, cls.menus[key][1])
-            
-            cls.active[pname].stop()
-            del cls.active[pname]
-            cls.cfg.set("plugins", pname, "False")
+            try:
+                #remove hotkeys
+                for key in cls.hotkeys:
+                    if cls.hotkeys[key][0].name == pname:
+                        cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
+                
+                #remove menuItems
+                for key in cls.menus:
+                    if cls.menus[key][0].name == pname:
+                        cls.menus[key] = (pname, cls.menus[key][1])
+                
+                cls.active[pname].stop()
+                del cls.active[pname]
+                cls.cfg.set("plugins", pname, "False")
+            except:
+                err = ts3.logMessage("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.deactivate", 0)
+                if err != ts3defines.ERROR_ok:
+                    print("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()))
         
     @classmethod
     def reload(cls):
         #stop all running modules
         for key, p in cls.active.items():
-            p.stop()
+            try:
+                p.stop()
+            except:
+                err = ts3.logMessage("Error stopping python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.reload", 0)
+                if err != ts3defines.ERROR_ok:
+                    print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
+                    
         cls.active = {}
         cls.plugins = {}
     
@@ -217,7 +242,7 @@ class PluginHost(object):
                 try:
                     ret.append(meth(*args))
                 except:
-                    ts3.logMessage(traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ts3plugin.%s" % key, 0)
+                    print("Error calling method of plugin %s: %s" % (key, traceback.format_exc()))
           
         for r in ret:
             if r:
@@ -229,9 +254,17 @@ class PluginHost(object):
     def processCommand(cls, schid, command):
         tokens = command.split(' ')
         
+        if len(tokens) == 0 or tokens[0] == "":
+            return False
+        
         for key, p in cls.active.items():
             if p.commandKeyword == tokens[0]:
-                return p.processCommand(schid, " ".join(tokens[1:]))
+                try:
+                    return p.processCommand(schid, " ".join(tokens[1:]))
+                except:
+                    err = ts3.logMessage("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.processCommand", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()))
         
         return False
         
@@ -240,8 +273,13 @@ class PluginHost(object):
         ret = []
         for key, p in cls.active.items():
             if p.infoTitle is not None:
-                ret.append(p.infoTitle)
-                ret += p.infoData(schid, aid, atype)
+                try:
+                    ret.append(p.infoTitle)
+                    ret += p.infoData(schid, aid, atype)
+                except:
+                    err = ts3.logMessage("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.infoData", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()))
             
         return ret
         
@@ -295,7 +333,12 @@ class PluginHost(object):
             (plugin, locid) = cls.menus[menuItemID]
             if type(plugin) is not str:
                 #if plugin was reloaded, but menuItem does not exist anymore
-                plugin.onMenuItemEvent(schid, atype, locid, selectedItemID)
+                try:
+                    plugin.onMenuItemEvent(schid, atype, locid, selectedItemID)
+                except:
+                    err = ts3.logMessage("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onMenuItemEvent", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
       
     @classmethod
     def globalHotkeyKeyword(cls, plugin, localkeyword):
@@ -317,7 +360,12 @@ class PluginHost(object):
         if keyword in cls.hotkeys:
             (plugin, lockey) = cls.hotkeys[keyword]
             if type(plugin) is not str:
-                plugin.onHotkeyEvent(lockey)
+                try:
+                    plugin.onHotkeyEvent(lockey)
+                except:
+                    err = ts3.logMessage("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onHotkeyEvent", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
                 
     @classmethod
     def onEditPlaybackVoiceDataEvent(cls, schid, clientID, samples, channels):

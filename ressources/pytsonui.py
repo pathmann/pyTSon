@@ -7,7 +7,7 @@ from PythonQt.QtCore import Qt, QFile, QIODevice
 from PythonQt.QtUiTools import QUiLoader
 
 from rlcompleter import Completer
-import traceback
+import traceback, re
 from itertools import takewhile
 
 import ts3
@@ -417,9 +417,14 @@ class StdRedirector:
             self.callback(text.rstrip())
         self.no = not self.no
 
+def defaultFont():
+    if sys.platform.startswith("win"):
+        return QFont("Courier", 12)
+    else:
+        return QFont("Monospace", 12)
 
 class PythonConsole(QPlainTextEdit):
-    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=QFont("Monospace", 12), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, parent=None):
+    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, parent=None):
         super(QPlainTextEdit, self).__init__(parent)
         
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -628,7 +633,7 @@ class PythonConsole(QPlainTextEdit):
     def doTab(self):
         if self.tabcomplete:
             cmd = self.currentLine()
-            tokens = cmd.split(" ")
+            tokens = list(filter(None, re.split("[, \t\-\+\*\[\]\{\}:\(\)]+", cmd)))
             if tokens[-1] != "":
                 state = 0
                 cur = self.comp.complete(tokens[-1], state)
@@ -646,18 +651,18 @@ class PythonConsole(QPlainTextEdit):
                     if len(l) == 1:
                         self.removeCurrentLine()
                         self.writePrompt(False)
-                        before = " ".join(tokens[:-1])
+                        before = cmd[:-len(tokens[-1])]
                         if before == "":
                             self.textCursor().insertText(l[0])
                         else:
-                            self.textCursor().insertText(" ".join(tokens[:-1]) + " " + l[0])
+                            self.textCursor().insertText(cmd[:-len(tokens[-1])] + l[0])
                     else:
                         self.appendLine("\t\t".join(l))
                         self.writePrompt(True)
                         
                         prefix = ''.join(c[0] for c in takewhile(lambda x: all(x[0] == y for y in x), zip(*l)))
                         if prefix != '':
-                            self.textCursor().insertText(" ".join(tokens[:-1]) + " " + prefix)
+                            self.textCursor().insertText(cmd[:-len(tokens[-1])] + prefix)
                         else:
                             self.textCursor().insertText(cmd)
         else:
