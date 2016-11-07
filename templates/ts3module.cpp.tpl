@@ -17,7 +17,7 @@
 #define PYLIST_TO_ARRAY(type, list, error, ret, appendNull) (void*)(list, error, ret, appendNull)
 #define ARRAY_TO_PYLIST(type, array, formatChar, error, ret, len) (void*)(array, formatChar, error, ret, len)
 #define VECTOR(x, y, z) (void*)(x, y, z)
-#define CPPALLOC(type, size) (void*)(type, size)
+#define CPPALLOC(type, size) (void*)(size)
 #define delete
 #define CPPDELARR(arr) (void*)(arr)
 #else
