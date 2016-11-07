@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>646</width>
-    <height>518</height>
+    <height>559</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,7 +64,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Name:</string>
+            <string>&amp;Name:</string>
            </property>
            <property name="buddy">
             <cstring>nameEdit</cstring>
@@ -81,7 +81,7 @@
          <item row="4" column="0" colspan="2">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Version:</string>
+            <string>&amp;Version:</string>
            </property>
            <property name="buddy">
             <cstring>versionEdit</cstring>
@@ -343,6 +343,43 @@
              <widget class="QSpinBox" name="tabwidthSpin"/>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="startupBox">
+         <property name="title">
+          <string>Startup</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Run script:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="scriptEdit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="scriptButton">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="silentButton">
+            <property name="text">
+             <string>Silent</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

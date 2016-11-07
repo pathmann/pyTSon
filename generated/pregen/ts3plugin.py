@@ -30,7 +30,8 @@ class PluginMount(type):
 
 
 class PluginHost(object):
-    defaultConfig = [("general", [("differentApi", "False")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600")])]
+    defaultConfig = [("general", [("differentApi", "False")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
+
 
     @classmethod
     def setupConfig(cls):
@@ -210,7 +211,7 @@ class PluginHost(object):
     @classmethod
     def showScriptingConsole(cls):
         if not cls.shell:
-            cls.shell = PythonConsole(cls.cfg.getboolean("console", "tabcomplete"), cls.cfg.getboolean("console", "spaces"), cls.cfg.getint("console", "tabwidth"), QFont(cls.cfg.get("console", "fontFamily"), cls.cfg.getint("console", "fontSize")), QColor(cls.cfg.get("console", "backgroundColor")), QColor(cls.cfg.get("console", "textColor")), cls.cfg.getint("console", "width"), cls.cfg.getint("console", "height"))
+            cls.shell = PythonConsole(cls.cfg.getboolean("console", "tabcomplete"), cls.cfg.getboolean("console", "spaces"), cls.cfg.getint("console", "tabwidth"), QFont(cls.cfg.get("console", "fontFamily"), cls.cfg.getint("console", "fontSize")), QColor(cls.cfg.get("console", "backgroundColor")), QColor(cls.cfg.get("console", "textColor")), cls.cfg.getint("console", "width"), cls.cfg.getint("console", "height"), cls.cfg.get("console", "startup"), cls.cfg.getboolean("console", "silentStartup"))
             cls.shell.connect("destroyed()", cls.scriptingConsoleDestroyed)
         cls.shell.show()
 
