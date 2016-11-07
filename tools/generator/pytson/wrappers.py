@@ -81,6 +81,21 @@ class FunctionWrapper(object):
             return ""
         else:
             return '\n'.join(self.bodylines)
+            
+    @property
+    def docString(self):
+        if self.ts3decl:
+            return ""
+        else:
+            ret = ""
+            indocs = False
+            for l in self.bodylines:
+                if l.strip() == "\"\"\"":
+                    indocs = not indocs
+                elif indocs:
+                    ret += "%s\\n" % l.strip()
+                    
+            return ret
 
 
 class CallbackWrapper(object):
@@ -199,3 +214,19 @@ class CallbackWrapper(object):
             return ""
         else:
             return '\n'.join(self.bodylines)
+            
+    @property
+    def docString(self):
+        if self.original:
+            return ""
+        else:
+            ret = ""
+            indocs = False
+            for l in self.bodylines:
+                if l.strip() == "\"\"\"":
+                    indocs = not indocs
+                    indocs = True
+                elif indocs:
+                    ret += "%s\\n" % l.strip()
+                    
+            return ret
