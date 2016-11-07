@@ -603,17 +603,13 @@ PyObject* getHotkeyFromKeyword(PyObject* /*self*/, PyObject* args) {
   //unsigned int getHotkeyFromKeyword(const char *pluginID, const char **keywords, char **hotkeys, size_t arrayLen, size_t hotkeyBufSize)
   /*
     @staticmethod
-    def getHotkeyFromKeyword(keywords, hotkeys, arrayLen, hotkeyBufSize):
+    def getHotkeyFromKeyword(keywords):
         """
-        
+
         @param keywords:
         @type keywords:
-        @param hotkeys:
-        @type hotkeys:
-        @param arrayLen:
-        @type arrayLen:
-        @param hotkeyBufSize:
-        @type hotkeyBufSize:
+        @return:
+        @rtype:
         """
   */
   PyObject* pykeywords;
@@ -7100,4 +7096,3 @@ PyObject* getDefaultCaptureMode(PyObject* /*self*/, PyObject* args) {
 
   return pyret;
 }
-
