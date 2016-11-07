@@ -32,7 +32,9 @@ OTHER_FILES += templates/ts3module.h.tpl \
     templates/plugin.h.tpl \
     templates/plugin.cpp.tpl \
     templates/ts3defines.py.tpl \
-    templates/ts3plugin.py.tpl
+    templates/ts3plugin.py.tpl \
+    ressources/pyTSon-configdialog.ui \
+    ressources/pytsonui.py
 
 unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon
