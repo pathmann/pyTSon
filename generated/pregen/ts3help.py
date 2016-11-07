@@ -3,6 +3,10 @@ import ts3
 
 
 def help(obj):
+    """
+    This is a wrapper around pydoc.help to display docstrings for the ts3 module.
+    Note: Adding the docstrings directly in the cpython module blows up the data segment of the pyTSon library.
+    """
     if hasattr(obj, "__module__") and obj.__module__ == "ts3":
         name = getattr(obj, "__name__", None)
         
