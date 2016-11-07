@@ -246,6 +246,11 @@ class ConfigurationDialog(QDialog):
                               ("tabwidthSpin", True, []),
                               ("tabwidthLabel", True, []),
                           ]),
+                          ("startupBox", False, [
+                              ("scriptEdit", True, []),
+                              ("scriptButton", True, []),
+                              ("silentButton", True, []),
+                          ]),
                       ]),
                    ])]
 
@@ -282,13 +287,8 @@ class ConfigurationDialog(QDialog):
         self.settingsButton.setEnabled(False)
         self.requiredApiEdit.setText(20)
 
-        p = self.backgroundColorButton.palette
-        p.setColor(QPalette.Button, QColor(self.cfg.get("console", "backgroundColor")))
-        self.backgroundColorButton.palette = p
-
-        p = self.textColorButton.palette
-        p.setColor(QPalette.Button, QColor(self.cfg.get("console", "textColor")))
-        self.textColorButton.palette = p
+        self.backgroundColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "backgroundColor")).name())
+        self.textColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "textColor")).name())
 
         f = QFont(self.cfg.get("console", "fontFamily"))
         self.fontFamilyCombo.setCurrentFont(f)
@@ -304,6 +304,9 @@ class ConfigurationDialog(QDialog):
 
         self.spacesButton.setChecked(self.cfg.getboolean("console", "spaces"))
         self.tabwidthSpin.setValue(self.cfg.getint("console", "tabwidth"))
+
+        self.scriptEdit.setText(self.cfg.get("console", "startup"))
+        self.silentButton.setChecked(self.cfg.getboolean("console", "silentStartup"))
 
         self.setupList()
 
@@ -375,17 +378,13 @@ class ConfigurationDialog(QDialog):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "backgroundColor")), self, "Console Background Color")
         if c.isValid():
             self.cfg.set("console", "backgroundColor", c.name())
-            p = self.backgroundColorButton.palette
-            p.setColor(QPalette.Button, c)
-            self.backgroundColorButton.palette = p
+            self.backgroundColorButton.setStyleSheet("background-color: %s;" % c.name())
 
     def onTextColorButtonClicked(self):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "textColor")), self, "Console Text Color")
         if c.isValid():
             self.cfg.set("console", "textColor", c.name())
-            p = self.textColorButton.palette
-            p.setColor(QPalette.Button, c)
-            self.textColorButton.palette = p
+            self.textColorButton.setStyleSheet("background-color: %s;" % c.name())
 
     def onFontFamilyComboChanged(self, font):
         self.cfg.set("console", "fontFamily", font.family())
@@ -406,6 +405,25 @@ class ConfigurationDialog(QDialog):
     def onTabwidthSpinChanged(self, width):
         self.cfg.set("console", "tabwidth", str(width))
 
+    def on_scriptButton_clicked(self):
+        fname = QFileDialog.getOpenFileName(self, "Startup script", os.path.dirname(self.cfg.get("console", "startup")), "Python scripts (*.py)")
+        if fname != "":
+            self.scriptEdit.setText(fname)
+            self.scriptEdit.setStyleSheet("border: 1px solid black")
+
+            self.cfg.set("console", "startup", fname)
+
+    def on_scriptEdit_textEdited(self, text):
+        if os.path.exists(text) and os.path.isfile(text):
+            self.scriptEdit.setStyleSheet("border: 1px solid black")
+
+            self.cfg.set("console", "startup", text)
+        else:
+            self.scriptEdit.setStyleSheet("border: 1px solid red")
+
+    def on_silentButton_toggled(self, act):
+        self.cfg.set("console", "silentStartup", str(act))
+
 
 class StdRedirector:
     def __init__(self, callback):
@@ -424,9 +442,9 @@ def defaultFont():
         return QFont("Monospace", 12)
 
 class PythonConsole(QPlainTextEdit):
-    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, parent=None):
+    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, startup="", silentStartup=False, parent=None):
         super(QPlainTextEdit, self).__init__(parent)
-
+        self.username = os.getlogin()
         self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.tabcomplete = tabcomplete
@@ -459,7 +477,11 @@ class PythonConsole(QPlainTextEdit):
 
         self.norformat = self.currentCharFormat()
 
-        self.writePrompt(False)
+        if os.path.isfile(startup):
+            with open(startup, "r") as f:
+                self.runCommand(f.read(), silentStartup)
+
+        self.writePrompt(self.plainText != "")
 
     def setFont(self, f):
         QPlainTextEdit.setFont(self, f)
@@ -469,7 +491,7 @@ class PythonConsole(QPlainTextEdit):
         self.setTabStopWidth(fm.width("X") * self.tabwidth)
 
     def prompt(self):
-        return ">>> " if not self.inmulti else "... "
+        return self.username+"> " if not self.inmulti else "... "
 
     def promptLength(self):
         return len(self.prompt())
@@ -686,6 +708,25 @@ class PythonConsole(QPlainTextEdit):
     def appendLine(self, text):
         self.appendPlainText(text)
 
+    def runCommand(self, cmd, silent):
+        if not silent:
+            tmp = sys.stdout
+            sys.stdout = StdRedirector(self.appendLine)
+
+        try:
+            try:
+                res = eval(cmd, self.globals)
+                if res != None:
+                    self.appendLine(repr(res))
+            except SyntaxError:
+                exec(cmd, self.globals)
+        except:
+            if not silent:
+                self.appendLine(traceback.format_exc())
+
+        if not silent:
+            sys.stdout = tmp
+
     def doExecuteCommand(self):
         cmd = self.currentLine().rstrip()
 
@@ -711,20 +752,7 @@ class PythonConsole(QPlainTextEdit):
 
         self.moveCursor(QTextCursor.End)
 
-        tmp = sys.stdout
-        sys.stdout = StdRedirector(self.appendLine)
-
-        try:
-            try:
-                res = eval(cmd, self.globals)
-                if res != None:
-                    self.appendLine(repr(res))
-            except SyntaxError:
-                exec(cmd, self.globals)
-        except:
-            self.appendLine(traceback.format_exc())
-
-        sys.stdout = tmp
+        self.runCommand(cmd, False)
         self.writePrompt(True)
 
         self.ensureCursorVisible()
