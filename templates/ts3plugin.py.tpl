@@ -112,7 +112,7 @@ class PluginHost(object):
             try:
                 p.stop()
             except:
-                print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
+                print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
                     
         cls.active = {}
         
