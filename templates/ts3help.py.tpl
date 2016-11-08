@@ -9,7 +9,7 @@ def help(obj):
     """
     if hasattr(obj, "__module__") and obj.__module__ == "ts3":
         name = getattr(obj, "__name__", None)
-        
+
         txt = ""
         if name:
             {% for name, f in functions.items() %}
@@ -22,12 +22,12 @@ def help(obj):
                 txt = "{{f.docString}}"
                 {% endif %}
             {% endfor %}
-                
+
         if txt != "":
             for l in txt.split("\n"):
                 print(l)
-                
+
             return
-                        
+
     return pydochelp(obj)
 

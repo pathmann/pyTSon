@@ -16,23 +16,23 @@ class answercontacts(ts3plugin):
     infoTitle = None
     menuItems = []
     hotkeys = []
-  
+
     def __init__(self):
         pass
-    
+
     def contactStatus(self, uid):
         """
         checks contact status of a given uid. Returns friend=0, blocked=1, neutral=2
         """
         db = QSqlDatabase.addDatabase("QSQLITE","pyTSon_example")
         db.setDatabaseName(ts3.getConfigPath() + "settings.db")
-        
+
         if not db.isValid():
             raise Exception("Database not valid")
-            
+
         if not db.open():
             raise Exception("Database could not be opened")
-            
+
         q = db.exec_("SELECT * FROM contacts WHERE value LIKE '%%IDS=%s%%'" % uid)
         ret = 2
 
@@ -42,12 +42,12 @@ class answercontacts(ts3plugin):
             for l in val.split('\n'):
                 if l.startswith('Friend='):
                     ret = int(l[-1])
-            
+
         q.delete()
         db.close()
         db.delete()
         QSqlDatabase.removeDatabase("pyTSon_example")
-        
+
         return ret
 
     def onTextMessageEvent(self, schid, targetMode, toID, fromID, fromName, fromUniqueIdentifier, message, ffIgnored):

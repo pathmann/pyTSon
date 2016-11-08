@@ -15,5 +15,5 @@ class {{name}}(object):
     {% for (n, v) in e %}
     {{n}} = {{v}}
     {% endfor %}
-    
+
 {% endfor %}
