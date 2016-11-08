@@ -3,10 +3,13 @@ import sys, os, glob
 import ts3, ts3defines
 
 import importlib, traceback
+import json
 
 from configparser import ConfigParser
 from pytsonui import PythonConsole, ConfigurationDialog
-from PythonQt.QtGui import QFont, QColor
+from PythonQt.QtGui import QFont, QColor, QMessageBox
+from PythonQt.QtCore import QUrl
+from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 class PluginMount(type):
     def __init__(cls, name, bases, attrs):
@@ -46,6 +49,8 @@ class PluginHost(object):
     def init(cls):
         cls.shell = None
         cls.confdlg = None
+
+        cls.nwm = None
 
         cls.modules = {}
 
@@ -102,6 +107,10 @@ class PluginHost(object):
         if cls.confdlg:
             cls.confdlg.delete()
         cls.confdlg = None
+
+        if cls.nwm:
+            cls.nwm.delete()
+        cls.nwm = None
 
         #store config
         with open(os.path.join(ts3.getConfigPath(), "pyTSon.conf"), "w") as f:
@@ -284,10 +293,65 @@ class PluginHost(object):
         return ret
 
     @classmethod
+    def parseReply(cls, repstr):
+        def platform_str():
+            try:
+                import sys, platform
+            except:
+                #sys can't really fail to load
+                raise Exception("Error importing platform module")
+
+            if sys.platform == "linux":
+                return "linux_%s" % "amd64" if platform.architecture()[0] == "64bit" else "x86"
+            elif sys.platform == "win32":
+                return "win%s" % platform.architecture()[0][:2]
+            else:
+                return "mac"
+
+        try:
+            obj = json.loads(repstr)
+
+            if obj["tag_name"] == "v1.0.4":
+                QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release")
+            else:
+                for a in obj["assets"]:
+                    if a["name"] == "pyTSon_%s.ts3_plugin" % platform_str():
+                        QMessageBox.information(None, "pyTSon Update Check", "There is an update of pyTSon for your platform. Get it from <a href='%s'>here</a>" % obj["html_url"])
+                        return
+
+                QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release (at least for your platform)")
+        except:
+            err = ts3.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseReply", 0)
+            if err != ts3defines.ERROR_ok:
+                print("Error parsing reply from update check: %s" % traceback.format_exc())
+
+    @classmethod
+    def updateCheckFinished(cls, reply):
+        if reply.error() == QNetworkReply.NoError:
+            cls.parseReply(reply.readAll().data().decode('utf-8'))
+        else:
+            err = ts3.logMessage("Error checking for update: %s" % reply.error(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.updateCheckFinished", 0)
+            if err != ts3defines.ERROR_ok:
+                print("Error checking for update: %s" % reply.error())
+
+        cls.nwm.delete()
+        cls.nwm = None
+
+    @classmethod
+    def updateCheck(cls):
+        if cls.nwm:
+            #there is a pending updatecheck
+            return
+
+        cls.nwm = QNetworkAccessManager()
+        cls.nwm.connect("finished(QNetworkReply*)", cls.updateCheckFinished)
+        cls.nwm.get(QNetworkRequest(QUrl("https://api.github.com/repos/pathmann/pyTSon/releases/latest")))
+
+    @classmethod
     def initMenus(cls):
-        nextid = 2
         cls.menus = {}
-        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", "")]
+        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Check for update", "")]
+        nextid = len(ret)
 
         for key, p in cls.active.items():
             for (atype, locid, text, icon) in p.menuItems:
@@ -327,6 +391,9 @@ class PluginHost(object):
             return
         elif menuItemID == 1:
             cls.configure()
+            return
+        elif menuItemID == 2:
+            cls.updateCheck()
             return
 
         if menuItemID in cls.menus:
