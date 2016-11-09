@@ -161,6 +161,19 @@ def getValues(parent, title, params, doneclb):
 
     return ret
 
+def connectSignalSlotsByName(sender, receiver):
+    """
+    Connects pythonqt signals by name (receiver.on_<sender.objectname>_<signalname>)
+    @param sender: the sender of signals
+    @type sender: QObject
+    @param receiver: the receiver which has slots as callables defined
+    @type receiver: object
+    """
+    for sig in dir(sender):
+        if type(getattr(sender, sig)).__name__ == "builtin_qt_signal":
+            if hasattr(receiver, "on_%s_%s" % (sender.objectName, sig.split('(')[0])):
+                getattr(sender, sig).connect(getattr(receiver, "on_%s_%s" % (sender.objectName, sig.split('(')[0])))
+
 
 def retrieveWidgets(obj, parent, widgets):
     """
@@ -172,48 +185,62 @@ def retrieveWidgets(obj, parent, widgets):
     @param widgets: a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. The elements must be children of parent. First element of tuple must held the widget's objectname. If second element is True, the widget will be added as property (by objectname) to obj. Third element of the tuple are the child widgets, which should be handled by setupui
     @type widgets: list[tuple(str, bool, list(...))]
     """
-        if type(parent) is QTabWidget:
-            childs = [parent.widget(i) for i in range(0, parent.count)]
-        else:
-            childs = parent.children()
+    if type(parent) is QTabWidget:
+        childs = [parent.widget(i) for i in range(0, parent.count)]
+    else:
+        childs = parent.children()
 
-        names = [w[0] for w in widgets]
-        stores = [w[1] for w in widgets]
-        grchilds = [w[2] for w in widgets]
+    names = [w[0] for w in widgets]
+    stores = [w[1] for w in widgets]
+    grchilds = [w[2] for w in widgets]
 
-        for c in childs:
-            if c.objectName in names:
-                i = names.index(c.objectName)
-                if stores[i]:
-                    setattr(obj, names[i], c)
+    for c in childs:
+        if c.objectName in names:
+            i = names.index(c.objectName)
+            if stores[i]:
+                setattr(obj, names[i], c)
 
-                #connect slots by name
-                for sig in dir(c):
-                    if type(getattr(c, sig)).__name__ == "builtin_qt_signal":
-                        if hasattr(obj, "on_%s_%s" % (c.objectName, sig.split('(')[0])):
-                            getattr(c, sig).connect(getattr(obj, "on_%s_%s" % (c.objectName, sig.split('(')[0])))
+            connectSignalSlotsByName(c, obj)
 
-                retrieveWidgets(obj, c, grchilds[i])
+            retrieveWidgets(obj, c, grchilds[i])
 
-                names.pop(i)
-                stores.pop(i)
-                grchilds.pop(i)
+            names.pop(i)
+            stores.pop(i)
+            grchilds.pop(i)
 
-            if len(names) == 0:
-                return
+        if len(names) == 0:
+            return
 
-        if len(names) != 0:
-            raise Exception("Malformed uifile, widgets not found: %s" % names)
+    if len(names) != 0:
+        raise Exception("Malformed uifile, widgets not found: %s" % names)
 
-def setupUi(obj, uipath, widgets):
+
+def retrieveAllWidgets(obj, parent):
+    """
+    Retrieves all child widgets from a parent widget and adds them as attribute to another object. If defined, signals from widgets are connected by name to methods in obj.
+    @param obj: the object which will get the attributes added
+    @type obj: object
+    @param parent: the toplevel widget
+    @type parent: QWidget
+    """
+    for c in parent.children():
+        if c.isWidgetType() and c.objectName != "":
+            setattr(obj, c.objectName, c)
+
+            connectSignalSlotsByName(c, obj)
+
+            retrieveAllWidgets(obj, c)
+
+
+def setupUi(obj, uipath, widgets=None):
     """
     Loads a Qt designer file (.ui), creates the widgets defined in and adds them as property to a given object. This internally calls retrieveWidgets, so signals from widgets are connected by name to obj.
     @param obj: The object which will act as parent of the loaded ui (this object will receive a new layout)
     @type obj: QWidget
     @param uipath: the path to the Qt designer file
     @type uipath: str
-    @param widgets: a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. See retrieveWidgets for details.
-    @type widgets: list[tuple(str, bool, list(...))]
+    @param widgets: optional argument; a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. See retrieveWidgets for details. If you omit this or pass None, recursively all child widgets will be stored
+    @type widgets: list[tuple(str, bool, list(...))] or None
     """
     if os.path.isfile(uipath):
         f = QFile(uipath)
@@ -229,7 +256,10 @@ def setupUi(obj, uipath, widgets):
     else:
         raise Exception("Could not find uifile")
 
-    retrieveWidgets(obj, ui, widgets)
+    if widgets:
+        retrieveWidgets(obj, ui, widgets)
+    else:
+        retrieveAllWidgets(obj, ui)
 
     layout = QHBoxLayout(obj)
     layout.addWidget(ui)
