@@ -14,6 +14,9 @@ import ts3
 
 @unique
 class ValueType(Enum):
+    """
+    enum to define the types of value shown and received with getValues.
+    """
     boolean = 1
     integer = 2
     double = 3
@@ -160,6 +163,15 @@ def getValues(parent, title, params, doneclb):
 
 
 def retrieveWidgets(obj, parent, widgets):
+    """
+    Retrieves widgets from a list and adds them as attribute to another object. If defined, signals from widgets are connected by name to methods in obj.
+    @param obj: the object which will get the attributes added
+    @type obj: object
+    @param parent: the toplevel widget
+    @type parent: QWidget
+    @param widgets: a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. The elements must be children of parent. First element of tuple must held the widget's objectname. If second element is True, the widget will be added as property (by objectname) to obj. Third element of the tuple are the child widgets, which should be handled by setupui
+    @type widgets: list[tuple(str, bool, list(...))]
+    """
         if type(parent) is QTabWidget:
             childs = [parent.widget(i) for i in range(0, parent.count)]
         else:
@@ -194,6 +206,15 @@ def retrieveWidgets(obj, parent, widgets):
             raise Exception("Malformed uifile, widgets not found: %s" % names)
 
 def setupUi(obj, uipath, widgets):
+    """
+    Loads a Qt designer file (.ui), creates the widgets defined in and adds them as property to a given object. This internally calls retrieveWidgets, so signals from widgets are connected by name to obj.
+    @param obj: The object which will act as parent of the loaded ui (this object will receive a new layout)
+    @type obj: QWidget
+    @param uipath: the path to the Qt designer file
+    @type uipath: str
+    @param widgets: a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. See retrieveWidgets for details.
+    @type widgets: list[tuple(str, bool, list(...))]
+    """
     if os.path.isfile(uipath):
         f = QFile(uipath)
         if f.open(QIODevice.ReadOnly):
@@ -311,6 +332,7 @@ class ConfigurationDialog(QDialog):
         self.setupList()
 
     def setupSlots(self):
+        #you can of course connect signal-slots manually, scriptEdit.textEdited for example is connected by setupui
         self.differentApiButton.connect("stateChanged(int)", self.onDifferentApiButtonChanged)
         self.pluginsList.connect("currentItemChanged(QListWidgetItem*, QListWidgetItem*)", self.onPluginsListCurrentItemChanged)
         self.pluginsList.connect("itemChanged(QListWidgetItem*)", self.onPluginsListItemChanged)
