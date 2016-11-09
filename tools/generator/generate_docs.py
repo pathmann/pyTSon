@@ -5,9 +5,10 @@ import sys, os
 from argparse import ArgumentParser
 
 DOC_FILES = ["ts3module.cpp", "plugin.cpp"]
+EXTRA_FILES = [("..", "..", "ressources", "pytsonui.py")]
 
 def main(inpdir, outdir):
-    outfiles = []
+    outfiles = [os.path.join(inpdir, os.path.join(*t)) for t in EXTRA_FILES]
     for fname in [os.path.join(inpdir, f) for f in DOC_FILES]:
         if not os.path.exists(fname):
             print("File %s does not exist" % fname)
@@ -27,7 +28,7 @@ def main(inpdir, outdir):
                     elif incomment:
                         outf.write(l)
 
-    os.system("epydoc %s --parse-only -o %s -n pyTSon --pdf" % (" ".join(outfiles), outdir))
+    os.system("epydoc %s --parse-only -o %s -n pyTSon --html" % (" ".join(outfiles), outdir))
 
 
 if __name__ == "__main__":
