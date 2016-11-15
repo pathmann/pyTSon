@@ -5,6 +5,7 @@ from enum import Enum, unique
 from PythonQt.QtGui import *
 from PythonQt.QtCore import Qt, QFile, QIODevice
 from PythonQt.QtUiTools import QUiLoader
+from PythonQt.QtNetwork import *
 
 from rlcompleter import Completer
 import traceback, re
@@ -273,6 +274,7 @@ class ConfigurationDialog(QDialog):
                           ("differentApiButton", True, []),
                           ("pluginsList", True, []),
                           ("reloadButton", True, []),
+                          ("repositoryButton", True, []),
                           ("settingsButton", True, []),
                           ("versionEdit", True, []),
                           ("nameEdit", True, []),
@@ -475,6 +477,10 @@ class ConfigurationDialog(QDialog):
 
     def on_silentButton_toggled(self, act):
         self.cfg.set("console", "silentStartup", str(act))
+
+    def on_repositoryButton_clicked(self):
+        self.muh = RepositoryDialog(self)
+        self.muh.show()
 
 
 class StdRedirector:
@@ -808,4 +814,33 @@ class PythonConsole(QPlainTextEdit):
         self.writePrompt(True)
 
         self.ensureCursorVisible()
+
+
+class RepositoryDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository.ui"))
+
+        with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+            self.replist = json.loads(f.read())
+
+        movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
+        movie.start()
+        self.loadingLabel.setMovie(movie)
+
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+        #update repositorylists
+        self.masterupdate = True
+        for rep in self.replist:
+            if 'name' in rep and 'url' in rep:
+                self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
+            else:
+                pass #log
+
+    def onNetworkReply(self, reply):
+        pass
 
