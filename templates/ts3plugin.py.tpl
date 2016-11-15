@@ -293,7 +293,7 @@ class PluginHost(object):
         return ret
 
     @classmethod
-    def parseReply(cls, repstr):
+    def parseUpdateReply(cls, repstr):
         def platform_str():
             try:
                 import sys, platform
@@ -321,14 +321,14 @@ class PluginHost(object):
 
                 QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release (at least for your platform)")
         except:
-            err = ts3.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseReply", 0)
+            err = ts3.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseUpdateReply", 0)
             if err != ts3defines.ERROR_ok:
                 print("Error parsing reply from update check: %s" % traceback.format_exc())
 
     @classmethod
     def updateCheckFinished(cls, reply):
         if reply.error() == QNetworkReply.NoError:
-            cls.parseReply(reply.readAll().data().decode('utf-8'))
+            cls.parseUpdateReply(reply.readAll().data().decode('utf-8'))
         else:
             err = ts3.logMessage("Error checking for update: %s" % reply.error(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.updateCheckFinished", 0)
             if err != ts3defines.ERROR_ok:
