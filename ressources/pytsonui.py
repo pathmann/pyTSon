@@ -872,6 +872,8 @@ class RepositoryDialog(QDialog):
         else:
             _printError("Network error: %s" % reply.error(), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
 
+        reply.deleteLater()
+
         #all repositories updated
         if self.masterupdate == 0:
             self.reloadButton.setEnabled(True)
