@@ -3,15 +3,16 @@ import sys, os
 from enum import Enum, unique
 
 from PythonQt.QtGui import *
-from PythonQt.QtCore import Qt, QFile, QIODevice
+from PythonQt.QtCore import Qt, QFile, QIODevice, QUrl
 from PythonQt.QtUiTools import QUiLoader
 from PythonQt.QtNetwork import *
 
 from rlcompleter import Completer
 import traceback, re
 from itertools import takewhile
+import json
 
-import ts3
+import ts3, ts3defines
 
 @unique
 class ValueType(Enum):
@@ -816,6 +817,12 @@ class PythonConsole(QPlainTextEdit):
         self.ensureCursorVisible()
 
 
+def _printError(msg, level, channel, aid):
+    err = ts3.logMessage(msg, level, channel, aid)
+    if err != ts3defines.ERROR_ok:
+        print(msg)
+
+
 class RepositoryDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -826,6 +833,8 @@ class RepositoryDialog(QDialog):
         with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
             self.replist = json.loads(f.read())
 
+        self.addons = {}
+
         movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
         movie.start()
         self.loadingLabel.setMovie(movie)
@@ -834,13 +843,48 @@ class RepositoryDialog(QDialog):
         self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
         #update repositorylists
-        self.masterupdate = True
+        self.masterupdate = len(self.replist)
         for rep in self.replist:
             if 'name' in rep and 'url' in rep:
                 self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
             else:
-                pass #log
+                self.masterupdate -= 1
+                _printError("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog", 0)
 
     def onNetworkReply(self, reply):
-        pass
+        self.masterupdate -= 1
 
+        if reply.error() == QNetworkReply.NoError:
+            try:
+                repo = json.loads(reply.readAll().data().decode('utf-8'))
+
+                for addon in repo:
+                    if all(x in addon for x in ["name", "author", "version", "apiVersion", "description", "url", "dependencies"]):
+                        self.addAddon(addon)
+                    else:
+                        for r in self.replist:
+                            if reply.url().url() == r["url"]:
+                                _printError("Invalid entry in repository %s: %s" % (r["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                                break
+            except:
+                _printError("Error parsing repository: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                print("data: %s (%s)" % (reply.readAll().data().decode('utf-8'), len(reply.readAll().data().decode('utf-8'))))
+        else:
+            _printError("Network error: %s" % reply.error(), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+
+        #all repositories updated
+        if self.masterupdate == 0:
+            self.reloadButton.setEnabled(True)
+            self.loadingLabel.hide()
+
+            self.pluginsList.sortItems()
+
+    def addAddon(self, addon):
+        if not addon["name"] in self.addons:
+            #repos are prioritized
+            self.addons[addon["name"]] = addon
+
+            item = QListWidgetItem(self.pluginsList)
+            item.setText(addon["name"])
+            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setData(Qt.UserRole, addon["name"])
