@@ -111,6 +111,18 @@ bool PythonHost::setupDirectories(QString &error) {
     }
   }
 
+  m_sitepackdir = m_includelibdir;
+  if (!m_sitepackdir.cd("site-packages")) {
+    if (!m_sitepackdir.mkdir("site-packages")) {
+      error = QObject::tr("Error creating include/Lib/site-packages directory");
+      return false;
+    }
+    else if (!m_sitepackdir.cd("site-packages")) {
+      error = QObject::tr("Error changing directory to new created include/Lib/site-packages directory");
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -159,6 +171,41 @@ QString PythonHost::formatError(const QString &fallback) {
   else return fallback;
 }
 
+bool PythonHost::setSysPath(QString& error) {
+  PyObject* syspath = PyList_New(5);
+  if (!syspath) {
+    error = QObject::tr("Memory error");
+    return false;
+  }
+
+  QDir pathdirs[] = {m_scriptsdir, m_includedir, m_includelibdir, m_dynloaddir, m_sitepackdir};
+  PyObject* pypath = NULL;
+  for (unsigned int i = 0; i < std::extent<decltype(pathdirs)>::value; ++i) {
+    pypath = Py_BuildValue("s", pathdirs[i].absolutePath().toUtf8().data());
+    if (!pypath) {
+      error = QObject::tr("Error creating directory string from path %1").arg(i);
+      Py_DECREF(syspath);
+      return false;
+    }
+
+    if (PyList_SetItem(syspath, i, pypath) != 0) {
+      error = QObject::tr("Error adding dir %1 to sys.path").arg(i);
+      Py_DECREF(pypath);
+      Py_DECREF(syspath);
+      return false;
+    }
+  }
+
+  //replace sys.path
+  if (PySys_SetObject("path", syspath) != 0) {
+    error = QObject::tr("Error setting sys.path");
+    Py_DECREF(syspath);
+    return false;
+  }
+
+  return true;
+}
+
 bool PythonHost::init(QString& error) {
   if (!setupDirectories(error))
     return false;
@@ -168,7 +215,7 @@ bool PythonHost::init(QString& error) {
     return false;
   }
 
-  Py_NoSiteFlag = 1;
+  //Py_NoSiteFlag = 1; //from now on, we need the siteflag to be able to use pip
   Py_FrozenFlag = 1;
   Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(const_cast<wchar_t*>(L"pyTSon"));
@@ -196,78 +243,8 @@ bool PythonHost::init(QString& error) {
   }
 
   //set syspath
-  PyObject* syspath = PyList_New(4);
-  if (!syspath) {
-    error = QObject::tr("Memory error");
+  if (!setSysPath(error))
     return false;
-  }
-
-  //add scriptspath to sys.path
-  PyObject* pypath = Py_BuildValue("s", m_scriptsdir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from scripts path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 0, pypath) != 0) {
-    error = QObject::tr("Error adding scriptsdir to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includepath to sys.path
-  pypath = Py_BuildValue("s", m_includedir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 1, pypath) != 0) {
-    error = QObject::tr("Error adding scriptsdir to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includelibpath to sys.path
-  pypath = Py_BuildValue("s", m_includelibdir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include/Lib path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 2, pypath) != 0) {
-    error = QObject::tr("Error adding include/Lib to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includelibpath to sys.path
-  pypath = Py_BuildValue("s", m_dynloaddir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include/Lib/lib-dynload path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 3, pypath) != 0) {
-    error = QObject::tr("Error adding include/Lib/lib-dynload to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //replace sys.path
-  if (PySys_SetObject("path", syspath) != 0) {
-    error = QObject::tr("Error setting sys.path");
-    Py_DECREF(syspath);
-    return false;
-  }
 
   PythonQt::init(PythonQt::PythonAlreadyInitialized);
   PythonQt_QtAll::init();

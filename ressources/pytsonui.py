@@ -480,8 +480,8 @@ class ConfigurationDialog(QDialog):
         self.cfg.set("console", "silentStartup", str(act))
 
     def on_repositoryButton_clicked(self):
-        self.muh = RepositoryDialog(self)
-        self.muh.show()
+        self.rpd = RepositoryDialog(self.host, self)
+        self.rpd.show()
 
 
 class StdRedirector:
@@ -824,16 +824,13 @@ def _printError(msg, level, channel, aid):
 
 
 class RepositoryDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, host, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
 
+        self.host = host
+
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository.ui"))
-
-        with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
-            self.replist = json.loads(f.read())
-
-        self.addons = {}
 
         movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
         movie.start()
@@ -842,35 +839,52 @@ class RepositoryDialog(QDialog):
         self.nwm = QNetworkAccessManager(self)
         self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
-        #update repositorylists
+        self.updateRepositories()
+
+    def updateRepositories(self):
+        try:
+            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+                self.replist = json.loads(f.read())
+        except:
+            _printError("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryDialog.updateRepositories", 0)
+            return False
+
+        self.addons = {}
+        self.pluginsList.clear()
+
         self.masterupdate = len(self.replist)
         for rep in self.replist:
             if 'name' in rep and 'url' in rep:
                 self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
             else:
                 self.masterupdate -= 1
-                _printError("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog", 0)
+                _printError("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.updateRepositories", 0)
+
+        return True
 
     def onNetworkReply(self, reply):
         self.masterupdate -= 1
 
+        for r in self.replist:
+            if reply.url().url() == r["url"]:
+                repo = r
+                break
+
         if reply.error() == QNetworkReply.NoError:
             try:
-                repo = json.loads(reply.readAll().data().decode('utf-8'))
+                addons = json.loads(reply.readAll().data().decode('utf-8'))
 
-                for addon in repo:
-                    if all(x in addon for x in ["name", "author", "version", "apiVersion", "description", "url", "dependencies"]):
-                        self.addAddon(addon)
+                for a in addons:
+                    if all(x in a for x in ["name", "author", "version", "apiVersion", "description", "url", "dependencies"]):
+                        a["repository"] = repo["name"]
+                        self.addAddon(a)
                     else:
-                        for r in self.replist:
-                            if reply.url().url() == r["url"]:
-                                _printError("Invalid entry in repository %s: %s" % (r["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
-                                break
+                        _printError("Invalid entry in repository %s: %s" % (repo["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                        break
             except:
-                _printError("Error parsing repository: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
-                print("data: %s (%s)" % (reply.readAll().data().decode('utf-8'), len(reply.readAll().data().decode('utf-8'))))
+                _printError("Error parsing repository %s: %s" % (repo["name"], traceback.format_exc()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
         else:
-            _printError("Network error: %s" % reply.error(), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+            _printError("Network error updating repository %s: %s" % (repo["name"], reply.error()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
 
         reply.deleteLater()
 
@@ -890,3 +904,69 @@ class RepositoryDialog(QDialog):
             item.setText(addon["name"])
             item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             item.setData(Qt.UserRole, addon["name"])
+
+            if addon["name"] in self.host.plugins:
+                if addon["version"] > self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.red)
+                    item.setToolTip("Update available")
+                elif addon["version"] == self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.green)
+                    item.setToolTip("You have this plugin installed, no update available")
+                elif addon["version"] < self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.gray)
+                    item.setToolTip("Your local version has a greater version number")
+
+    def on_pluginsList_currentItemChanged(self, cur, prev):
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.addons:
+                _printError("Internal error. Can't find addon %s in list" % name, ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.on_pluginsList_currentItemChanged", 0)
+                return
+
+            p = self.addons[name]
+            self.nameEdit.setText(p["name"])
+            self.authorEdit.setText(p["author"])
+            self.versionEdit.setText(p["version"])
+            self.descriptionEdit.setPlainText(p["description"])
+            self.apiEdit.setText(p["apiVersion"])
+            self.repositoryEdit.setText(p["repository"])
+
+            if name in self.host.plugins:
+                if p["version"] > self.host.plugins[name].version:
+                    self.installButton.setEnabled(True)
+                    self.installButton.setText("Update")
+                else:
+                    self.installButton.setEnabled(False)
+                    self.installButton.setText("Install")
+        else:
+          self.nameEdit.clear()
+          self.authorEdit.clear()
+          self.versionEdit.clear()
+          self.descriptionEdit.clear()
+          self.apiEdit.clear()
+          self.repositoryEdit.clear()
+
+    def on_reloadButton_clicked(self):
+        if self.updateRepositories():
+            self.reloadButton.setEnabled(False)
+            self.installButton.setEnabled(False)
+
+    def on_installButton_clicked(self):
+        item = self.pluginsList.currentItem()
+        if not item:
+            return
+
+        name = item.data(Qt.UserRole)
+        if not name in self.addons:
+            _printError("Internal error. Can't find addon %s in list" % name, ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.on_installButton_clicked", 0)
+            return
+
+        p = self.addons[name]
+        if name in self.host.plugins:
+            #update
+            pass
+        else:
+            #install
+            pass
+
+

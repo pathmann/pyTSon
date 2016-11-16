@@ -39,6 +39,7 @@ class PythonHost: public singleton<PythonHost> {
   protected:
     bool setupDirectories(QString& error);
     bool isReady();
+    bool setSysPath(QString& error);
 
     QString formatError(const QString& fallback);
   private:
@@ -49,6 +50,7 @@ class PythonHost: public singleton<PythonHost> {
     QDir m_includedir;
     QDir m_includelibdir;
     QDir m_dynloaddir;
+    QDir m_sitepackdir;
     PyObject* m_pmod;
     PyObject* m_pyhost;
     PyObject* m_callmeth;
