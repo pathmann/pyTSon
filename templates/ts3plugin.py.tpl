@@ -334,6 +334,7 @@ class PluginHost(object):
             if err != ts3defines.ERROR_ok:
                 print("Error checking for update: %s" % reply.error())
 
+        reply.deleteLater()
         cls.nwm.delete()
         cls.nwm = None
 
