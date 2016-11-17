@@ -316,6 +316,8 @@ class ConfigurationDialog(QDialog):
         self.cfg = cfg
         self.host = host
 
+        self.rpd = None
+
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), self.CONF_WIDGETS)
 
         self.setWindowTitle("pyTSon - Settings")
@@ -480,8 +482,11 @@ class ConfigurationDialog(QDialog):
         self.cfg.set("console", "silentStartup", str(act))
 
     def on_repositoryButton_clicked(self):
-        self.rpd = RepositoryDialog(self.host, self)
+        if not self.rpd:
+            self.rpd = RepositoryDialog(self.host, self)
+
         self.rpd.show()
+        self.rpd.raise_()
 
 
 class StdRedirector:
@@ -830,6 +835,8 @@ class RepositoryDialog(QDialog):
 
         self.host = host
 
+        self.rpm = None
+
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository.ui"))
 
         movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
@@ -839,9 +846,12 @@ class RepositoryDialog(QDialog):
         self.nwm = QNetworkAccessManager(self)
         self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
+        self.replist = {}
         self.updateRepositories()
 
     def updateRepositories(self):
+        self.loadingLabel.show()
+
         try:
             with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
                 self.replist = json.loads(f.read())
@@ -951,6 +961,13 @@ class RepositoryDialog(QDialog):
             self.reloadButton.setEnabled(False)
             self.installButton.setEnabled(False)
 
+    def on_repositoryButton_clicked(self):
+        if not self.rpm:
+            self.rpm = RepositoryManager(self)
+
+        self.rpm.show()
+        self.rpm.raise_()
+
     def on_installButton_clicked(self):
         item = self.pluginsList.currentItem()
         if not item:
@@ -969,4 +986,45 @@ class RepositoryDialog(QDialog):
             #install
             pass
 
+class RepositoryManager(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
 
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository-manager.ui"))
+
+        movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
+        movie.start()
+        self.loadingLabel.setMovie(movie)
+
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+        self.replist = {}
+        self.updateRepositories()
+
+    def updateRepositories(self):
+        self.loadingLabel.show()
+
+        try:
+            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+                self.replist = json.loads(f.read())
+        except:
+            _printError("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager", 0)
+            raise Exception("Error opening repositorymaster")
+
+    def onNetworkReply(self, reply):
+
+        reply.deleteLater()
+
+    def on_updateButton_clicked(self):
+        pass
+
+    def on_addButton_clicked(self):
+        pass
+
+    def on_deleteButton_clicked(self):
+        pass
+
+    def on_list_doubleClicked(self, item):
+        pass

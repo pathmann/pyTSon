@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
-    <height>418</height>
+    <width>739</width>
+    <height>405</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Reload online repository</string>
+            <string>Reload online repositories</string>
            </property>
           </widget>
          </item>
@@ -47,6 +47,26 @@
           <widget class="QPushButton" name="installButton">
            <property name="text">
             <string>Install</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="repositoryButton">
+           <property name="text">
+            <string>Manage repos</string>
            </property>
           </widget>
          </item>
