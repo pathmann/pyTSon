@@ -270,7 +270,7 @@ class ts3plugin(object):
         """
 */
 
-{% for name, c in callbacks.items() %}
+{% for name, c in callbacks|dictsort %}
 {{c.signature}} {
 {% if c.body == "" %}
   /*

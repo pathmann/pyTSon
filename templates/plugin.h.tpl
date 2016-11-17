@@ -17,7 +17,7 @@ extern "C" {
 #endif
 #endif
 
-{% for name, c in callbacks.items() %}
+{% for name, c in callbacks|dictsort %}
 EXPORT_SYMBOL {{c.signature}};
 {% endfor %}
 

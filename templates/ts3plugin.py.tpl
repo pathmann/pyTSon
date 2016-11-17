@@ -566,7 +566,7 @@ class ts3plugin(object, metaclass=PluginMount):
     def onCustom3dRolloffCalculationWaveEvent(self, schid, waveHandle, distance, volume):
         return volume
 
-{% for name, c in callbacks.items() %}
+{% for name, c in callbacks|dictsort %}
     def {{name}}(self, {{c.parameterNames | join(', ')}}):
         pass
 
