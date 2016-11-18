@@ -6,6 +6,7 @@ from PythonQt.QtGui import *
 from PythonQt.QtCore import Qt, QFile, QIODevice, QUrl
 from PythonQt.QtUiTools import QUiLoader
 from PythonQt.QtNetwork import *
+from PythonQt import BoolResult
 
 from rlcompleter import Completer
 import traceback, re
@@ -822,7 +823,7 @@ class PythonConsole(QPlainTextEdit):
         self.ensureCursorVisible()
 
 
-def _printError(msg, level, channel, aid):
+def _ts3print(msg, level, channel, aid):
     err = ts3.logMessage(msg, level, channel, aid)
     if err != ts3defines.ERROR_ok:
         print(msg)
@@ -856,19 +857,20 @@ class RepositoryDialog(QDialog):
             with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
                 self.replist = json.loads(f.read())
         except:
-            _printError("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryDialog.updateRepositories", 0)
+            _ts3print("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryDialog.updateRepositories", 0)
             return False
 
         self.addons = {}
         self.pluginsList.clear()
 
-        self.masterupdate = len(self.replist)
+        self.masterupdate = sum(x["active"] for x in self.replist)
         for rep in self.replist:
-            if 'name' in rep and 'url' in rep:
-                self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
+            if all(x in rep for x in ['name', 'url', 'origin', 'active']):
+                if rep["active"]:
+                    self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
             else:
                 self.masterupdate -= 1
-                _printError("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.updateRepositories", 0)
+                _ts3print("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.updateRepositories", 0)
 
         return True
 
@@ -889,12 +891,12 @@ class RepositoryDialog(QDialog):
                         a["repository"] = repo["name"]
                         self.addAddon(a)
                     else:
-                        _printError("Invalid entry in repository %s: %s" % (repo["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                        _ts3print("Invalid entry in repository %s: %s" % (repo["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
                         break
             except:
-                _printError("Error parsing repository %s: %s" % (repo["name"], traceback.format_exc()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                _ts3print("Error parsing repository %s: %s" % (repo["name"], traceback.format_exc()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
         else:
-            _printError("Network error updating repository %s: %s" % (repo["name"], reply.error()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+            _ts3print("Network error updating repository %s: %s" % (repo["name"], reply.error()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
 
         reply.deleteLater()
 
@@ -930,7 +932,7 @@ class RepositoryDialog(QDialog):
         if cur:
             name = cur.data(Qt.UserRole)
             if not name in self.addons:
-                _printError("Internal error. Can't find addon %s in list" % name, ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.on_pluginsList_currentItemChanged", 0)
+                QMessageBox.critical("Internal error", "Can't find addon %s in list" % name)
                 return
 
             p = self.addons[name]
@@ -975,7 +977,7 @@ class RepositoryDialog(QDialog):
 
         name = item.data(Qt.UserRole)
         if not name in self.addons:
-            _printError("Internal error. Can't find addon %s in list" % name, ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.on_installButton_clicked", 0)
+            QMessageBox.critical(self, "Internal error", "Can't find addon %s in list" % name)
             return
 
         p = self.addons[name]
@@ -990,6 +992,15 @@ class RepositoryManager(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setModal(True)
+
+        try:
+            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+                repmaster = json.loads(f.read())
+                self.replist = {x["name"]:x for x in repmaster}
+        except:
+            _ts3print("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager", 0)
+            raise Exception("Error opening repositorymaster")
 
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository-manager.ui"))
 
@@ -1000,31 +1011,140 @@ class RepositoryManager(QDialog):
         self.nwm = QNetworkAccessManager(self)
         self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
-        self.replist = {}
         self.updateRepositories()
+
+        self.connect("finished(int)", self.onClosed)
+
+    def onClosed(self):
+        with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "w") as f:
+            json.dump(list(self.replist.values()), f)
 
     def updateRepositories(self):
         self.loadingLabel.show()
+        self.updateButton.setEnabled(False)
 
-        try:
-            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
-                self.replist = json.loads(f.read())
-        except:
-            _printError("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager", 0)
-            raise Exception("Error opening repositorymaster")
+        self.nwm.get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/pathmann/pyTSon_repository/master/repositorymaster.json")))
 
     def onNetworkReply(self, reply):
+        if reply.error() == QNetworkReply.NoError:
+            try:
+                repos = json.loads(reply.readAll().data().decode('utf-8'))
 
+                for r in repos:
+                    if all(x in r for x in ["name", "url", "active", "origin"]):
+                        self.addRepository(r)
+                    else:
+                        _ts3print("Invalid entry in repositorymaster", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryManager.onNetworkReply", 0)
+            except:
+                _ts3print("Error reading repositorymaster: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager.onNetworkReply", 0)
+        else:
+            print("updated error %s")
+
+        self.loadingLabel.hide()
+        self.updateButton.setEnabled(True)
         reply.deleteLater()
 
+        self.displayList()
+
+    def addRepository(self, r):
+        name = r["name"]
+        if name in self.replist:
+            if self.replist[name]["origin"] == "online":
+                if self.replist[name]["url"] != r["url"]:
+                    self.replist[name]["url"] = r["url"]
+                    _ts3print("url for repository %s updated" % name, ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.onNetworkReply", 0)
+            else:
+                _ts3print("Ignoring online repository %s, got a local one with that name", ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.onNetworkReply", 0)
+        else:
+            self.replist[name] = r
+
+    def displayList(self):
+        self.list.clear()
+
+        for name, r in self.replist.items():
+            item = QListWidgetItem(name)
+            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Checked if r["active"] else Qt.Unchecked)
+            item.setData(Qt.UserRole, name)
+            self.list.addItem(item)
+
     def on_updateButton_clicked(self):
-        pass
+        self.updateRepositories()
 
     def on_addButton_clicked(self):
-        pass
+        ok = BoolResult()
+        name = QInputDialog.getText(self, "New repository's name", "Name:", QLineEdit.Normal, "", ok)
+
+        if name in self.replist:
+            QMessageBox.critical(self, "Error", "The name %s is already in use" % name)
+            return
+
+        if ok:
+            url = QInputDialog.getText(self, "New repository's url", "URL:", QLineEdit.Normal, "", ok)
+
+            if ok:
+                qurl = QUrl(url)
+                if qurl.isValid() and not qurl.isLocalFile():
+                    rep = dict()
+                    rep["name"] = name
+                    rep["url"] = url
+                    rep["origin"] = "local"
+                    rep["active"] = True
+
+                    self.replist[name] = rep
+
+                    item = QListWidgetItem(name)
+                    item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                    item.setCheckState(Qt.Checked)
+                    item.setData(Qt.UserRole, name)
+                    self.list.addItem(item)
+                else:
+                    QMessageBox.critical("Error", "The URL %s is not valid" % url)
 
     def on_deleteButton_clicked(self):
-        pass
+        cur = self.list.currentItem()
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.replist:
+                QMessageBox.critical("Internal error", "Can't find repository %s in list" % name)
+                return
+
+            del self.replist[name]
+            cur.delete()
 
     def on_list_doubleClicked(self, item):
-        pass
+        name = item.data(Qt.UserRole)
+        try:
+            rep = self.replist[name]
+        except:
+            QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+            return
+
+        ok = BoolResult()
+        newurl = QInputDialog.getText(self, "Change url of repository %s" % name, "Url:", QLineEdit.Normal, rep["url"], ok)
+
+        if ok:
+            rep["url"] = newurl
+            rep["origin"] = "local"
+
+    def on_list_currentItemChanged(self, cur, prev):
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.replist:
+                self.deleteButton.setEnabled(False)
+                QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+                return
+
+            self.deleteButton.setEnabled(True)
+        else:
+            self.deleteButton.setEnabled(False)
+
+    def on_list_itemChanged(self, item):
+        if item:
+            name = item.data(Qt.UserRole)
+
+            if not name in self.replist:
+                QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+                return
+
+            self.replist[name]["active"] = item.checkState() == Qt.Checked

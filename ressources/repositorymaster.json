@@ -2,6 +2,7 @@
     {
         "name": "pyTSon master",
         "active": true,
+        "origin": "online",
         "url": "https://raw.githubusercontent.com/pathmann/pyTSon_repository/master/repository.json"
     }
 ]
