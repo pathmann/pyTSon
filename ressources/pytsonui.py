@@ -1023,7 +1023,7 @@ class RepositoryManager(QDialog):
         self.loadingLabel.show()
         self.updateButton.setEnabled(False)
 
-        self.nwm.get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/pathmann/pyTSon_repository/master/repositorymaster.json")))
+        self.nwm.get(QNetworkRequest(QUrl("https://cdn.rawgit.com/pathmann/pyTSon_repository/master/repositorymaster.json")))
 
     def onNetworkReply(self, reply):
         if reply.error() == QNetworkReply.NoError:
