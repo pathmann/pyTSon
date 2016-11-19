@@ -157,24 +157,8 @@ class ts3plugin(object):
         @param failedPermissionID:
         @type failedPermissionID:
         """
-        
-    def onUserLoggingMessageEvent(self, logMessage, logLevel, logChannel, logID, logTime, completeLogString):
-        """
 
-        @param logMessage:
-        @type logMessage:
-        @param logLevel:
-        @type logLevel:
-        @param logChannel:
-        @type logChannel:
-        @param logID:
-        @type logID:
-        @param logTime:
-        @type logTime:
-        @param completeLogString:
-        @type completeLogString:
-        """
-        
+
     def onEditPlaybackVoiceDataEvent(self, schid, clientID, samples, channels):
         """
         

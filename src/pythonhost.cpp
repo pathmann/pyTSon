@@ -598,6 +598,7 @@ int PythonHost::onServerPermissionErrorEvent(uint64 schid, const char* errorMess
 }
 
 void PythonHost::onUserLoggingMessageEvent(const char* logMessage, int logLevel, const char* logChannel, uint64 logID, const char* logTime, const char* completeLogString) {
+  return;
   QString callerror;
   if (!PythonHost::instance()->callMethod(NULL, callerror, "(ssisKss)", "onUserLoggingMessageEvent",  logMessage,  logLevel,  logChannel, (unsigned long long) logID,  logTime,  completeLogString)) {
     printf("%s\n", QObject::tr("Calling onUserLoggingMessageEvent failed with error \"%1\"\n").arg(callerror).toUtf8().data());
