@@ -276,6 +276,7 @@ class ConfigurationDialog(QDialog):
                           ("differentApiButton", True, []),
                           ("pluginsList", True, []),
                           ("reloadButton", True, []),
+                          ("createButton", True, []),
                           ("repositoryButton", True, []),
                           ("settingsButton", True, []),
                           ("versionEdit", True, []),
@@ -488,6 +489,9 @@ class ConfigurationDialog(QDialog):
 
         self.rpd.show()
         self.rpd.raise_()
+
+    def on_createButton_clicked(self):
+        pass
 
 
 class StdRedirector:
@@ -1148,3 +1152,10 @@ class RepositoryManager(QDialog):
                 return
 
             self.replist[name]["active"] = item.checkState() == Qt.Checked
+
+class InstallDialog(QDialog):
+    def __init__(self, host, parent=None):
+        super().__init__(parent)
+        setAttribute(Qt.WA_DeleteOnClose)
+
+        self.host = host
