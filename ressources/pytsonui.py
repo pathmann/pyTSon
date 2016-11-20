@@ -1153,6 +1153,7 @@ class RepositoryManager(QDialog):
 
             self.replist[name]["active"] = item.checkState() == Qt.Checked
 
+
 class InstallDialog(QDialog):
     def __init__(self, host, parent=None):
         super().__init__(parent)

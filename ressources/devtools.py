@@ -31,9 +31,20 @@ def createPlugin(name):
     """
     ename = _escapeString(name)
     if ename in PluginHost.plugins:
-        return False
+        raise Exception("A plugin with that escaped name already exist")
 
-    pass
+    p = os.path.join(ts3.getPluginPath(), "pyTSon", "scripts", ename)
+    if os.path.isdir(p):
+        raise Exception("Directory already exist")
+
+    os.mkdir(p)
+    os.mkdir(os.path.join(p, "include"))
+
+    fp = os.path.join(p, ename + ".py")
+    with open(fp, "w") as f:
+        f.write(PLUGIN_SKELETON % (ename, ename))
+
+    return fp
 
 
 def installOnlinePlugin(addon, fpath):
@@ -61,6 +72,6 @@ def installDependencies(name, deps):
         return False
 
     try:
-        pipmain(["install", "-t", os.path.join(ts3.getPluginPath(), "pyTSon", "scripts", ename] + deps)
+        pipmain(["install", "-t", os.path.join(ts3.getPluginPath(), "pyTSon", "scripts", ename)] + deps)
     except SystemExit:
         return False
