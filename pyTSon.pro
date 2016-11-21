@@ -37,7 +37,8 @@ OTHER_FILES += templates/ts3module.h.tpl \
     ressources/pytsonui.py \
     ressources/repository.ui \
     ressources/repository-manager.ui \
-    ressources/devtools.py
+    ressources/devtools.py \
+    ressources/installer.ui
 
 unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon
@@ -88,3 +89,6 @@ include ($${PYTHONQT_PATH}/generated_cpp/com_trolltech_qt_gui/com_trolltech_qt_g
 include ($${PYTHONQT_PATH}/generated_cpp/com_trolltech_qt_sql/com_trolltech_qt_sql.pri)
 include ($${PYTHONQT_PATH}/generated_cpp/com_trolltech_qt_network/com_trolltech_qt_network.pri)
 include ($${PYTHONQT_PATH}/generated_cpp/com_trolltech_qt_uitools/com_trolltech_qt_uitools.pri)
+
+FORMS += \
+    ressources/installer.ui

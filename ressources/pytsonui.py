@@ -12,6 +12,11 @@ from rlcompleter import Completer
 import traceback, re
 from itertools import takewhile
 import json
+from tempfile import gettempdir
+
+from zipfile import ZipFile
+import io
+import devtools
 
 import ts3, ts3defines
 
@@ -491,7 +496,12 @@ class ConfigurationDialog(QDialog):
         self.rpd.raise_()
 
     def on_createButton_clicked(self):
-        pass
+        ok = BoolResult()
+        name = QInputDialog.getText(self, "New plugin's name", "Name:", QLineEdit.Normal, "", ok)
+
+        if ok:
+            fp = devtools.createPlugin(name)
+            QMessageBox.information(self, "Plugin created", "A new plugin has been created: %s" % fp)
 
 
 class StdRedirector:
@@ -954,6 +964,9 @@ class RepositoryDialog(QDialog):
                 else:
                     self.installButton.setEnabled(False)
                     self.installButton.setText("Install")
+            else:
+                self.installButton.setEnabled(True)
+                self.installButton.setText("Install")
         else:
           self.nameEdit.clear()
           self.authorEdit.clear()
@@ -984,13 +997,10 @@ class RepositoryDialog(QDialog):
             QMessageBox.critical(self, "Internal error", "Can't find addon %s in list" % name)
             return
 
-        p = self.addons[name]
-        if name in self.host.plugins:
-            #update
-            pass
-        else:
-            #install
-            pass
+        self.installer = InstallDialog(self.host, self)
+        self.installer.show()
+        self.installer.install(self.addons[name])
+
 
 class RepositoryManager(QDialog):
     def __init__(self, parent=None):
@@ -1157,6 +1167,61 @@ class RepositoryManager(QDialog):
 class InstallDialog(QDialog):
     def __init__(self, host, parent=None):
         super().__init__(parent)
-        setAttribute(Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setModal(True)
+
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
 
         self.host = host
+        self.addon = None
+
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+    def install(self, addon):
+        self.addon = addon
+        reply = self.nwm.get(QNetworkRequest(QUrl(addon["url"])))
+        reply.connect("downloadProgress(qint64, qint64)", self.onDownloadProgress)
+
+        self.consoleEdit.append("Downloading %s ..." % addon["url"])
+
+    def onDownloadProgress(self, rec, total):
+        self.progressBar.setValue((rec / total) * 25)
+
+    def onNetworkReply(self, reply):
+        if reply.error() == QNetworkReply.NoError:
+            self.consoleEdit.append("Download finished.")
+            self.progressBar.setValue(25)
+
+            ext = self.addon["url"].strip().split('.')[-1]
+            if ext == "py":
+                devtools.createPlugin(self.addon["name"], content=reply.readAll().data().decode('utf-8'))
+            elif ext == "zip":
+                fp = devtools.createPlugin(self.addon["name"], withfile=False)
+                with ZipFile(io.BytesIO(reply.readAll()), "r") as zip:
+                    zip.extractall(os.path.abspath(fp))
+            else:
+                self.consoleEdit.append("Unrecognized URL extension")
+                reply.deleteLater()
+                return
+
+            self.consoleEdit.append("Files created.")
+            self.progressBar.setValue(50)
+            self._depInstall()
+        else:
+            self.consoleEdit.append("Network error: %s" % reply.error())
+
+        reply.deleteLater()
+
+    def _depInstall(self):
+        #replace stdout
+        tmp = sys.stdout
+        sys.stdout = StdRedirector(self.consoleEdit.append)
+
+        if self.addon["name"] in self.host.plugins:
+            #update
+            pass
+        else:
+            devtools.installDependencies(self.addon["name"], self.addon["dependencies"])
+
+        sys.stdout = tmp
