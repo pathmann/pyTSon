@@ -25,7 +25,7 @@ PYPLUGIN_CALLBACK_BLACKLIST = ["ts3plugin_freeMemory", "ts3plugin_registerPlugin
                                "ts3plugin_onUserLoggingMessageEvent", "ts3plugin_onEditPlaybackVoiceDataEvent",
                                "ts3plugin_onEditPostProcessVoiceDataEvent", "ts3plugin_onEditMixedPlaybackVoiceDataEvent",
                                "ts3plugin_onEditCapturedVoiceDataEvent", "ts3plugin_onCustom3dRolloffCalculationClientEvent",
-                               "ts3plugin_onCustom3dRolloffCalculationWaveEvent"]
+                               "ts3plugin_onCustom3dRolloffCalculationWaveEvent", "ts3plugin_onFileTransferStatusEvent"]
 
 MODULE_FUNCTION_BLACKLIST = ["freeMemory"]
 

@@ -747,9 +747,6 @@ class ts3plugin(object, metaclass=PluginMount):
     def onChannelMoveEvent(self, serverConnectionHandlerID, channelID, newChannelParentID, invokerID, invokerName, invokerUniqueIdentifier):
         pass
 
-    def onFileTransferStatusEvent(self, transferID, status, statusMessage, remotefileSize, serverConnectionHandlerID):
-        pass
-
     def onHotkeyRecordedEvent(self, keyword, key):
         pass
 

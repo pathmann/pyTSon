@@ -89,7 +89,6 @@ EXPORT_SYMBOL void ts3plugin_onMessageListEvent(uint64 serverConnectionHandlerID
 EXPORT_SYMBOL void ts3plugin_onSoundDeviceListChangedEvent(const char *modeID, int playOrCap);
 EXPORT_SYMBOL void ts3plugin_onServerLogFinishedEvent(uint64 serverConnectionHandlerID, uint64 lastPos, uint64 fileSize);
 EXPORT_SYMBOL void ts3plugin_onServerGroupByClientIDEvent(uint64 serverConnectionHandlerID, const char *name, uint64 serverGroupList, uint64 clientDatabaseID);
-EXPORT_SYMBOL void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char *statusMessage, uint64 remotefileSize, uint64 serverConnectionHandlerID);
 EXPORT_SYMBOL void ts3plugin_onFileListEvent(uint64 serverConnectionHandlerID, uint64 channelID, const char *path, const char *name, uint64 size, uint64 datetime, int type, uint64 incompletesize, const char *returnCode);
 EXPORT_SYMBOL void ts3plugin_onIncomingClientQueryEvent(uint64 serverConnectionHandlerID, const char *commandText);
 EXPORT_SYMBOL void ts3plugin_onServerLogEvent(uint64 serverConnectionHandlerID, const char *logMsg);

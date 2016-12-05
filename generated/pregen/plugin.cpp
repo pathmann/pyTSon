@@ -1783,29 +1783,6 @@ void ts3plugin_onServerGroupByClientIDEvent(uint64 serverConnectionHandlerID, co
   }
 }
 
-void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char *statusMessage, uint64 remotefileSize, uint64 serverConnectionHandlerID) {
-  /*
-    def onFileTransferStatusEvent(self, transferID, status, statusMessage, remotefileSize, serverConnectionHandlerID):
-        """
-        
-        @param transferID:
-        @type transferID:
-        @param status:
-        @type status:
-        @param statusMessage:
-        @type statusMessage:
-        @param remotefileSize:
-        @type remotefileSize:
-        @param serverConnectionHandlerID:
-        @type serverConnectionHandlerID:
-        """
-  */
-  QString callerror;
-  if (!PLUGIN_HOST_CALL(NULL, callerror, "(sIIsKK)", "onFileTransferStatusEvent", (unsigned int) transferID,  status,  statusMessage, (unsigned long long) remotefileSize, (unsigned long long) serverConnectionHandlerID)) {
-    LOG_ADD(QSTR("Calling onFileTransferStatusEvent failed with error \"%1\"").arg(callerror), LogLevel_ERROR, serverConnectionHandlerID);
-  }
-}
-
 void ts3plugin_onFileListEvent(uint64 serverConnectionHandlerID, uint64 channelID, const char *path, const char *name, uint64 size, uint64 datetime, int type, uint64 incompletesize, const char *returnCode) {
   /*
     def onFileListEvent(self, serverConnectionHandlerID, channelID, path, name, size, datetime, atype, incompletesize, returnCode):
