@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 #docs
 
 
-FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("generated/pregen/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf"), ("ressources/answercontacts.py", "plugins/pyTSon/scripts/answercontacts.py"), ("ressources/autopoke.py", "plugins/pyTSon/scripts/autopoke.py"), ("ressources/autoreply.py", "plugins/pyTSon/scripts/autoreply.py"), ("ressources/cmdtest.py", "plugins/pyTSon/scripts/cmdtest.py"), ("ressources/tweakui.py", "plugins/pyTSon/scripts/tweakui.py"), ("generated/pregen/ts3help.py", "plugins/pyTSon/include/ts3help.py")]
+FILES = [("ressources/pytsonui.py", "plugins/pyTSon/include/pytsonui.py"), ("ressources/pyTSon-configdialog.ui", "plugins/pyTSon/ressources/pyTSon-configdialog.ui"), ("generated/pregen/ts3plugin.py", "plugins/pyTSon/scripts/ts3plugin.py"), ("generated/pregen/ts3defines.py", "plugins/pyTSon/include/ts3defines.py"), ("generated/pregen/api.pdf", "plugins/pyTSon/docs/pyTSon.pdf"), ("ressources/answercontacts.py", "plugins/pyTSon/scripts/answercontacts.py"), ("ressources/autopoke.py", "plugins/pyTSon/scripts/autopoke.py"), ("ressources/autoreply.py", "plugins/pyTSon/scripts/autoreply.py"), ("ressources/cmdtest.py", "plugins/pyTSon/scripts/cmdtest.py"), ("ressources/tweakui.py", "plugins/pyTSon/scripts/tweakui.py"), ("ressources/ipcplugin.py", "plugins/pyTSon/scripts/ipcplugin.py"), ("generated/pregen/ts3help.py", "plugins/pyTSon/include/ts3help.py")]
 
 ARCHFILES = {'win32' : [("build/pyTSon.dll", "plugins/pyTSon_win32.dll")], 'win64' : [("build/pyTSon.dll", "plugins/pyTSon_win64.dll")], 'linux_x86' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_x86.so")], 'linux_amd64' : [("build/libpyTSon.so.1.0.0", "plugins/libpyTSon_linux_amd64.so")], 'mac' : [("build/libpyTSon.1.0.0.dylib", "plugins/libpyTSon_mac.dylib")]}
 
@@ -48,7 +48,7 @@ def main(root, pythondir, outdir, arches):
         zip = zipfile.ZipFile(os.path.join(outdir, "pyTSon_%s.ts3_plugin" % a), "w", zipfile.ZIP_DEFLATED)
         for loc, inzip in FILES + ARCHFILES[a]:
             locpath = os.path.join(root, loc)
-            
+
             if os.path.isfile(locpath):
                 zip.write(locpath, inzip)
             else:
@@ -56,10 +56,10 @@ def main(root, pythondir, outdir, arches):
                     for f in files:
                         fn = os.path.join(base, f)
                         zip.write(fn, inzip + fn[len(locpath):])
-                        
+
         for loc, inzip in PYTHONFILES[a]:
             locpath = os.path.join(pythondir, loc)
-            
+
             if os.path.isfile(locpath):
                 zip.write(locpath, inzip)
             else:
@@ -68,7 +68,7 @@ def main(root, pythondir, outdir, arches):
                         for f in files:
                             fn = os.path.join(base, f)
                             zip.write(fn, inzip + fn[len(locpath):])
-            
+
         if a.startswith("win"):
             zip.writestr("package.ini", INIBASE_WIN % a)
         else:
@@ -81,13 +81,13 @@ if __name__ == "__main__":
     parser.add_argument('pythondir', help='The directory, python is installed in')
     parser.add_argument('outputdir', help='The directory, where output files should be placed in')
     parser.add_argument('arch', nargs='+', help='architecture to bundle')
-    
+
     args = parser.parse_args()
-    
+
     for key in args.arch:
         if key not in ARCHFILES:
             print("Unrecognized architecture, possible values are: %s" % ", ".join(ARCHFILES.keys()))
             sys.exit(1)
-            
+
     main(args.rootdir, args.pythondir, args.outputdir, args.arch)
 
