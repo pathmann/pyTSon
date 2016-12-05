@@ -55,6 +55,8 @@ class ipcdata(object):
                 ret.append(self.read())
 
             return ret if t == "l" else tuple(ret)
+        else:
+            raise Exception("Unknown ipcdata type")
 
     def readAll(self, fromstart=False):
         if fromstart:
@@ -94,6 +96,8 @@ class ipcplugin(ts3plugin):
         self.server = QLocalServer()
         self.server.connect("newConnection()", self.onNewConnection)
 
+        self.buf = {}
+
         path = os.path.join(ts3.getPluginPath(), "pyTSon", "ipcsocket")
         QLocalServer.removeServer(path)
         if not self.server.listen(path):
@@ -108,13 +112,33 @@ class ipcplugin(ts3plugin):
 
     def onNewConnection(self):
         cli = self.server.nextPendingConnection()
+        self.buf[cli] = bytes()
         cli.connect("readyRead()", lambda: self.onClientData(cli))
         cli.connect("disconnected()", lambda: self.onClientDisconnected(cli))
 
         self.clients.append(cli)
 
     def onClientData(self, cli):
-        data = ipcdata(init=cli.read(cli.bytesAvailable()).data())
+        self.buf[cli] += cli.read(cli.bytesAvailable())
+        self.handleBuffer(cli)
+
+    def handleBuffer(self, cli):
+        if len(self.buf[cli]) < ipcdata.longlen:
+            return
+
+        plen = int.from_bytes(self.buf[cli][:ipcdata.longlen], byteorder='big')
+        if len(self.buf[cli]) < plen: #message not complete
+            return
+        elif len(self.buf[cli]) > plen: #multiple messages
+            self.handleFunction(cli, self.buf[cli][ipcdata.longlen:plen +1])
+            self.buf[cli] = self.buf[cli][plen +1:]
+            self.handleBuffer(cli)
+        else: #only one message len(self.buf) == plen
+            self.handleFunction(cli, self.buf[cli][ipcdata.longlen:])
+            self.buf[cli] = bytes()
+
+    def handleFunction(self, cli, buf):
+        data = ipcdata(init=buf)
         name = data.read()
 
         if hasattr(ts3, name):
@@ -133,10 +157,11 @@ class ipcplugin(ts3plugin):
 
     def onClientDisconnected(self, cli):
         self.clients.remove(cli)
+        del self.buf[cli]
 
     def send(self, bytestr):
         for cli in self.clients:
-            cli.write(QByteArray(bytestr))
+            cli.write(QByteArray((len(bytestr) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + bytestr))
 
     def callback(self, name, *args):
         data = ipcdata(obj=name)
@@ -153,11 +178,46 @@ class ipcplugin(ts3plugin):
 """
 Example PyQt python client:
 class ipcclient(object):
+    class funcs(object):
+        def __init__(self, socket):
+            self.socket = socket
+
+        def function(self, name, *args):
+            if self.socket.state() != QLocalSocket.ConnectedState:
+                raise Exception("Socket is not connected")
+
+            data = ipcdata(obj=name)
+
+            for p in args:
+                data.append(p)
+
+            self.incmd = True
+            self.socket.write(data.data)
+            if self.socket.waitForBytesWritten(1000):
+                if self.socket.waitForReadyRead(5000):
+                    data = ipcdata(init=self.socket.read(self.socket.bytesAvailable()))
+                    self.incmd = False
+                    return data.read()
+                else:
+                    self.incmd = False
+                    raise Exception("Socket timed out waiting for answer")
+            else:
+                self.incmd = False
+                raise Exception("Socket timed out during write process")
+
+        def __getattr__(self, name):
+            return (lambda *args: self.function(name, *args))
+
     def __init__(self, path):
         self.incmd = False
 
+        self.buf = bytes()
+
         self.socket = QLocalSocket()
         self.socket.readyRead.connect(self.onReadyRead)
+
+        self._funcs = ipcclient.funcs(self.socket)
+
         self.socket.connectToServer(path)
 
         if not self.socket.waitForConnected(1000):
@@ -167,37 +227,34 @@ class ipcclient(object):
         if self.incmd:
             return
 
-        data = ipcdata(init=self.socket.read(self.socket.bytesAvailable()))
+        self.buf += self.socket.read(self.socket.bytesAvailable())
+        self.handleBuffer()
+
+    def handleBuffer(self):
+        if len(self.buf) < ipcdata.longlen:
+            return
+
+        plen = int.from_bytes(self.buf[:ipcdata.longlen], byteorder='big')
+        if len(self.buf) < plen: #message not complete
+            return
+        elif len(self.buf) > plen: #multiple messages
+            self.handleCallback(self.buf[ipcdata.longlen:plen])
+            self.buf = self.buf[plen:]
+            self.handleBuffer()
+        else: #only one message len(self.buf) == plen
+            self.handleCallback(self.buf[ipcdata.longlen:])
+            self.buf = bytes()
+
+    def handleCallback(self, buf):
+        data = ipcdata(init=buf)
         name = data.read()
 
         if hasattr(self, name):
             getattr(self, name)(*tuple(data.readAll()))
 
-    def function(self, name, *args):
-        if self.socket.state() != QLocalSocket.ConnectedState:
-            raise Exception("Socket is not connected")
-
-        data = ipcdata(obj=name)
-
-        for p in args:
-            data.append(p)
-
-        self.incmd = True
-        self.socket.write(data.data)
-        if self.socket.waitForBytesWritten(1000):
-            if self.socket.waitForReadyRead(5000):
-                data = ipcdata(init=self.socket.read(self.socket.bytesAvailable()))
-                self.incmd = False
-                return data.read()
-            else:
-                self.incmd = False
-                raise Exception("Socket timed out waiting for answer")
-        else:
-            self.incmd = False
-            raise Exception("Socket timed out during write process")
-
-    def __getattr__(self, name):
-        return (lambda *args: self.function(name, *args))
+    @property
+    def functions(self):
+        return self._funcs
 
 class myclient(ipcclient):
     def onTalkStatusChangeEvent(self, serverConnectionHandlerID, status, isReceivedWhisper, clientID):
