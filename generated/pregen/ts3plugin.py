@@ -519,6 +519,7 @@ class ts3plugin(object, metaclass=PluginMount):
     def stop(self):
         pass
 
+    """
     def configure(self, qParentWidget):
         pass
 
@@ -812,4 +813,4 @@ class ts3plugin(object, metaclass=PluginMount):
 
     def onChannelGroupListEvent(self, serverConnectionHandlerID, channelGroupID, name, atype, iconID, saveDB):
         pass
-
+    """
