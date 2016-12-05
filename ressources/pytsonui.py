@@ -1175,11 +1175,13 @@ class InstallDialog(QDialog):
         self.host = host
         self.addon = None
 
+        self.pip = devtools.SimplePip(self.consoleEdit.append)
         self.nwm = QNetworkAccessManager(self)
         self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
     def install(self, addon):
         self.addon = addon
+
         reply = self.nwm.get(QNetworkRequest(QUrl(addon["url"])))
         reply.connect("downloadProgress(qint64, qint64)", self.onDownloadProgress)
 
@@ -1193,26 +1195,39 @@ class InstallDialog(QDialog):
             self.consoleEdit.append("Download finished.")
             self.progressBar.setValue(25)
 
-            ext = self.addon["url"].strip().split('.')[-1]
-            if ext == "py":
-                devtools.createPlugin(self.addon["name"], content=reply.readAll().data().decode('utf-8'))
-            elif ext == "zip":
-                fp = devtools.createPlugin(self.addon["name"], withfile=False)
-                with ZipFile(io.BytesIO(reply.readAll()), "r") as zip:
-                    zip.extractall(os.path.abspath(fp))
+            if reply.header(QNetworkRequest.ContentTypeHeader) != "application/zip":
+                self.pip.installPlugin(self.addon, reply.readAll().data().decode('utf-8'), iszip=False)
             else:
-                self.consoleEdit.append("Unrecognized URL extension")
-                reply.deleteLater()
-                return
+                self.pip.installPlugin(self.addon, io.BytesIO(reply.readAll()), iszip=True)
 
-            self.consoleEdit.append("Files created.")
-            self.progressBar.setValue(50)
-            self._depInstall()
+            """
+            ext = self.addon["url"].strip().split('.')[-1]
+
+            try:
+                if ext == "py":
+                    devtools.createPlugin(self.addon["name"], content=reply.readAll().data().decode('utf-8'))
+                elif ext == "zip":
+                    fp = devtools.createPlugin(self.addon["name"], withfile=False)
+                    with ZipFile(io.BytesIO(reply.readAll()), "r") as zip:
+                        zip.extractall(os.path.abspath(fp))
+                else:
+                    self.consoleEdit.append("Unrecognized URL extension")
+                    reply.deleteLater()
+                    return
+            except Exception as e:
+                self.consoleEdit.append("Install failed: %s" % e)
+            else:
+                self.consoleEdit.append("Files created.")
+                self.progressBar.setValue(50)
+                self.pip.installDependencies(self.addon["dependencies"])
+
+            """
         else:
             self.consoleEdit.append("Network error: %s" % reply.error())
 
         reply.deleteLater()
 
+"""
     def _depInstall(self):
         #replace stdout
         tmp = sys.stdout
@@ -1225,3 +1240,4 @@ class InstallDialog(QDialog):
             devtools.installDependencies(self.addon["name"], self.addon["dependencies"])
 
         sys.stdout = tmp
+"""
