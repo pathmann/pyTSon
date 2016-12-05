@@ -540,32 +540,12 @@ class ts3plugin(object, metaclass=PluginMount):
     def onServerPermissionErrorEvent(self, schid, errorMessage, error, returnCode, failedPermissionID):
         pass
 
-    def onUserLoggingMessageEvent(self, logMessage, logLevel, logChannel, logID, logTime, completeLogString):
-        pass
-
     def onMenuItemEvent(self, schid, atype, menuItemID, selectedItemID):
         pass
 
     def onHotkeyEvent(self, keyword):
         pass
 
-    def onEditPlaybackVoiceDataEvent(self, schid, clientID, samples, channels):
-        return(False, [])
-
-    def onEditPostProcessVoiceDataEvent(self, schid, clientID, samples, channels, channelSpeakerArray, channelFillMask):
-        return (False, [], 0)
-
-    def onEditMixedPlaybackVoiceDataEvent(self, schid, samples, channels, channelSpeakerArray, channelFillMask):
-        return (False, [], 0)
-
-    def onEditCapturedVoiceDataEvent(self, schid, samples, channels, edited):
-        return (False, [], 0)
-
-    def onCustom3dRolloffCalculationClientEvent(self, schid, clientID, distance, volume):
-        return volume
-
-    def onCustom3dRolloffCalculationWaveEvent(self, schid, waveHandle, distance, volume):
-        return volume
 
 {% for name, c in callbacks|dictsort %}
     def {{name}}(self, {{c.parameterNames | join(', ')}}):
