@@ -317,5 +317,9 @@ class myclient(ipcclient):
 
     def onClientSelfVariableUpdateEvent(self, schid, flag, oldval, newval):
         print("selfupdate %s %s %s %s" % (schid, flag, oldval, newval))
+
+client = myclient("/path/to/your/pluginpath/pyTSon/ipcsocket")
+#get client id of schid=1
+(err, myid) = client.getClientID(1)
 """
 
