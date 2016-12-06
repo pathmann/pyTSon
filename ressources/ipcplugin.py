@@ -320,6 +320,6 @@ class myclient(ipcclient):
 
 client = myclient("/path/to/your/pluginpath/pyTSon/ipcsocket")
 #get client id of schid=1
-(err, myid) = client.getClientID(1)
+(err, myid) = client.functions.getClientID(1)
 """
 
