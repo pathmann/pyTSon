@@ -24,7 +24,7 @@ class ipcdata(object):
             self.buf += d
         elif type(obj) is int:
             self.buf += b'i'
-            self.buf += obj.to_bytes(self.longlen, byteorder='big')
+            self.buf += obj.to_bytes(self.longlen, byteorder='big', signed=True)
         elif type(obj) is list or type(obj) is tuple:
             self.buf += b'l' if type(obj) is list else b't'
             self.buf += len(obj).to_bytes(self.longlen, byteorder='big')
@@ -45,7 +45,7 @@ class ipcdata(object):
             return self.buf[spos:self.pos].decode('utf-8')
         elif t == "i":
             self.pos += self.longlen
-            return int.from_bytes(self.buf[self.pos - self.longlen:self.pos], byteorder='big')
+            return int.from_bytes(self.buf[self.pos - self.longlen:self.pos], byteorder='big', signed=True)
         elif t == "l" or t == "t":
             ret = []
             self.pos += self.longlen
@@ -91,12 +91,11 @@ class ipcplugin(ts3plugin):
     hotkeys = []
 
     def __init__(self):
-        self.clients = []
+        self.clients = {}
+        self.buf = {}
 
         self.server = QLocalServer()
         self.server.connect("newConnection()", self.onNewConnection)
-
-        self.buf = {}
 
         path = os.path.join(ts3.getPluginPath(), "pyTSon", "ipcsocket")
         QLocalServer.removeServer(path)
@@ -104,22 +103,45 @@ class ipcplugin(ts3plugin):
             raise Exception("Error opening local socket (%s)" % path)
 
     def stop(self):
-        for cli in self.clients:
+        for cli in list(self.clients):
             cli.disconnectFromServer()
+            cli.delete()
+
+        self.buf = {}
 
         self.server.close()
         self.server.delete()
 
     def onNewConnection(self):
         cli = self.server.nextPendingConnection()
-        self.buf[cli] = bytes()
+
+        self.clients[cli] = "unknown"
+
         cli.connect("readyRead()", lambda: self.onClientData(cli))
         cli.connect("disconnected()", lambda: self.onClientDisconnected(cli))
 
-        self.clients.append(cli)
-
     def onClientData(self, cli):
-        self.buf[cli] += cli.read(cli.bytesAvailable())
+        if self.clients[cli] == "unknown":
+            clitype = cli.read(1)
+
+            if clitype == b'f':
+                self.clients[cli] = "function"
+                self.buf[cli] = bytes()
+
+                if cli.bytesAvailable() == 0:
+                    return
+            elif clitype == b'c':
+                self.clients[cli] = "callback"
+                return
+            else:
+                cli.write(QByteArray("Unknown client type"))
+                cli.disconnectFromServer()
+                cli.delete()
+                return
+        elif self.clients[cli] == "callback":
+            return
+
+        self.buf[cli] += cli.read(cli.bytesAvailable()).data()
         self.handleBuffer(cli)
 
     def handleBuffer(self, cli):
@@ -149,19 +171,22 @@ class ipcplugin(ts3plugin):
             ret = getattr(ts3, name)(*args)
 
             if ret:
-                cli.write(QByteArray(ipcdata(obj=ret).data))
+                data = ipcdata(obj=ret)
+                cli.write(QByteArray((len(data.data) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + data.data))
         else:
             err = ts3.logMessage("Unknown method data %s" % data.data, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ipcplugin", 0)
             if err != ts3defines.ERROR_ok:
                 print("Unknown method data in ipcplugin: %s" % data.data)
 
     def onClientDisconnected(self, cli):
-        self.clients.remove(cli)
-        del self.buf[cli]
+        del self.clients[cli]
+        if cli in self.buf:
+            del self.buf[cli]
 
     def send(self, bytestr):
         for cli in self.clients:
-            cli.write(QByteArray((len(bytestr) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + bytestr))
+            if self.clients[cli] == "callback":
+                cli.write(QByteArray((len(bytestr) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + bytestr))
 
     def callback(self, name, *args):
         data = ipcdata(obj=name)
@@ -179,8 +204,17 @@ class ipcplugin(ts3plugin):
 Example PyQt python client:
 class ipcclient(object):
     class funcs(object):
-        def __init__(self, socket):
-            self.socket = socket
+        def __init__(self, path):
+            self.socket = QLocalSocket()
+
+            self.socket.connectToServer(path)
+
+            if not self.socket.waitForConnected(1000):
+                raise Exception("Error connecting to socket on %s" % path)
+            else:
+                self.socket.write(b"f")
+                if not self.socket.waitForBytesWritten(1000):
+                    raise Exception("Error registering as function socket")
 
         def function(self, name, *args):
             if self.socket.state() != QLocalSocket.ConnectedState:
@@ -192,15 +226,32 @@ class ipcclient(object):
                 data.append(p)
 
             self.incmd = True
-            self.socket.write(data.data)
+            self.socket.write((len(data.data) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + data.data)
             if self.socket.waitForBytesWritten(1000):
-                if self.socket.waitForReadyRead(5000):
-                    data = ipcdata(init=self.socket.read(self.socket.bytesAvailable()))
-                    self.incmd = False
-                    return data.read()
-                else:
-                    self.incmd = False
-                    raise Exception("Socket timed out waiting for answer")
+                r = 0
+                plen = 0
+
+                while r < 3:
+                    r += 1
+                    if self.socket.waitForReadyRead(5000):
+                        if plen == 0:
+                            if self.socket.bytesAvailable() < ipcdata.longlen:
+                                continue
+                            else:
+                                plen = int.from_bytes(self.socket.read(ipcdata.longlen), byteorder='big')
+
+                        if plen != 0:
+                            if plen - ipcdata.longlen != self.socket.bytesAvailable():
+                                continue
+                            else:
+                                data = ipcdata(init=self.socket.read(self.socket.bytesAvailable()))
+                                self.incmd = False
+                                return data.read()
+                    else:
+                        self.incmd = False
+                        raise Exception("Socket timed out waiting for answer")
+
+                raise Exception("Socket timed out running 3 rounds waiting for answer")
             else:
                 self.incmd = False
                 raise Exception("Socket timed out during write process")
@@ -216,12 +267,16 @@ class ipcclient(object):
         self.socket = QLocalSocket()
         self.socket.readyRead.connect(self.onReadyRead)
 
-        self._funcs = ipcclient.funcs(self.socket)
+        self._funcs = ipcclient.funcs(path)
 
         self.socket.connectToServer(path)
 
         if not self.socket.waitForConnected(1000):
             raise Exception("Error connecting to socket on %s" % path)
+        else:
+            self.socket.write(b"c")
+            if not self.socket.waitForBytesWritten(1000):
+                    raise Exception("Error registering as callback socket")
 
     def onReadyRead(self):
         if self.incmd:
@@ -259,5 +314,8 @@ class ipcclient(object):
 class myclient(ipcclient):
     def onTalkStatusChangeEvent(self, serverConnectionHandlerID, status, isReceivedWhisper, clientID):
         print("talkstatus %s %s %s" % (serverConnectionHandlerID, status, clientID))
+
+    def onClientSelfVariableUpdateEvent(self, schid, flag, oldval, newval):
+        print("selfupdate %s %s %s %s" % (schid, flag, oldval, newval))
 """
 
