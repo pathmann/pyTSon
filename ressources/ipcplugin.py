@@ -172,7 +172,9 @@ class ipcplugin(ts3plugin):
 
             if ret:
                 data = ipcdata(obj=ret)
-                cli.write(QByteArray((len(data.data) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + data.data))
+            else:
+                data = ipcdata(obj=tuple())
+            cli.write(QByteArray((len(data.data) + ipcdata.longlen).to_bytes(ipcdata.longlen, byteorder='big') + data.data))
         else:
             err = ts3.logMessage("Unknown method data %s" % data.data, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ipcplugin", 0)
             if err != ts3defines.ERROR_ok:
