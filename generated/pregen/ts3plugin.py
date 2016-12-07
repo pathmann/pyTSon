@@ -436,67 +436,6 @@ class PluginHost(object):
                     if err != ts3defines.ERROR_ok:
                         print("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
 
-    @classmethod
-    def onEditPlaybackVoiceDataEvent(cls, schid, clientID, samples, channels):
-        changed = False
-        for key, p in cls.active.items():
-            (customized, newsamples) = p.onEditPlaybackVoiceDataEvent(schid, clientID, samples, channels)
-            if customized and len(newsamples) == len(samples):
-                samples = newsamples
-                changed = True
-
-        return (changed, samples)
-
-    @classmethod
-    def onEditPostProcessVoiceDataEvent(cls, schid, clientID, samples, channels, channelSpeakerArray, channelFillMask):
-        changed = False
-        for key, p in cls.active.items():
-            (customized, newsamples, newchannelFillMask) = p.onEditPostProcessVoiceDataEvent(schid, clientID, samples, channelSpeakerArray, channelFillMask)
-            if customized and len(newsamples) == len(samples):
-                samples = newsamples
-                channelFillMask = newchannelFillMask
-                changed = True
-
-        return (changed, samples, channelFillMask)
-
-    @classmethod
-    def onEditMixedPlaybackVoiceDataEvent(cls, schid, samples, channels, channelSpeakerArray, channelFillMask):
-        changed = False
-        for key, p in cls.active.items():
-            (customized, newsamples, newchannelFillMask) = p.onEditMixedPlaybackVoiceDataEvent(schid, samples, channels, channelSpeakerArray, channelFillMask)
-            if customized and len(newsamples) == len(samples):
-                samples = newsamples
-                channelFillMask = newchannelFillMask
-                changed = True
-
-        return (changed, samples, channelFillMask)
-
-    @classmethod
-    def onEditCapturedVoiceDataEvent(cls, schid, samples, channels, edited):
-        changed = False
-        for key, p in cls.active.items():
-            (customized, newsamples, newedited) = p.onEditCapturedVoiceDataEvent(schid, samples, channels, edited)
-            if customized and len(newsamples) == len(samples):
-                samples = newsamples
-                edited = newedited
-                changed = True
-
-        return (changed, samples, edited)
-
-    @classmethod
-    def onCustom3dRolloffCalculationClientEvent(cls, schid, clientID, distance, volume):
-        for key, p in cls.active.items():
-            volume = p.onCustom3dRolloffCalculationClientEvent(schid, clientID, distance, volume)
-
-        return volume
-
-    @classmethod
-    def onCustom3dRolloffCalculationWaveEvent(cls, schid, waveHandle, distance, volume):
-        for key, p in cls.active.items():
-            volume = p.onCustom3dRolloffCalculationWaveEvent(schid, waveHandle, distance, volume)
-
-        return volume
-
 
 class ts3plugin(object, metaclass=PluginMount):
     """
