@@ -18,11 +18,13 @@ class PluginMount(type):
             PluginHost.plugins = {}
             PluginHost.active = {}
         else:
-            for a in ['name', 'version', 'apiVersion', 'author', 'description', 'offersConfigure', 'commandKeyword', 'infoTitle', 'menuItems', 'hotkeys']:
+            for a in ['requestAutoload', 'name', 'version', 'apiVersion', 'author', 'description', 'offersConfigure', 'commandKeyword', 'infoTitle', 'menuItems', 'hotkeys']:
                 if not hasattr(cls, a):
-                    err = ts3.logMessage("Plugin not loaded, missing required attribute %s" % a, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
+                    err = ts3.logMessage("Plugin %s not loaded, missing required attribute %s" % (name, a), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
                     if err != ts3defines.ERROR_ok:
-                        print("Plugin not loaded, missing required attribute %s" % a)
+                        print("Plugin %s not loaded, missing required attribute %s" % (name, a))
+
+                    return
 
             if not cls.name in PluginHost.plugins:
                 PluginHost.plugins[cls.name] = cls
