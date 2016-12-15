@@ -28,7 +28,7 @@ INIBASE = """
 Name = pyTSon
 Type = Plugin
 Author = Thomas \\"PLuS\\" Pathmann
-Version = 1.0.4
+Version = 1.0.5
 Platforms = %s
 Description = "pyTSon - A python plugin to enhance the TS3 client with python scripts"
 """
@@ -37,7 +37,7 @@ INIBASE_WIN = """
 Name = pyTSon
 Type = Plugin
 Author = Thomas \\"PLuS\\" Pathmann
-Version = 1.0.4
+Version = 1.0.5
 Platforms = %s
 Description = "pyTSon - A python plugin to enhance the TS3 client with python scripts. In order to work, you have to move python35.dll manually from %%APPDATA%%\\\\TS3Client\\\\plugins\\\\pyTSon\\\\ to %%PROGRAMFILES%%\\\\Teamspeak 3 Client\\\\ once"
 """

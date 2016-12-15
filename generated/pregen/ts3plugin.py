@@ -314,7 +314,7 @@ class PluginHost(object):
         try:
             obj = json.loads(repstr)
 
-            if obj["tag_name"] == "v1.0.4":
+            if obj["tag_name"] == "v1.0.5":
                 QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release")
             else:
                 for a in obj["assets"]:
