@@ -43,7 +43,7 @@ unix:!mac {
 macx {
     QT_MODULES = Core Gui Widgets Network Sql
     for(m, QT_MODULES) {
-        QMAKE_POST_LINK += install_name_tool -change @rpath/libQt5$${m}.5.dylib @executable_path/../Frameworks/libQt5$${m}.dylib ${DESTDIR}${TARGET} &
+        QMAKE_POST_LINK += install_name_tool -change @rpath/libQt5$${m}.5.dylib @executable_path/../Frameworks/libQt5$${m}.dylib $${DESTDIR}/libpyTSon.dylib &&
     }
 }
 
