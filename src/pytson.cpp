@@ -47,31 +47,6 @@ int ts3plugin_init() {
 
   ts3logdispatcher::instance()->init("pyTSon");
 
-#if defined(Q_OS_WIN_BOOTSTRAP) //change to Q_OS_WIN when ready
-  HANDLE memhandle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, PATH_LEN, TEXT("pyTSondllpath"));
-  if (memhandle != NULL) {
-    DWORD err = GetLastError();
-    if (err == ERROR_ALREADY_EXISTS) {
-      /* the bootstrap library needs to create the shared memory */
-
-      void* shmem = MapViewOfFile(memhandle, FILE_MAP_WRITE, 0, 0, 0);
-      if (shmem) {
-        wchar_t buf[PATH_LEN];
-        memcpy(buf, shmem, PATH_LEN);
-
-        UnmapViewOfFile(shmem);
-
-        if (SetDllDirectory(wbuf) == 0)
-          ts3logdispatcher::instance()->add("Error resetting dll search path", LogLevel_WARNING, GetLastError());
-      }
-    }
-    else ts3logdispatcher::instance()->add(QString("Error opening shared memory object, ignoring: %1").arg(err), LogLevel_WARNING);
-
-    if (memhandle)
-      CloseHandle(memhandle);
-  }
-#endif
-
   QString error;
   if (PythonHost::instance()->init(error)) {
     return 0;
