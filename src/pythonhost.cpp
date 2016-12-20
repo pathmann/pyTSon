@@ -99,6 +99,24 @@ bool PythonHost::setupDirectories(QString &error) {
     }
   }
 
+  /* the plugin was updated, so we need to replace the old libdir */
+  QDir newincludelibdir = m_includedir;
+  if (newincludelibdir.cd(QString("%1_new").arg(LIBDIR))) {
+    //delete the old include/Lib
+    if (!m_includelibdir.removeRecursively()) {
+      error = QObject::tr("Error deleting old include/Lib directory");
+      return false;
+    }
+
+    //move the new include/Lib dir
+    if (!newincludelibdir.rename(newincludelibdir.path(), m_includelibdir.path())) {
+      error = QObject::tr("Error moving new include/Lib directory");
+      return false;
+    }
+
+    ts3logdispatcher::instance()->add(QObject::tr("New include/Lib directory installed"), LogLevel_INFO);
+  }
+
   m_dynloaddir = m_includelibdir;
   if (!m_dynloaddir.cd("lib-dynload")) {
     if (!m_dynloaddir.mkdir("lib-dynload")) {
