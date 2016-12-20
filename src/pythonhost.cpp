@@ -53,38 +53,20 @@ bool PythonHost::setupDirectories(QString &error) {
   }
 
   if (!m_scriptsdir.cd("pyTSon")) {
-    if (!m_scriptsdir.mkdir("pyTSon")) {
-      error = QObject::tr("Error creating plugin directory");
-      return false;
-    }
-    else if (!m_scriptsdir.cd("pyTSon")) {
-      error = QObject::tr("Error changing directory to new created plugin directory");
-      return false;
-    }
+    error = QObject::tr("Error changing directory to plugin directory");
+    return false;
   }
 
   m_includedir = m_scriptsdir;
 
   if (!m_scriptsdir.cd("scripts")) {
-    if (!m_scriptsdir.mkdir("scripts")) {
-      error = QObject::tr("Error creating scripts directory");
-      return false;
-    }
-    else if (!m_scriptsdir.cd("scripts")) {
-      error = QObject::tr("Error changing directory to new created scripts directory");
-      return false;
-    }
+    error = QObject::tr("Error changing directory to scripts directory");
+    return false;
   }
 
   if (!m_includedir.cd("include")) {
-    if (!m_includedir.mkdir("include")) {
-      error = QObject::tr("Error creating include directory");
-      return false;
-    }
-    else if (!m_includedir.cd("include")) {
-      error = QObject::tr("Error changing directory to new created include directory");
-      return false;
-    }
+    error = QObject::tr("Error changing directory to  include directory");
+    return false;
   }
 
   m_includelibdir = m_includedir;
@@ -119,14 +101,8 @@ bool PythonHost::setupDirectories(QString &error) {
 
   m_dynloaddir = m_includelibdir;
   if (!m_dynloaddir.cd("lib-dynload")) {
-    if (!m_dynloaddir.mkdir("lib-dynload")) {
-      error = QObject::tr("Error creating include/Lib/lib-dynload directory");
-      return false;
-    }
-    else if (!m_dynloaddir.cd("lib-dynload")) {
       error = QObject::tr("Error changing directory to new created include/Lib/lib-dynload directory");
       return false;
-    }
   }
 
   return true;
