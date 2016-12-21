@@ -40,7 +40,7 @@ Running
 How to use
 ==========
 1. Get the latest release for your Teamspeak client [here](https://github.com/pathmann/pyTSon/releases/) or compile the source yourself.
-2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This is only needed once per python version.])
+--2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This is only needed once per python version.])-- This step can be omitted since the client now loads dependencies from pyTSon's directory.
 3. Restart your Teamspeak Client.
 4. Download or write any pyTSon script and place it in `%APPDATA%\TS3Client\plugins\pyTSon\scripts\` on windows resp. `~/.ts3client/plugins/pyTSon/scripts/` on unix.
 5. In your client click on "Plugins" => "pyTSon" => "Settings" and on the settings dialog click on "Reload All" and check the plugins checkbox if it's not checked already.
