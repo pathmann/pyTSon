@@ -1,0 +1,25 @@
+#C++ and libs
+*.so
+*.dll
+*.dylib
+*.a
+*.o
+*.lib
+
+#Qt
+*.pro.user
+Makefile*
+
+#Visual Studio
+*.sln
+*.vcxproj*
+
+#Python
+__pycache__
+
+#pyTSon
+includes/PythonQt
+includes/python-352
+build
+src/build
+
