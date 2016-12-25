@@ -45,6 +45,8 @@ macx {
     for(m, QT_MODULES) {
         QMAKE_POST_LINK += install_name_tool -change @rpath/libQt5$${m}.5.dylib @executable_path/../Frameworks/libQt5$${m}.dylib $${DESTDIR}/libpyTSon.dylib &&
     }
+
+    QMAKE_POST_LINK += install_name_tool -change $$PWD/../includes/python-352/install/lib/libpython3.5m.dylib @loader_path/pyTSon/libpython3.5m.dylib ${DESTDIR}${TARGET} &
 }
 
 ########PYTHON SETTINGS############

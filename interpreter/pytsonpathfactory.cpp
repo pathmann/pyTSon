@@ -25,8 +25,6 @@ pytsonpathfactory::pytsonpathfactory(const char* execname) {
 
   //delete binary name
   m_base = m_exec.substr(0, m_exec.find_last_of("\\/"));
-  //delete bin directory
-  m_base = m_base.substr(0, m_base.find_last_of("\\/"));
   //m_base = ~/.ts3client/plugins/pyTSon
 
   m_inc = std::string(m_base);
