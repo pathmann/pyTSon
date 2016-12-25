@@ -162,6 +162,7 @@ bool PythonHost::init(QString& error) {
     return false;
   }
 
+  Py_NoSiteFlag = 1;
   Py_FrozenFlag = 1;
   Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(const_cast<wchar_t*>(L"pyTSon"));
