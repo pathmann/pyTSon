@@ -5,13 +5,12 @@ CONFIG += c++11
 TARGET = pyTSon
 TEMPLATE = lib
 
-DESTDIR = $$PWD/../build
-OBJECTS_DIR = $$PWD/build
-MOC_DIR = $$PWD/build
-RCC_DIR = $$PWD/build
-UI_DIR = $$PWD/build
+DESTDIR = ../build
+OBJECTS_DIR = build
+MOC_DIR = build
+RCC_DIR = build
+UI_DIR = build
 
-#INCLUDEPATH += src
 INCLUDEPATH += ../includes/pluginsdk/21/include
 
 SOURCES += pytson.cpp \
@@ -40,17 +39,18 @@ unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon
 }
 
+
+########PYTHON SETTINGS############
+include (../python.pri)
+
 macx {
     QT_MODULES = Core Gui Widgets Network Sql
     for(m, QT_MODULES) {
         QMAKE_POST_LINK += install_name_tool -change @rpath/libQt5$${m}.5.dylib @executable_path/../Frameworks/libQt5$${m}.dylib $${DESTDIR}/libpyTSon.dylib &&
     }
 
-    QMAKE_POST_LINK += install_name_tool -change $$PWD/../includes/python-352/install/lib/libpython3.5m.dylib @loader_path/pyTSon/libpython3.5m.dylib ${DESTDIR}${TARGET} &
+    QMAKE_POST_LINK += install_name_tool -change $${PYTHONPATH}/lib/libpython3.5m.dylib @loader_path/pyTSon/libpython3.5m.dylib ${DESTDIR}${TARGET} &
 }
-
-########PYTHON SETTINGS############
-include ($$PWD/../python.pri)
 
 
 #########GENERATED SOURCES#########
@@ -64,7 +64,7 @@ INCLUDEPATH += ../generated/pregen
 
 
 #########PythonQt Settings#########
-PYTHONQT_PATH = $${PWD}/../includes/PythonQt
+PYTHONQT_PATH = ../includes/PythonQt
 
 INCLUDEPATH += $${PYTHONQT_PATH}/src \
   $${PYTHONQT_PATH}/extensions/PythonQt_QtAll

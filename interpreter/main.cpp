@@ -10,7 +10,7 @@
 
 void deleteArray(wchar_t** arr, size_t size) {
   for (unsigned int i = 0; i < size; ++i)
-    delete[] arr[i];
+    PyMem_RawFree(arr[i]);
 
   delete[] arr;
 }
@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
   if (PyErr_Occurred()) {
     PyErr_Print();
     deleteArray(pyargv, argc -1);
-    free(wname);
+    PyMem_RawFree(wname);
     return 1;
   }
 
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
   PyObject* syspath = constructSysPath(fac);
   if (!syspath) {
     deleteArray(pyargv, argc -1);
-    free(wname);
+    PyMem_RawFree(wname);
     Py_Finalize();
     return 1;
   }
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
   if (PySys_SetObject("path", syspath) != 0) {
     Py_DECREF(syspath);
     deleteArray(pyargv, argc -1);
-    free(wname);
+    PyMem_RawFree(wname);
 
     std::cerr << "Error setting sys.path" << std::endl;
     return 1;
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
   FILE* f = fopen(argv[1], "r");
   if (!f) {
     deleteArray(pyargv, argc -1);
-    free(wname);
+    PyMem_RawFree(wname);
 
     std::cerr << "Error opening script (error: " << errno << ")" << std::endl;
     return 1;
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
   Py_Finalize();
 
   deleteArray(pyargv, argc -1);
-  free(wname);
+  PyMem_RawFree(wname);
 
   return 0;
 }

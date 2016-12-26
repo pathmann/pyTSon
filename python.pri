@@ -12,8 +12,9 @@ unix:!mac {
 }
 
 macx {
-    INCLUDEPATH += $$PWD/includes/python-352/install/include/python3.5m
-    LIBS += $$PWD/includes/python-352/install/lib/libpython3.5m.dylib
+    PYTHONPATH = $$PWD/includes/python-352/install
+    INCLUDEPATH += $${PYTHONPATH}/include/python3.5m
+    LIBS += $${PYTHONPATH}/lib/libpython3.5m.dylib
     LIBS += -lpthread -ldl  -lutil
 }
 

@@ -14,6 +14,7 @@
 #include "ts3module.h"
 
 #if defined(Q_OS_LINUX)
+  #define INTERPRETER "python"
   #if defined(__x86_64__)
     //linux64
     #define LIBDIR "Lib_linux64"
@@ -22,6 +23,7 @@
     #define LIBDIR "Lib_linux32"
   #endif
 #elif defined(Q_OS_WIN)
+  #define INTERPRETER "python.exe"
   #if defined(Q_OS_WIN64)
     //win64
     #define LIBDIR "Lib_win64"
@@ -31,39 +33,55 @@
   #endif
 #else
   //mac
+  #define INTERPRETER "python"
   #define LIBDIR "Lib"
 #endif
 
-PythonHost::PythonHost(): m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
+PythonHost::PythonHost(): m_interpreter(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
 
 }
 
 PythonHost::~PythonHost() {
-
+  if (m_interpreter)
+    PyMem_RawFree(m_interpreter);
 }
 
 bool PythonHost::setupDirectories(QString &error) {
   char path[256];
   ts3_funcs.getPluginPath(path, 256, ts3_pluginid);
 
-  m_scriptsdir.setPath(path);
-  if (!m_scriptsdir.exists()) {
+  m_base.setPath(path);
+
+
+  if (!m_base.exists()) {
     error = QObject::tr("Error getting pluginpath");
     return false;
   }
 
-  if (!m_scriptsdir.cd("pyTSon")) {
+  if (!m_base.cd("pyTSon")) {
     error = QObject::tr("Error changing directory to plugin directory");
     return false;
   }
 
-  m_includedir = m_scriptsdir;
+  QString interpreterpath = m_base.absoluteFilePath(INTERPRETER);
+  if (!QFile::exists(interpreterpath)) {
+    error = QObject::tr("Interpreter not found in").arg(interpreterpath);
+    return false;
+  }
 
+  m_interpreter = Py_DecodeLocale(interpreterpath.toUtf8().data(), NULL);
+  if (!m_interpreter) {
+    error = QObject::tr("Error decoding interpreter path");
+    return false;
+  }
+
+  m_scriptsdir = m_base;
   if (!m_scriptsdir.cd("scripts")) {
     error = QObject::tr("Error changing directory to scripts directory");
     return false;
   }
 
+  m_includedir = m_base;
   if (!m_includedir.cd("include")) {
     error = QObject::tr("Error changing directory to  include directory");
     return false;
@@ -165,7 +183,7 @@ bool PythonHost::init(QString& error) {
   Py_NoSiteFlag = 1;
   Py_FrozenFlag = 1;
   Py_IgnoreEnvironmentFlag = 1;
-  Py_SetProgramName(const_cast<wchar_t*>(L"pyTSon"));
+  Py_SetProgramName(m_interpreter);
   Py_NoUserSiteDirectory = 1;
 
   QString libdir = m_includelibdir.absolutePath();
@@ -176,12 +194,13 @@ bool PythonHost::init(QString& error) {
 #endif
   libdir += m_dynloaddir.absolutePath();
 
-  wchar_t* wlibdir = new wchar_t[libdir.length() +1];
-  int len = libdir.toWCharArray(wlibdir);
-  wlibdir[len] = '\0';
-
+  wchar_t* wlibdir = Py_DecodeLocale(libdir.toUtf8().data(), NULL);
+  if (!wlibdir) {
+    error = QObject::tr("Error decoding module search path");
+    return false;
+  }
   Py_SetPath(wlibdir);
-  delete[] wlibdir;
+  PyMem_RawFree(wlibdir);
 
   Py_Initialize();
   if (PyErr_Occurred()) {
