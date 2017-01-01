@@ -10,14 +10,7 @@
  #endif
 
 pytsonpathfactory::pytsonpathfactory(const char* execname) {
-  char cwd[400];
-
-  if (!getcwd(cwd, sizeof(cwd) / sizeof(char)))
-    throw std::runtime_error("Could not get current working directory");
-
-  std::string tmp = std::string(cwd);
-  tmp += PATHSEP;
-  tmp += execname;
+  std::string tmp(execname);
 
   char* norm = realpath(tmp.c_str(), NULL);
   m_exec = std::string(norm);

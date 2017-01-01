@@ -62,16 +62,28 @@ PyObject* constructSysPath(const pytsonpathfactory fac) {
   return syspath;
 }
 
-wchar_t** convertArgs(unsigned int start, unsigned int count, char** argv) {
-  const unsigned int len = count - start +1;
-  wchar_t** ret = new wchar_t*[count - start +1];
+wchar_t** convertArgs(int start, int last, char** argv, int jumpover = -1) {
+  unsigned int len = last - start +2;
+  if (jumpover >= 0)
+    --len;
+
+  wchar_t** ret = new wchar_t*[len];
   ret[len -1] = NULL;
 
-  for (unsigned int i = start; i < count; ++i) {
-    ret[i -1] = Py_DecodeLocale(argv[i], NULL);
+  unsigned int rid;
+  for (int i = start; i <= last; ++i) {
+    if (jumpover == i)
+      continue;
 
-    if (!ret[i -1]) {
-      deleteArray(ret, i -1);
+    if (jumpover == -1 || jumpover > i)
+      rid = i - start;
+    else
+      rid = i - start -1;
+
+    ret[rid] = Py_DecodeLocale(argv[i], NULL);
+
+    if (!ret[rid]) {
+      deleteArray(ret, rid);
 
       std::cerr << "Error decoding argument " << i << ": " << argv[i] << std::endl;
       return NULL;
@@ -81,15 +93,41 @@ wchar_t** convertArgs(unsigned int start, unsigned int count, char** argv) {
   return ret;
 }
 
+void printHelp(const char* prog) {
+  std::cout << "usage: " << prog << "[-c cmd | file] [arg] ..." << std::endl;
+}
+
 int main(int argc, char** argv) {
   if (argc == 0) {
     std::cerr << "No executablename in arg[0]" << std::endl;
     return 1;
   }
   else if (argc == 1) {
-    std::cout << "No script to execute" << std::endl;
+    std::cout << "Nothing to do here" << std::endl;
+    printHelp(argv[0]);
     return 0;
   }
+
+  std::string fname;
+  std::string cmd;
+  int jmpover = -1;
+  unsigned int arglen = argc -1;
+
+  if (!strcmp("--help", argv[1])) {
+    printHelp(argv[0]);
+    return 0;
+  }
+  else if (!strcmp("-c", argv[1])) {
+    if (argc == 2) {
+      std::cerr << "No command given" << std::endl;
+      return 1;
+    }
+
+    cmd = argv[2];
+    jmpover = 2;
+    --arglen;
+  }
+  else fname = argv[1];
 
   char* tmp = setlocale(LC_ALL, NULL);
   char* loc = new char[strlen(tmp) +1];
@@ -101,7 +139,7 @@ int main(int argc, char** argv) {
 
   setlocale(LC_ALL, "");
 
-  wchar_t** pyargv = convertArgs(1, argc, argv);
+  wchar_t** pyargv = convertArgs(1, argc -1, argv, jmpover);
   if (!pyargv) {
     setlocale(LC_ALL, loc);
     delete[]loc;
@@ -109,36 +147,36 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  setlocale(LC_ALL, loc);
-  delete[] loc;
-
   pytsonpathfactory fac(argv[0]);
-
-  Py_FrozenFlag = 1;
-  Py_IgnoreEnvironmentFlag = 1;
-  Py_NoUserSiteDirectory = 1;
 
   std::string execpath(fac.executablePath());
   wchar_t* wname = Py_DecodeLocale(execpath.c_str(), NULL);
   Py_SetProgramName(wname);
 
+  setlocale(LC_ALL, loc);
+  delete[] loc;
+
   std::string modpath(fac.moduleSearchPath());
   Py_SetPath(std::wstring(modpath.begin(), modpath.end()).c_str());
+
+  Py_FrozenFlag = 1;
+  Py_IgnoreEnvironmentFlag = 1;
+  Py_NoUserSiteDirectory = 1;
 
   Py_InitializeEx(0);
 
   if (PyErr_Occurred()) {
     PyErr_Print();
-    deleteArray(pyargv, argc -1);
+    deleteArray(pyargv, arglen);
     PyMem_RawFree(wname);
     return 1;
   }
 
-  PySys_SetArgvEx(argc -1, pyargv, 0);
+  PySys_SetArgvEx(arglen, pyargv, 0);
 
   PyObject* syspath = constructSysPath(fac);
   if (!syspath) {
-    deleteArray(pyargv, argc -1);
+    deleteArray(pyargv, arglen);
     PyMem_RawFree(wname);
     Py_Finalize();
     return 1;
@@ -146,27 +184,35 @@ int main(int argc, char** argv) {
 
   if (PySys_SetObject("path", syspath) != 0) {
     Py_DECREF(syspath);
-    deleteArray(pyargv, argc -1);
+    deleteArray(pyargv, arglen);
     PyMem_RawFree(wname);
+    Py_Finalize();
 
     std::cerr << "Error setting sys.path" << std::endl;
     return 1;
   }
 
-  FILE* f = fopen(argv[1], "r");
-  if (!f) {
-    deleteArray(pyargv, argc -1);
-    PyMem_RawFree(wname);
+  if (!fname.empty()) {
+    FILE* f = fopen(fname.c_str(), "r");
+    if (!f) {
+      deleteArray(pyargv, arglen);
+      PyMem_RawFree(wname);
+      Py_Finalize();
 
-    std::cerr << "Error opening script (error: " << errno << ")" << std::endl;
-    return 1;
+      std::cerr << "Error opening script (error: " << errno << ")" << std::endl;
+      return 1;
+    }
+
+    PyRun_SimpleFileEx(f, argv[1], 1);
   }
-
-  PyRun_SimpleFileEx(f, argv[1], 1);
+  else {
+    if (PyRun_SimpleString(cmd.c_str()) != 0)
+      std::cerr << "Error executing command" << std::endl;
+  }
 
   Py_Finalize();
 
-  deleteArray(pyargv, argc -1);
+  deleteArray(pyargv, arglen);
   PyMem_RawFree(wname);
 
   return 0;
