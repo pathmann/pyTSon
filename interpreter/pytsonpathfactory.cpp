@@ -2,13 +2,6 @@
 
 #include <stdexcept>
 
-#if defined(_WIN32)
-    #include <direct.h>
-    #define getcwd _getcwd
-#else
-    #include <unistd.h>
- #endif
-
 pytsonpathfactory::pytsonpathfactory(const char* execname) {
   std::string tmp(execname);
 
@@ -45,6 +38,8 @@ const std::string pytsonpathfactory::moduleSearchPath() const {
   std::string ret(m_lib);
   ret += PATHDELIM;
   ret += m_dynload;
+  ret += PATHDELIM;
+  ret += m_site;
   // = ~/.ts3client/plugins/pyTSon/include/Lib:~/.ts3client/plugins/pyTSon/include/Lib/lib-dynload
 
   return ret;
