@@ -40,14 +40,16 @@ int main(int argc, char** argv) {
     pyargv2[i] = pyargv[i];
   }
 
-  wchar_t* execpath = Py_DecodeLocale(argv[0], NULL);
-
   setlocale(LC_ALL, loc);
   delete[] loc;
 
-  Py_SetProgramName(execpath);
-
   pytsonpathfactory fac(argv[0]);
+
+  std::string execpath = fac.executablePath();
+  std::wstring wexecpath(execpath.begin(), execpath.end());
+  Py_SetProgramName(const_cast<wchar_t*>(wexecpath.c_str()));
+
+
   std::string modpath(fac.moduleSearchPath());
   Py_SetPath(std::wstring(modpath.begin(), modpath.end()).c_str());
 
@@ -55,7 +57,6 @@ int main(int argc, char** argv) {
 
   deleteArray(pyargv2, argc);
   delete[] pyargv;
-  PyMem_RawFree(execpath);
 
   return res;
 }
