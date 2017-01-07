@@ -18,20 +18,22 @@ pytsonpathfactory::pytsonpathfactory(const char* execname) {
   m_inc += "include";
   //m_inc = ~/.ts3client/plugins/pyTSon/include
 
-  m_lib = std::string(m_inc);
+  m_lib = std::string(m_base);
   m_lib += PATHSEP;
-  m_lib += LIBDIR;
-  //m_lib = ~/.ts3client/plugins/pyTSon/include/Lib
+  m_lib += "lib";
+  m_lib += PATHSEP;
+  m_lib += "python3.5";
+  //m_lib = ~/.ts3client/plugins/pyTSon/lib/python3.5
 
   m_dynload = std::string(m_lib);
   m_dynload += PATHSEP;
   m_dynload += "lib-dynload";
-  //m_dynload = ~/.ts3client/plugins/pyTSon/include/Lib/lib-dynload
+  //m_dynload = ~/.ts3client/plugins/pyTSon/lib/python3.5m/lib-dynload
 
   m_site = std::string(m_lib);
   m_site += PATHSEP;
   m_site += "site-packages";
-  //m_site = ~/.ts3client/plugins/pyTSon/include/site-packages
+  //m_site = ~/.ts3client/plugins/pyTSon/lib/python3.5m/site-packages
 }
 
 const std::string pytsonpathfactory::moduleSearchPath() const {
@@ -40,7 +42,7 @@ const std::string pytsonpathfactory::moduleSearchPath() const {
   ret += m_dynload;
   ret += PATHDELIM;
   ret += m_site;
-  // = ~/.ts3client/plugins/pyTSon/include/Lib:~/.ts3client/plugins/pyTSon/include/Lib/lib-dynload
+  // = ~/.ts3client/plugins/pyTSon/lib/python3.5m/lib:~/.ts3client/plugins/pyTSon/lib/python3.5m/lib-dynload
 
   return ret;
 }

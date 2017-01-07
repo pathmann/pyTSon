@@ -6,28 +6,13 @@
 #if defined(__gnu_linux__)
   #define PATHSEP "/"
   #define PATHDELIM ":"
-  #if defined(__x86_64__)
-    //linux64
-    #define LIBDIR "Lib_linux64"
-  #else
-    //linux32
-    #define LIBDIR "Lib_linux32"
-  #endif
 #elif defined(_WIN32)
   #define PATHSEP "\\"
   #define PATHDELIM ";"
-  #if defined(_WIN64)
-    //win64
-    #define LIBDIR "Lib_win64"
-  #else
-    //win32
-    #define LIBDIR "Lib_win32"
-  #endif
 #else
   //mac
   #define PATHSEP "/"
   #define PATHDELIM ":"
-  #define LIBDIR "Lib"
 #endif
 
 class pytsonpathfactory {
