@@ -3,14 +3,23 @@ import sys, os
 from enum import Enum, unique
 
 from PythonQt.QtGui import *
-from PythonQt.QtCore import Qt, QFile, QIODevice
+from PythonQt.QtCore import Qt, QFile, QIODevice, QUrl
 from PythonQt.QtUiTools import QUiLoader
+from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PythonQt import BoolResult
 
 from rlcompleter import Completer
 import traceback, re
 from itertools import takewhile
 
-import ts3
+import json
+from tempfile import gettempdir
+
+from zipfile import ZipFile
+import io
+import devtools
+
+import ts3, ts3defines
 
 @unique
 class ValueType(Enum):
@@ -273,6 +282,8 @@ class ConfigurationDialog(QDialog):
                           ("differentApiButton", True, []),
                           ("pluginsList", True, []),
                           ("reloadButton", True, []),
+                          ("createButton", True, []),
+                          ("repositoryButton", True, []),
                           ("settingsButton", True, []),
                           ("versionEdit", True, []),
                           ("nameEdit", True, []),
@@ -312,6 +323,8 @@ class ConfigurationDialog(QDialog):
 
         self.cfg = cfg
         self.host = host
+
+        self.rpd = None
 
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), self.CONF_WIDGETS)
 
@@ -475,6 +488,21 @@ class ConfigurationDialog(QDialog):
 
     def on_silentButton_toggled(self, act):
         self.cfg.set("console", "silentStartup", str(act))
+
+    def on_repositoryButton_clicked(self):
+        if not self.rpd:
+            self.rpd = RepositoryDialog(self.host, self)
+
+        self.rpd.show()
+        self.rpd.raise_()
+
+    def on_createButton_clicked(self):
+        ok = BoolResult()
+        name = QInputDialog.getText(self, "New plugin's name", "Name:", QLineEdit.Normal, "", ok)
+
+        if ok:
+            fp = devtools.createPlugin(name)
+            QMessageBox.information(self, "Plugin created", "A new plugin has been created: %s" % fp)
 
 
 class StdRedirector:
@@ -809,3 +837,364 @@ class PythonConsole(QPlainTextEdit):
 
         self.ensureCursorVisible()
 
+
+def _ts3print(msg, level, channel, aid):
+    err = ts3.logMessage(msg, level, channel, aid)
+    if err != ts3defines.ERROR_ok:
+        print(msg)
+
+
+class RepositoryDialog(QDialog):
+    def __init__(self, host, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
+        self.host = host
+
+        self.rpm = None
+
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository.ui"))
+
+        movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
+        movie.start()
+        self.loadingLabel.setMovie(movie)
+
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+        self.replist = {}
+        self.updateRepositories()
+
+    def updateRepositories(self):
+        self.loadingLabel.show()
+
+        try:
+            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+                self.replist = json.loads(f.read())
+        except:
+            _ts3print("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryDialog.updateRepositories", 0)
+            return False
+
+        self.addons = {}
+        self.pluginsList.clear()
+
+        self.masterupdate = sum(x["active"] for x in self.replist)
+        for rep in self.replist:
+            if all(x in rep for x in ['name', 'url', 'origin', 'active']):
+                if rep["active"]:
+                    self.nwm.get(QNetworkRequest(QUrl(rep["url"])))
+            else:
+                self.masterupdate -= 1
+                _ts3print("Invalid repository in list, ignoring", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.updateRepositories", 0)
+
+        return True
+
+    def onNetworkReply(self, reply):
+        self.masterupdate -= 1
+
+        for r in self.replist:
+            if reply.url().url() == r["url"]:
+                repo = r
+                break
+
+        if reply.error() == QNetworkReply.NoError:
+            try:
+                addons = json.loads(reply.readAll().data().decode('utf-8'))
+
+                for a in addons:
+                    if all(x in a for x in ["name", "author", "version", "apiVersion", "description", "url", "dependencies"]):
+                        a["repository"] = repo["name"]
+                        self.addAddon(a)
+                    else:
+                        _ts3print("Invalid entry in repository %s: %s" % (repo["name"], str(addon)), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+                        break
+            except:
+                _ts3print("Error parsing repository %s: %s" % (repo["name"], traceback.format_exc()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+        else:
+            _ts3print("Network error updating repository %s: %s" % (repo["name"], reply.error()), ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryDialog.onNetworkReply", 0)
+
+        reply.deleteLater()
+
+        #all repositories updated
+        if self.masterupdate == 0:
+            self.reloadButton.setEnabled(True)
+            self.loadingLabel.hide()
+
+            self.pluginsList.sortItems()
+
+    def addAddon(self, addon):
+        if not addon["name"] in self.addons:
+            #repos are prioritized
+            self.addons[addon["name"]] = addon
+
+            item = QListWidgetItem(self.pluginsList)
+            item.setText(addon["name"])
+            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setData(Qt.UserRole, addon["name"])
+
+            if addon["name"] in self.host.plugins:
+                if addon["version"] > self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.red)
+                    item.setToolTip("Update available")
+                elif addon["version"] == self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.green)
+                    item.setToolTip("You have this plugin installed, no update available")
+                elif addon["version"] < self.host.plugins[addon["name"]].version:
+                    item.setForeground(Qt.gray)
+                    item.setToolTip("Your local version has a greater version number")
+
+    def on_pluginsList_currentItemChanged(self, cur, prev):
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.addons:
+                QMessageBox.critical("Internal error", "Can't find addon %s in list" % name)
+                return
+
+            p = self.addons[name]
+            self.nameEdit.setText(p["name"])
+            self.authorEdit.setText(p["author"])
+            self.versionEdit.setText(p["version"])
+            self.descriptionEdit.setPlainText(p["description"])
+            self.apiEdit.setText(p["apiVersion"])
+            self.repositoryEdit.setText(p["repository"])
+
+            if name in self.host.plugins:
+                if p["version"] > self.host.plugins[name].version:
+                    self.installButton.setEnabled(True)
+                    self.installButton.setText("Update")
+                else:
+                    self.installButton.setEnabled(False)
+                    self.installButton.setText("Install")
+            else:
+                self.installButton.setEnabled(True)
+                self.installButton.setText("Install")
+        else:
+          self.nameEdit.clear()
+          self.authorEdit.clear()
+          self.versionEdit.clear()
+          self.descriptionEdit.clear()
+          self.apiEdit.clear()
+          self.repositoryEdit.clear()
+
+    def on_reloadButton_clicked(self):
+        if self.updateRepositories():
+            self.reloadButton.setEnabled(False)
+            self.installButton.setEnabled(False)
+
+    def on_repositoryButton_clicked(self):
+        if not self.rpm:
+            self.rpm = RepositoryManager(self)
+
+        self.rpm.show()
+        self.rpm.raise_()
+
+    def on_installButton_clicked(self):
+        item = self.pluginsList.currentItem()
+        if not item:
+            return
+
+        name = item.data(Qt.UserRole)
+        if not name in self.addons:
+            QMessageBox.critical(self, "Internal error", "Can't find addon %s in list" % name)
+            return
+
+        self.installer = InstallDialog(self.host, self)
+        self.installer.show()
+        self.installer.install(self.addons[name])
+
+
+class RepositoryManager(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setModal(True)
+
+        try:
+            with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "r") as f:
+                repmaster = json.loads(f.read())
+                self.replist = {x["name"]:x for x in repmaster}
+        except:
+            _ts3print("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager", 0)
+            raise Exception("Error opening repositorymaster")
+
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repository-manager.ui"))
+
+        movie = QMovie(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "loading.gif"), "", self)
+        movie.start()
+        self.loadingLabel.setMovie(movie)
+
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+        self.updateRepositories()
+
+        self.connect("finished(int)", self.onClosed)
+
+    def onClosed(self):
+        with open(os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "repositorymaster.json"), "w") as f:
+            json.dump(list(self.replist.values()), f)
+
+    def updateRepositories(self):
+        self.loadingLabel.show()
+        self.updateButton.setEnabled(False)
+
+        self.nwm.get(QNetworkRequest(QUrl("https://raw.githubusercontent.com/pathmann/pyTSon_repository/master/repositorymaster.json")))
+
+    def onNetworkReply(self, reply):
+        if reply.error() == QNetworkReply.NoError:
+            try:
+                repos = json.loads(reply.readAll().data().decode('utf-8'))
+
+                for r in repos:
+                    if all(x in r for x in ["name", "url", "active", "origin"]):
+                        self.addRepository(r)
+                    else:
+                        _ts3print("Invalid entry in repositorymaster", ts3defines.LogLevel.LogLevel_WARNING, "pyTSon.RepositoryManager.onNetworkReply", 0)
+            except:
+                _ts3print("Error reading repositorymaster: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryManager.onNetworkReply", 0)
+        else:
+            print("updated error %s")
+
+        self.loadingLabel.hide()
+        self.updateButton.setEnabled(True)
+        reply.deleteLater()
+
+        self.displayList()
+
+    def addRepository(self, r):
+        name = r["name"]
+        if name in self.replist:
+            if self.replist[name]["origin"] == "online":
+                if self.replist[name]["url"] != r["url"]:
+                    self.replist[name]["url"] = r["url"]
+                    _ts3print("url for repository %s updated" % name, ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.onNetworkReply", 0)
+            else:
+                _ts3print("Ignoring online repository %s, got a local one with that name", ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.onNetworkReply", 0)
+        else:
+            self.replist[name] = r
+
+    def displayList(self):
+        self.list.clear()
+
+        for name, r in self.replist.items():
+            item = QListWidgetItem(name)
+            item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Checked if r["active"] else Qt.Unchecked)
+            item.setData(Qt.UserRole, name)
+            self.list.addItem(item)
+
+    def on_updateButton_clicked(self):
+        self.updateRepositories()
+
+    def on_addButton_clicked(self):
+        ok = BoolResult()
+        name = QInputDialog.getText(self, "New repository's name", "Name:", QLineEdit.Normal, "", ok)
+
+        if name in self.replist:
+            QMessageBox.critical(self, "Error", "The name %s is already in use" % name)
+            return
+
+        if ok:
+            url = QInputDialog.getText(self, "New repository's url", "URL:", QLineEdit.Normal, "", ok)
+
+            if ok:
+                qurl = QUrl(url)
+                if qurl.isValid() and not qurl.isLocalFile():
+                    rep = dict()
+                    rep["name"] = name
+                    rep["url"] = url
+                    rep["origin"] = "local"
+                    rep["active"] = True
+
+                    self.replist[name] = rep
+
+                    item = QListWidgetItem(name)
+                    item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                    item.setCheckState(Qt.Checked)
+                    item.setData(Qt.UserRole, name)
+                    self.list.addItem(item)
+                else:
+                    QMessageBox.critical("Error", "The URL %s is not valid" % url)
+
+    def on_deleteButton_clicked(self):
+        cur = self.list.currentItem()
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.replist:
+                QMessageBox.critical("Internal error", "Can't find repository %s in list" % name)
+                return
+
+            del self.replist[name]
+            cur.delete()
+
+    def on_list_doubleClicked(self, item):
+        name = item.data(Qt.UserRole)
+        try:
+            rep = self.replist[name]
+        except:
+            QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+            return
+
+        ok = BoolResult()
+        newurl = QInputDialog.getText(self, "Change url of repository %s" % name, "Url:", QLineEdit.Normal, rep["url"], ok)
+
+        if ok:
+            rep["url"] = newurl
+            rep["origin"] = "local"
+
+    def on_list_currentItemChanged(self, cur, prev):
+        if cur:
+            name = cur.data(Qt.UserRole)
+            if not name in self.replist:
+                self.deleteButton.setEnabled(False)
+                QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+                return
+
+            self.deleteButton.setEnabled(True)
+        else:
+            self.deleteButton.setEnabled(False)
+
+    def on_list_itemChanged(self, item):
+        if item:
+            name = item.data(Qt.UserRole)
+
+            if not name in self.replist:
+                QMessageBox.critical(self, "Internal error", "Can't find repository %s in list" % name)
+                return
+
+            self.replist[name]["active"] = item.checkState() == Qt.Checked
+
+
+class InstallDialog(QDialog):
+    def __init__(self, host, parent=None):
+        super().__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setModal(True)
+
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
+
+        self.host = host
+        self.addon = None
+
+        self.pip = devtools.SimplePip(self.consoleEdit.append)
+        self.nwm = QNetworkAccessManager(self)
+        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+    def install(self, addon):
+        self.addon = addon
+
+        self.nwm.get(QNetworkRequest(QUrl(addon["url"])))
+        self.consoleEdit.append("Downloading %s ..." % addon["url"])
+
+    def onNetworkReply(self, reply):
+        if reply.error() == QNetworkReply.NoError:
+            self.consoleEdit.append("Download finished.")
+
+            if reply.header(QNetworkRequest.ContentTypeHeader) != "application/zip":
+                self.pip.installPlugin(self.addon, reply.readAll().data().decode('utf-8'), False)
+            else:
+                self.pip.installPlugin(self.addon, io.BytesIO(reply.readAll()), True)
+        else:
+            self.consoleEdit.append("Network error: %s" % reply.error())
+
+        reply.deleteLater()

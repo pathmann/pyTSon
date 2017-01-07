@@ -3,14 +3,11 @@
 
 #include <string>
 
-#if defined(__gnu_linux__)
-  #define PATHSEP "/"
-  #define PATHDELIM ":"
-#elif defined(_WIN32)
+#if defined(_WIN32)
   #define PATHSEP "\\"
   #define PATHDELIM ";"
 #else
-  //mac
+  //mac + linux
   #define PATHSEP "/"
   #define PATHDELIM ":"
 #endif

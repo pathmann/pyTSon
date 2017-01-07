@@ -195,9 +195,10 @@ class PluginHost(object):
         cls.plugins = {}
 
         #import all modules
-        for f in glob.glob(os.path.join(ts3.getPluginPath(), "pyTSon", "scripts", "*.py")):
-            if os.path.isfile(f) and os.path.basename(f) != "ts3plugin.py":
-                base = os.path.basename(f[:-3])
+        spath = os.path.join(ts3.getPluginPath(), "pyTSon", "scripts")
+        for d in glob.glob(os.path.join(spath, "*/")):
+            if os.path.isdir(d):
+                base = os.path.relpath(d, spath)
                 try:
                     if base in cls.modules:
                         cls.modules[base] = importlib.reload(cls.modules[base])
@@ -314,7 +315,7 @@ class PluginHost(object):
         try:
             obj = json.loads(repstr)
 
-            if obj["tag_name"] == "v1.0.5":
+            if obj["tag_name"] == "v1.1.0":
                 QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release")
             else:
                 for a in obj["assets"]:

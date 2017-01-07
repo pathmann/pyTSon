@@ -13,28 +13,12 @@
 #include "ts3logdispatcher.h"
 #include "ts3module.h"
 
-#if defined(Q_OS_LINUX)
-  #define INTERPRETER "python"
-  #if defined(__x86_64__)
-    //linux64
-    #define LIBDIR "Lib_linux64"
-  #else
-    //linux32
-    #define LIBDIR "Lib_linux32"
-  #endif
-#elif defined(Q_OS_WIN)
+
+#if defined(Q_OS_WIN)
   #define INTERPRETER "python.exe"
-  #if defined(Q_OS_WIN64)
-    //win64
-    #define LIBDIR "Lib_win64"
-  #else
-    //win32
-    #define LIBDIR "Lib_win32"
-  #endif
 #else
-  //mac
+  //mac + linux
   #define INTERPRETER "python"
-  #define LIBDIR "Lib"
 #endif
 
 PythonHost::PythonHost(): m_interpreter(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
@@ -51,7 +35,6 @@ bool PythonHost::setupDirectories(QString &error) {
   ts3_funcs.getPluginPath(path, 256, ts3_pluginid);
 
   m_base.setPath(path);
-
 
   if (!m_base.exists()) {
     error = QObject::tr("Error getting pluginpath");
@@ -83,44 +66,63 @@ bool PythonHost::setupDirectories(QString &error) {
 
   m_includedir = m_base;
   if (!m_includedir.cd("include")) {
-    error = QObject::tr("Error changing directory to  include directory");
+    error = QObject::tr("Error changing directory to include directory");
     return false;
   }
 
-  m_includelibdir = m_includedir;
-  if (!m_includelibdir.cd(LIBDIR)) {
-    if (!m_includelibdir.mkdir(LIBDIR)) {
-      error = QObject::tr("Error creating include/Lib directory");
-      return false;
-    }
-    else if (!m_includelibdir.cd(LIBDIR)) {
-      error = QObject::tr("Error changing directory to new created include/Lib directory");
-      return false;
-    }
-  }
+  m_libdir = m_base;
+  bool havelib = true;
+  if (!m_libdir.cd("lib"))
+    havelib = false;
 
   /* the plugin was updated, so we need to replace the old libdir */
-  QDir newincludelibdir = m_includedir;
-  if (newincludelibdir.cd(QString("%1_new").arg(LIBDIR))) {
-    //delete the old include/Lib
-    if (!m_includelibdir.removeRecursively()) {
-      error = QObject::tr("Error deleting old include/Lib directory");
+  QDir newincludelibdir = m_base;
+  if (newincludelibdir.cd("lib_new")) {
+    //delete the old lib
+    if (havelib) {
+      if (!m_libdir.removeRecursively()) {
+        error = QObject::tr("Error deleting old lib directory");
+        return false;
+      }
+    }
+
+    //move the new lib dir
+    QString newpath = m_libdir.absolutePath();
+    if (!havelib) {
+      newpath += QDir::separator();
+      newpath += "lib";
+    }
+
+    if (!newincludelibdir.rename(newincludelibdir.path(), newpath)) {
+      error = QObject::tr("Error moving new lib directory");
       return false;
     }
 
-    //move the new include/Lib dir
-    if (!newincludelibdir.rename(newincludelibdir.path(), m_includelibdir.path())) {
-      error = QObject::tr("Error moving new include/Lib directory");
-      return false;
+    if (!havelib) {
+      if (!m_libdir.cd("lib")) {
+        error = QObject::tr("Error changing directory to new installed lib directory");
+        return false;
+      }
     }
 
-    ts3logdispatcher::instance()->add(QObject::tr("New include/Lib directory installed"), LogLevel_INFO);
+    ts3logdispatcher::instance()->add(QObject::tr("New lib directory installed"), LogLevel_INFO);
   }
 
-  m_dynloaddir = m_includelibdir;
+  if (!m_libdir.cd("python3.5")) {
+    error = QObject::tr("Error changing directory to standard lib directory");
+    return false;
+  }
+
+  m_sitepackdir = m_libdir;
+  if (!m_sitepackdir.cd("site-packages")) {
+    error = QObject::tr("Error changing directory to site directory");
+    return false;
+  }
+
+  m_dynloaddir = m_libdir;
   if (!m_dynloaddir.cd("lib-dynload")) {
-      error = QObject::tr("Error changing directory to new created include/Lib/lib-dynload directory");
-      return false;
+    error = QObject::tr("Error changing directory to dynload directory");
+    return false;
   }
 
   return true;
@@ -171,22 +173,43 @@ QString PythonHost::formatError(const QString &fallback) {
   else return fallback;
 }
 
-bool PythonHost::init(QString& error) {
-  if (!setupDirectories(error))
-    return false;
-
-  if (PyImport_AppendInittab("ts3", &PyInit_ts3) == -1) {
-    ts3logdispatcher::instance()->add(QObject::tr("Error initializing ts3 module"), LogLevel_ERROR);
+bool PythonHost::setSysPath(QString& error) {
+  PyObject* syspath = PyList_New(5);
+  if (!syspath) {
+    error = QObject::tr("Memory error");
     return false;
   }
 
-  Py_NoSiteFlag = 1;
-  Py_FrozenFlag = 1;
-  Py_IgnoreEnvironmentFlag = 1;
-  Py_SetProgramName(m_interpreter);
-  Py_NoUserSiteDirectory = 1;
+  QDir pathdirs[] = {m_scriptsdir, m_includedir, m_libdir, m_dynloaddir, m_sitepackdir};
+  PyObject* pypath = NULL;
+  for (unsigned int i = 0; i < std::extent<decltype(pathdirs)>::value; ++i) {
+    pypath = Py_BuildValue("s", pathdirs[i].absolutePath().toUtf8().data());
+    if (!pypath) {
+      error = QObject::tr("Error creating directory string from path %1").arg(i);
+      Py_DECREF(syspath);
+      return false;
+    }
 
-  QString libdir = m_includelibdir.absolutePath();
+    if (PyList_SetItem(syspath, i, pypath) != 0) {
+      error = QObject::tr("Error adding dir %1 to sys.path").arg(i);
+      Py_DECREF(pypath);
+      Py_DECREF(syspath);
+      return false;
+    }
+  }
+
+  //replace sys.path
+  if (PySys_SetObject("path", syspath) != 0) {
+    error = QObject::tr("Error setting sys.path");
+    Py_DECREF(syspath);
+    return false;
+  }
+
+  return true;
+}
+
+bool PythonHost::setModuleSearchpath(QString& error) {
+  QString libdir = m_libdir.absolutePath();
 #ifdef Q_OS_WIN
   libdir += ";";
 #else
@@ -202,85 +225,34 @@ bool PythonHost::init(QString& error) {
   Py_SetPath(wlibdir);
   PyMem_RawFree(wlibdir);
 
+  return true;
+}
+
+bool PythonHost::init(QString& error) {
+  if (!setupDirectories(error))
+    return false;
+
+  if (PyImport_AppendInittab("ts3", &PyInit_ts3) == -1) {
+    ts3logdispatcher::instance()->add(QObject::tr("Error initializing ts3 module"), LogLevel_ERROR);
+    return false;
+  }
+
+  Py_FrozenFlag = 1;
+  Py_IgnoreEnvironmentFlag = 1;
+  Py_SetProgramName(m_interpreter);
+  Py_NoUserSiteDirectory = 1;
+
+  if (!setModuleSearchpath(error))
+    return false;
+
   Py_Initialize();
   if (PyErr_Occurred()) {
     PyErr_Print();
     return false;
   }
 
-  //set syspath
-  PyObject* syspath = PyList_New(4);
-  if (!syspath) {
-    error = QObject::tr("Memory error");
+  if (!setSysPath(error))
     return false;
-  }
-
-  //add scriptspath to sys.path
-  PyObject* pypath = Py_BuildValue("s", m_scriptsdir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from scripts path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 0, pypath) != 0) {
-    error = QObject::tr("Error adding scriptsdir to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includepath to sys.path
-  pypath = Py_BuildValue("s", m_includedir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 1, pypath) != 0) {
-    error = QObject::tr("Error adding scriptsdir to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includelibpath to sys.path
-  pypath = Py_BuildValue("s", m_includelibdir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include/Lib path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 2, pypath) != 0) {
-    error = QObject::tr("Error adding include/Lib to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //add includelibpath to sys.path
-  pypath = Py_BuildValue("s", m_dynloaddir.absolutePath().toUtf8().data());
-  if (!pypath) {
-    error = QObject::tr("Error creating python directory string from include/Lib/lib-dynload path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  if (PyList_SetItem(syspath, 3, pypath) != 0) {
-    error = QObject::tr("Error adding include/Lib/lib-dynload to sys.path");
-    Py_DECREF(pypath);
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  //replace sys.path
-  if (PySys_SetObject("path", syspath) != 0) {
-    error = QObject::tr("Error setting sys.path");
-    Py_DECREF(syspath);
-    return false;
-  }
 
   PythonQt::init(PythonQt::PythonAlreadyInitialized);
   PythonQt_QtAll::init();
