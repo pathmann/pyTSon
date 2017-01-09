@@ -38,7 +38,8 @@ OTHER_FILES += ../templates/ts3module.h.tpl \
     ../ressources/installer.ui \
     ../ressources/pytsonui.py \
     ../ressources/devtools.py \
-    ../ressources/repositorymaster.json
+    ../ressources/repositorymaster.json \
+    ../ressources/pytson.py
 
 
 unix:!mac {

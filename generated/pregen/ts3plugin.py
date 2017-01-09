@@ -1,6 +1,6 @@
 import sys, os, glob
 
-import ts3, ts3defines
+import ts3, ts3defines, pytson
 
 import importlib, traceback
 import json
@@ -50,6 +50,8 @@ class PluginHost(object):
 
     @classmethod
     def init(cls):
+        pytson._setup()
+
         cls.shell = None
         cls.confdlg = None
 
@@ -205,9 +207,9 @@ class PluginHost(object):
                     else:
                         cls.modules[base] = importlib.__import__(base)
                 except:
-                    err = ts3.logMessage("Error loading python plugin from %s: %s" % (os.path.basename(f), traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
+                    err = ts3.logMessage("Error loading python plugin from %s: %s" % (d, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
                     if err != ts3defines.ERROR_ok:
-                        print("Error loading python plugin from %s: %s" % (os.path.basename(f), traceback.format_exc()))
+                        print("Error loading python plugin from %s: %s" % (d, traceback.format_exc()))
 
         #save local menu ids
         for globid, (p, locid) in cls.menus.items():
