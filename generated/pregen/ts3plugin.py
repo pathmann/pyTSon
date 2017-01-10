@@ -63,7 +63,7 @@ class PluginHost(object):
         cls.hotkeys = {}
 
         cls.cfg = ConfigParser()
-        cls.cfg.read(os.path.join(ts3.getConfigPath(), "pyTSon.conf"))
+        cls.cfg.read(pytson.getConfigPath("pyTSon.conf"))
 
         cls.setupConfig()
 
@@ -118,7 +118,7 @@ class PluginHost(object):
         cls.nwm = None
 
         #store config
-        with open(os.path.join(ts3.getConfigPath(), "pyTSon.conf"), "w") as f:
+        with open(pytson.getConfigPath("pyTSon.conf"), "w") as f:
             cls.cfg.write(f)
 
         #stop all plugins
@@ -197,7 +197,7 @@ class PluginHost(object):
         cls.plugins = {}
 
         #import all modules
-        spath = os.path.join(ts3.getPluginPath(), "pyTSon", "scripts")
+        spath = pytson.getPluginPath("scripts")
         for d in glob.glob(os.path.join(spath, "*/")):
             if os.path.isdir(d):
                 base = os.path.relpath(d, spath)
