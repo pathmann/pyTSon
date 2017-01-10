@@ -89,9 +89,10 @@ class %s(ts3plugin):
         @param name: the name of the plugin
         @type name: str
         """
-        ename = _PluginInstaller.escapeString(name)
+        ename = PluginInstaller._escapeString(name)
         p = pytson.getPluginPath("scripts", ename)
         if os.path.isdir(p):
+            print("removing %s" % p)
             shutil.rmtree(p)
 
     def _print(self, msg):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>760</width>
-    <height>559</height>
+    <height>597</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,26 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="pluginsList"/>
+          <widget class="QTableWidget" name="pluginsTable">
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="columnCount">
+            <number>3</number>
+           </property>
+           <attribute name="horizontalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>80</number>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <column/>
+           <column/>
+           <column/>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -45,13 +64,6 @@
             <widget class="QPushButton" name="reloadButton">
              <property name="text">
               <string>Reload all</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="settingsButton">
-             <property name="text">
-              <string>Settings</string>
              </property>
             </widget>
            </item>
@@ -67,13 +79,6 @@
               </size>
              </property>
             </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="createButton">
-             <property name="text">
-              <string>Create new</string>
-             </property>
-            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="repositoryButton">

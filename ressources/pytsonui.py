@@ -280,11 +280,9 @@ class ConfigurationDialog(QDialog):
     CONF_WIDGETS = [("tabWidget", False, [
                       ("pluginsTab", False, [
                           ("differentApiButton", True, []),
-                          ("pluginsList", True, []),
+                          ("pluginsTable", True, []),
                           ("reloadButton", True, []),
-                          ("createButton", True, []),
                           ("repositoryButton", True, []),
-                          ("settingsButton", True, []),
                           ("versionEdit", True, []),
                           ("nameEdit", True, []),
                           ("authorEdit", True, []),
@@ -334,22 +332,38 @@ class ConfigurationDialog(QDialog):
         self.setupSlots()
 
     def setupList(self):
-        self.pluginsList.clear()
+        self.pluginsTable.clear()
+        self.pluginsTable.setRowCount(15)
 
+        row = 0
         for key, p in self.host.plugins.items():
             if self.cfg.getboolean("general", "differentApi", fallback=False) or p.apiVersion == 20:
-                item = QListWidgetItem(self.pluginsList)
-                item.setText(p.name)
+                item = QTableWidgetItem(p.name)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
-                item.setData(Qt.UserRole, key)
+                item.setData(Qt.UserRole, key)        
+                self.pluginsTable.setItem(row, 0, item)
 
-        self.pluginsList.sortItems()
+                if p.offersConfigure:
+                    setbutton = QToolButton()
+                    setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p))
+                    self.pluginsTable.setCellWidget(row, 1, setbutton)
+
+                    if p.name not in self.host.active:
+                        setbutton.setEnabled(False)
+
+                rembutton = QToolButton()
+                rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p))
+                self.pluginsTable.setCellWidget(row, 2, rembutton)
+
+                row += 1
+
+        self.pluginsTable.setRowCount(row)
+        self.pluginsTable.sortItems(0)
 
     def setupValues(self):
         self.differentApiButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "differentApi", fallback=False) else Qt.Unchecked)
-        self.settingsButton.setEnabled(False)
-        self.requiredApiEdit.setText(20)
+        self.requiredApiEdit.setText(21)
 
         self.backgroundColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "backgroundColor")).name())
         self.textColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "textColor")).name())
@@ -377,10 +391,9 @@ class ConfigurationDialog(QDialog):
     def setupSlots(self):
         #you can of course connect signal-slots manually, scriptEdit.textEdited for example is connected by setupui
         self.differentApiButton.connect("stateChanged(int)", self.onDifferentApiButtonChanged)
-        self.pluginsList.connect("currentItemChanged(QListWidgetItem*, QListWidgetItem*)", self.onPluginsListCurrentItemChanged)
-        self.pluginsList.connect("itemChanged(QListWidgetItem*)", self.onPluginsListItemChanged)
+        self.pluginsTable.connect("currentCellChanged(int, int, int, int)", self.onPluginsTableCurrentItemChanged)
+        self.pluginsTable.connect("itemChanged(QTableWidgetItem*)", self.onPluginsTableItemChanged)
         self.reloadButton.connect("clicked()", self.onReloadButtonClicked)
-        self.settingsButton.connect("clicked()", self.onSettingsButtonClicked)
 
         self.backgroundColorButton.connect("clicked()", self.onBackgroundColorButtonClicked)
         self.textColorButton.connect("clicked()", self.onTextColorButtonClicked)
@@ -395,7 +408,8 @@ class ConfigurationDialog(QDialog):
         self.host.reload()
         self.setupList()
 
-    def onPluginsListCurrentItemChanged(self, cur, prev):
+    def onPluginsTableCurrentItemChanged(self, currow, curcol, prevrow, prevcol):
+        cur = self.pluginsTable.item(currow, 0)
         if not cur:
             self.nameEdit.clear()
             self.versionEdit.clear()
@@ -403,8 +417,6 @@ class ConfigurationDialog(QDialog):
             self.descriptionEdit.clear()
             self.keywordEdit.clear()
             self.apiEdit.clear()
-
-            self.settingsButton.setEnabled(False)
         else:
             p = self.host.plugins[cur.data(Qt.UserRole)]
 
@@ -415,29 +427,32 @@ class ConfigurationDialog(QDialog):
             self.keywordEdit.setText(p.commandKeyword)
             self.apiEdit.setText(p.apiVersion)
 
-            self.settingsButton.setEnabled(p.name in self.host.active and p.offersConfigure)
-
-    def onPluginsListItemChanged(self, item):
+    def onPluginsTableItemChanged(self, item):
         checked = item.checkState() == Qt.Checked
         name = item.data(Qt.UserRole)
 
         if checked and name not in self.host.active:
             self.host.activate(name)
+            if self.host.active[name].offersConfigure:
+                self.pluginsTable.cellWidget(item.row(), 1).setEnabled(True)
         elif not checked and name in self.host.active:
+            if self.host.active[name].offersConfigure:
+                self.pluginsTable.cellWidget(item.row(), 1).setEnabled(False)
             self.host.deactivate(name)
 
-        if self.pluginsList.currentItem() == item:
-            self.settingsButton.setEnabled(checked and name in self.host.active and self.host.active[name].offersConfigure)
+    def onRemoveButtonClicked(self, plugin):
+        if plugin.name in self.host.active:
+            self.host.deactivate(plugin.name)
+        devtools.PluginInstaller.removePlugin(plugin.name)
 
     def onReloadButtonClicked(self):
         self.host.reload()
         self.host.start()
         self.setupList()
 
-    def onSettingsButtonClicked(self):
-        cur = self.pluginsList.currentItem()
-        if cur:
-            self.host.active[cur.data(Qt.UserRole)].configure(self)
+    def onSettingsButtonClicked(self, plugin):
+        if plugin.name in self.host.active:
+            plugin.configure(self)
 
     def onBackgroundColorButtonClicked(self):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "backgroundColor")), self, "Console Background Color")
@@ -496,14 +511,6 @@ class ConfigurationDialog(QDialog):
         self.rpd.show()
         self.rpd.raise_()
 
-    def on_createButton_clicked(self):
-        ok = BoolResult()
-        name = QInputDialog.getText(self, "New plugin's name", "Name:", QLineEdit.Normal, "", ok)
-
-        if ok:
-            fp = devtools.PluginInstaller.createPlugin(name)
-            QMessageBox.information(self, "Plugin created", "A new plugin has been created: %s" % fp)
-
 
 class StdRedirector:
     def __init__(self, callback):
@@ -520,6 +527,7 @@ def defaultFont():
         return QFont("Courier", 12)
     else:
         return QFont("Monospace", 12)
+
 
 class PythonConsole(QPlainTextEdit):
     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2, font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white, width=800, height=600, startup="", silentStartup=False, parent=None):
