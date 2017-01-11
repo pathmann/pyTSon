@@ -19,7 +19,7 @@ from zipfile import ZipFile
 import io
 import devtools
 
-import ts3, ts3defines, pytson
+import ts3, ts3defines, pytson, ts3client
 
 @unique
 class ValueType(Enum):
@@ -275,6 +275,12 @@ def setupUi(obj, uipath, widgets=None):
     obj.setLayout(layout)
 
 
+def _ts3print(msg, level, channel, aid):
+    err = ts3.logMessage(msg, level, channel, aid)
+    if err != ts3defines.ERROR_ok:
+        print(msg)
+
+
 class ConfigurationDialog(QDialog):
     #[(objectName, store, [children])]
     CONF_WIDGETS = [("tabWidget", False, [
@@ -335,28 +341,42 @@ class ConfigurationDialog(QDialog):
         self.pluginsTable.clear()
         self.pluginsTable.setRowCount(15)
 
+        try:
+            ico = ts3client.IconPack.current()
+            ico.open()
+        except Exception as e:
+            ico = None
+            _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ConfigurationDialog.setupList", 0)
+
         row = 0
         for key, p in self.host.plugins.items():
             if self.cfg.getboolean("general", "differentApi", fallback=False) or p.apiVersion == 20:
                 item = QTableWidgetItem(p.name)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
-                item.setData(Qt.UserRole, key)        
+                item.setData(Qt.UserRole, key)
                 self.pluginsTable.setItem(row, 0, item)
 
                 if p.offersConfigure:
                     setbutton = QToolButton()
                     setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p))
+                    if ico:
+                        setbutton.setIcon(QIcon(ico.icon("SETTINGS")))
                     self.pluginsTable.setCellWidget(row, 1, setbutton)
 
                     if p.name not in self.host.active:
                         setbutton.setEnabled(False)
 
                 rembutton = QToolButton()
+                if ico:
+                    rembutton.setIcon(QIcon(ico.icon("DELETE")))
                 rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p))
                 self.pluginsTable.setCellWidget(row, 2, rembutton)
 
                 row += 1
+
+        if ico:
+            ico.close()
 
         self.pluginsTable.setRowCount(row)
         self.pluginsTable.sortItems(0)
@@ -844,12 +864,6 @@ class PythonConsole(QPlainTextEdit):
         self.writePrompt(True)
 
         self.ensureCursorVisible()
-
-
-def _ts3print(msg, level, channel, aid):
-    err = ts3.logMessage(msg, level, channel, aid)
-    if err != ts3defines.ERROR_ok:
-        print(msg)
 
 
 class MultiInputDialog(QDialog):
