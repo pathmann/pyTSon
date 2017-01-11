@@ -170,6 +170,19 @@ def getValues(parent, title, params, doneclb):
 
     return ret
 
+def setIcon(obj, iconpack):
+    """
+
+    @param obj: the widget
+    @type obj: QWidget
+    @param iconpack: the iconpack
+    @type iconpack: ts3client.IconPack
+    """
+    if iconpack:
+        if hasattr(obj, "setIcon") and hasattr(obj, "pytsonicon"):
+            var = obj.pytsonicon
+            obj.setIcon(QIcon(iconpack.icon(var)))
+
 def connectSignalSlotsByName(sender, receiver):
     """
     Connects pythonqt signals by name (receiver.on_<sender.objectname>_<signalname>)
@@ -184,7 +197,7 @@ def connectSignalSlotsByName(sender, receiver):
                 getattr(sender, sig).connect(getattr(receiver, "on_%s_%s" % (sender.objectName, sig.split('(')[0])))
 
 
-def retrieveWidgets(obj, parent, widgets):
+def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
     """
     Retrieves widgets from a list and adds them as attribute to another object. If defined, signals from widgets are connected by name to methods in obj.
     @param obj: the object which will get the attributes added
@@ -193,11 +206,25 @@ def retrieveWidgets(obj, parent, widgets):
     @type parent: QWidget
     @param widgets: a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. The elements must be children of parent. First element of tuple must held the widget's objectname. If second element is True, the widget will be added as property (by objectname) to obj. Third element of the tuple are the child widgets, which should be handled by setupui
     @type widgets: list[tuple(str, bool, list(...))]
+    @param seticons: if True, icons will be set according to the widgets 'pytsonicon' attribute
+    @type seticons: bool
+    @param iconpack: the iconpack
+    @type iconpack: ts3client.IconPack
     """
     if type(parent) is QTabWidget:
         childs = [parent.widget(i) for i in range(0, parent.count)]
     else:
         childs = parent.children()
+
+    root = False
+    if seticons and not iconpack:
+        try:
+            iconpack = ts3client.IconPack.current()
+            iconpack.open()
+            root = True
+        except:
+            iconpack = None
+            seticons = False
 
     names = [w[0] for w in widgets]
     stores = [w[1] for w in widgets]
@@ -210,35 +237,59 @@ def retrieveWidgets(obj, parent, widgets):
                 setattr(obj, names[i], c)
 
             connectSignalSlotsByName(c, obj)
+            setIcon(c, iconpack)
 
-            retrieveWidgets(obj, c, grchilds[i])
+            retrieveWidgets(obj, c, grchilds[i], seticons, iconpack)
 
             names.pop(i)
             stores.pop(i)
             grchilds.pop(i)
 
         if len(names) == 0:
+            if root:
+                iconpack.close()
             return
+
+    if root:
+        iconpack.close()
 
     if len(names) != 0:
         raise Exception("Malformed uifile, widgets not found: %s" % names)
 
 
-def retrieveAllWidgets(obj, parent):
+def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
     """
     Retrieves all child widgets from a parent widget and adds them as attribute to another object. If defined, signals from widgets are connected by name to methods in obj.
     @param obj: the object which will get the attributes added
     @type obj: object
     @param parent: the toplevel widget
     @type parent: QWidget
+    @param seticons: if True, icons will be set according to the widgets 'pytsonicon' attribute
+    @type seticons: bool
+    @param iconpack: the iconpack
+    @type iconpack: ts3client.IconPack
     """
+    root = False
+    if seticons and not iconpack:
+        try:
+            iconpack = ts3client.IconPack.current()
+            iconpack.open()
+            root = True
+        except:
+            iconpack = None
+            seticons = False
+
     for c in parent.children():
         if c.isWidgetType() and c.objectName != "":
             setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
+            setIcon(c, iconpack)
 
-            retrieveAllWidgets(obj, c)
+            retrieveAllWidgets(obj, c, seticons, iconpack)
+
+    if root:
+        iconpack.close()
 
 
 def setupUi(obj, uipath, widgets=None):

@@ -65,6 +65,9 @@
              <property name="text">
               <string>Reload all</string>
              </property>
+             <property name="pytsonicon" stdset="0">
+              <string>RELOAD</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -273,7 +276,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>Famil&amp;y:</string>
+             <string>Fa&amp;mily:</string>
             </property>
             <property name="buddy">
              <cstring>fontFamilyCombo</cstring>
