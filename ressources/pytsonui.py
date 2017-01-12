@@ -21,6 +21,13 @@ import devtools
 
 import ts3, ts3defines, pytson, ts3client
 
+
+def _ts3print(msg, level, channel, aid):
+    err = ts3.logMessage(msg, level, channel, aid)
+    if err != ts3defines.ERROR_ok:
+        print(msg)
+
+
 @unique
 class ValueType(Enum):
     """
@@ -172,7 +179,8 @@ def getValues(parent, title, params, doneclb):
 
 def setIcon(obj, iconpack):
     """
-
+    Sets the icon of a QWidget (if it has a property Icon) to an icon in the soundpack represented by a variable which is acquired by the property 'pytsonicon' of the object.
+    If no such property is available, nothing is done.
     @param obj: the widget
     @type obj: QWidget
     @param iconpack: the iconpack
@@ -182,6 +190,7 @@ def setIcon(obj, iconpack):
         if hasattr(obj, "setIcon") and hasattr(obj, "pytsonicon"):
             var = obj.pytsonicon
             obj.setIcon(QIcon(iconpack.icon(var)))
+
 
 def connectSignalSlotsByName(sender, receiver):
     """
@@ -222,9 +231,10 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
             iconpack = ts3client.IconPack.current()
             iconpack.open()
             root = True
-        except:
+        except Exception as e:
             iconpack = None
             seticons = False
+            _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.retrieveWidgets.%s" % obj.objectName, 0)
 
     names = [w[0] for w in widgets]
     stores = [w[1] for w in widgets]
@@ -275,9 +285,10 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
             iconpack = ts3client.IconPack.current()
             iconpack.open()
             root = True
-        except:
+        except Exception as e:
             iconpack = None
             seticons = False
+            _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.retrieveAllWidgets.%s" % obj.objectName, 0)
 
     for c in parent.children():
         if c.isWidgetType() and c.objectName != "":
@@ -292,7 +303,7 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
         iconpack.close()
 
 
-def setupUi(obj, uipath, widgets=None):
+def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None):
     """
     Loads a Qt designer file (.ui), creates the widgets defined in and adds them as property to a given object. This internally calls retrieveWidgets, so signals from widgets are connected by name to obj.
     @param obj: The object which will act as parent of the loaded ui (this object will receive a new layout)
@@ -301,7 +312,22 @@ def setupUi(obj, uipath, widgets=None):
     @type uipath: str
     @param widgets: optional argument; a recursive (parent-relation of widgets) list of tuples, defining which widgets should be added as attributes to obj. See retrieveWidgets for details. If you omit this or pass None, recursively all child widgets will be stored
     @type widgets: list[tuple(str, bool, list(...))] or None
+    @param seticons: if True, widgets containing a string-property called 'pytsonicon' will get the icon of a soundpack (value of property = variable in soundpack)
+    @type seticons: bool
+    @param iconpack: if set, the iconpack will be used, if None, the current iconpack is used
+    @type iconpack: ts3client.IconPack
     """
+    root = False
+    if seticons and not iconpack:
+        try:
+            iconpack = ts3client.IconPack.current()
+            iconpack.open()
+            root = True
+        except Exception as e:
+            iconpack = None
+            seticons = False
+            _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.retrieveWidgets.%s" % obj.objectName, 0)
+
     if os.path.isfile(uipath):
         f = QFile(uipath)
         if f.open(QIODevice.ReadOnly):
@@ -317,19 +343,16 @@ def setupUi(obj, uipath, widgets=None):
         raise Exception("Could not find uifile")
 
     if widgets:
-        retrieveWidgets(obj, ui, widgets)
+        retrieveWidgets(obj, ui, widgets, seticons, iconpack)
     else:
-        retrieveAllWidgets(obj, ui)
+        retrieveAllWidgets(obj, ui, seticons, iconpack)
+
+    if root:
+        iconpack.close()
 
     layout = QHBoxLayout(obj)
     layout.addWidget(ui)
     obj.setLayout(layout)
-
-
-def _ts3print(msg, level, channel, aid):
-    err = ts3.logMessage(msg, level, channel, aid)
-    if err != ts3defines.ERROR_ok:
-        print(msg)
 
 
 class ConfigurationDialog(QDialog):
@@ -381,7 +404,7 @@ class ConfigurationDialog(QDialog):
 
         self.rpd = None
 
-        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), self.CONF_WIDGETS)
+        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
 
         self.setWindowTitle("pyTSon - Settings")
 
