@@ -25,7 +25,7 @@ pytsonpathfactory::pytsonpathfactory(const char* execname) {
   m_lib = std::string(m_base);
   m_lib += PATHSEP;
   m_lib += "lib";
-#if defined(_WIN32)
+#ifndef _WIN32
   m_lib += PATHSEP;
   m_lib += "python3.5";
 #endif
