@@ -256,6 +256,8 @@ class ConfigurationDialog(QDialog):
 
         setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
 
+        self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+
         self.setWindowTitle("pyTSon - Settings")
 
         self.setupValues()
@@ -284,6 +286,7 @@ class ConfigurationDialog(QDialog):
                 if p.offersConfigure:
                     setbutton = QToolButton()
                     setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p))
+                    setbutton.setToolTip("Configure")
                     if ico:
                         setbutton.setIcon(QIcon(ico.icon("SETTINGS")))
                     self.pluginsTable.setCellWidget(row, 1, setbutton)
@@ -295,6 +298,7 @@ class ConfigurationDialog(QDialog):
                 if ico:
                     rembutton.setIcon(QIcon(ico.icon("DELETE")))
                 rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p))
+                rembutton.setToolTip("Remove")
                 self.pluginsTable.setCellWidget(row, 2, rembutton)
 
                 row += 1
