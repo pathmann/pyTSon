@@ -1,5 +1,9 @@
 #include "pytsonpathfactory.h"
 
+#if defined(_WIN32)
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 #include <stdexcept>
 
 pytsonpathfactory::pytsonpathfactory(const char* execname) {

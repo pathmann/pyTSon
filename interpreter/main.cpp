@@ -3,7 +3,13 @@
 #include <locale>
 #include <iostream>
 
+#include <array>
+
 #include "pytsonpathfactory.h"
+
+#if defined(_WIN32)
+#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
+#endif
 
 void deleteArray(wchar_t** arr, size_t size) {
   for (unsigned int i = 0; i < size; ++i)
@@ -111,6 +117,7 @@ int main(int argc, char** argv) {
   std::string fname, cmd, mod;
   //argv[0] is never in sys.argv
   unsigned int pyargc = argc -1;
+  int cmdarg = -1;
   int argstart = -1;
   std::array<const char*, 17> iparams = {"-b", "-bb", "-B", "-d", "-E", "-i", "-I", "-O", "-OO", "-q", "-s", "-S", "-u", "-v", "-V", "--version", "-x"};
   std::array<const char*, 2> iargparams = {"-W", "-X"};
@@ -128,6 +135,7 @@ int main(int argc, char** argv) {
 
       cmd = argv[i +1];
       argstart = i +2;
+      cmdarg = i;
       --pyargc;
       ++i;
       break;
@@ -140,6 +148,7 @@ int main(int argc, char** argv) {
 
       mod = argv[i +1];
       argstart = i +2;
+      cmdarg = i;
       --pyargc;
       ++i;
       break;
@@ -165,7 +174,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (fname.empty() && cmd.empty() && mod.empty()) {
+  if ((fname.empty() && cmd.empty() && mod.empty()) || (fname.empty() && cmdarg == -1)) {
     std::cerr << "Nothing to do here" << std::endl;
     printHelp(argv[0]);
     return 1;
@@ -193,32 +202,19 @@ int main(int argc, char** argv) {
   setlocale(LC_ALL, "");
 
   unsigned int rid = 0;
-  if (!cmd.empty()) {
-    pyargv[0] = Py_DecodeLocale("-c", NULL);
+  if (cmdarg != -1) {
+    pyargv[0] = Py_DecodeLocale(argv[cmdarg], NULL);
 
     if (!pyargv[0]) {
       delete[] pyargv;
       delete[] pyargv2;
       setlocale(LC_ALL, loc);
       delete[] loc;
-      std::cerr << "Error decoding \"-c\"" << std::endl;
+      std::cerr << "Error decoding argument " << argv[cmdarg] << std::endl;
       return 1;
     }
 
-    ++rid;
-  }
-  else if (!mod.empty()) {
-    pyargv[0] = Py_DecodeLocale("-m", NULL);
-
-    if (!pyargv[0]) {
-      delete[] pyargv;
-      delete[] pyargv2;
-      setlocale(LC_ALL, loc);
-      delete[] loc;
-      std::cerr << "Error decoding \"-m\"" << std::endl;
-      return 1;
-    }
-
+    pyargv2[0] = pyargv[0];
     ++rid;
   }
 
