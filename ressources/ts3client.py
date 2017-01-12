@@ -203,7 +203,7 @@ class IconPack(object):
 
                 self.settings = ConfigParser()
                 with self.cont.open("settings.ini") as f:
-                    self.settings.readfp(f)
+                    self.settings.read_string(f.read().decode('utf-8'))
 
             emconf = os.path.join("emoticons", "emoticons.txt")
             if emconf in self.cont.namelist():
@@ -216,7 +216,10 @@ class IconPack(object):
             self.settings = ConfigParser()
             self.settings.read(os.path.join(self.path, "settings.ini"))
 
-            #emoticons
+            emconf = os.path.join(self.path, "emoticons", "emoticons.txt")
+            if os.path.isfile(emconf):
+                with open(emconf, "r") as f:
+                    self._loadEmoticonSettings(f)
 
     def close(self):
         """
