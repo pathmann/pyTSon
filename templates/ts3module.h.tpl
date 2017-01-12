@@ -4,7 +4,7 @@
 #include <Python.h>
 
 #ifndef PYTSON_PARSER
-PyMODINIT_FUNC PyInit_ts3(void);
+PyMODINIT_FUNC PyInit_ts3lib(void);
 #endif
 
 PyObject* getPluginID(PyObject* self, PyObject* args);

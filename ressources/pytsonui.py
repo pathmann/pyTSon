@@ -17,7 +17,8 @@ from zipfile import ZipFile
 import io
 import devtools
 
-import ts3, ts3defines, pytson, ts3client
+import ts3lib as ts3
+import ts3defines, pytson, ts3client
 
 
 def _ts3print(msg, level, channel, aid):

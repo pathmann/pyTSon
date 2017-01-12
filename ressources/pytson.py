@@ -1,5 +1,5 @@
 import os, shutil
-import ts3
+import ts3lib as ts3
 
 
 def getConfigPath(*args):

@@ -3,7 +3,7 @@ import os
 from PythonQt.QtSql import QSqlDatabase
 from PythonQt.QtGui import QPixmap, QPainter, QPen
 
-import ts3
+import ts3lib as ts3
 
 from configparser import ConfigParser
 from zipfile import ZipFile

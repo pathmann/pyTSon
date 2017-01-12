@@ -232,7 +232,7 @@ bool PythonHost::init(QString& error) {
   if (!setupDirectories(error))
     return false;
 
-  if (PyImport_AppendInittab("ts3", &PyInit_ts3) == -1) {
+  if (PyImport_AppendInittab("ts3lib", &PyInit_ts3lib) == -1) {
     ts3logdispatcher::instance()->add(QObject::tr("Error initializing ts3 module"), LogLevel_ERROR);
     return false;
   }

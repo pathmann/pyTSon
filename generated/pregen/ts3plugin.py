@@ -1,6 +1,7 @@
 import sys, os, glob
 
-import ts3, ts3defines, pytson
+import ts3lib as ts3
+import ts3defines, pytson
 
 import importlib, traceback
 import json

@@ -32,7 +32,7 @@
 /*
 # coding: utf-8
 
-class ts3:
+class ts3lib:
     """
 
     """
@@ -255,7 +255,7 @@ static PyMethodDef ts3modfuncs[] = {
 
 static PyModuleDef mdef = {
   PyModuleDef_HEAD_INIT,
-  "ts3",
+  "ts3lib",
   NULL,
   -1,
   ts3modfuncs,
@@ -265,7 +265,7 @@ static PyModuleDef mdef = {
   NULL
 };
 
-PyMODINIT_FUNC PyInit_ts3(void) {
+PyMODINIT_FUNC PyInit_ts3lib(void) {
  return PyModule_Create(&mdef);
 }
 #endif
