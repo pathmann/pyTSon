@@ -25,8 +25,10 @@ pytsonpathfactory::pytsonpathfactory(const char* execname) {
   m_lib = std::string(m_base);
   m_lib += PATHSEP;
   m_lib += "lib";
+#if defined(_WIN32)
   m_lib += PATHSEP;
   m_lib += "python3.5";
+#endif
   //m_lib = ~/.ts3client/plugins/pyTSon/lib/python3.5
 
   m_dynload = std::string(m_lib);

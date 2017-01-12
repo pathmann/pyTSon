@@ -108,10 +108,12 @@ bool PythonHost::setupDirectories(QString &error) {
     ts3logdispatcher::instance()->add(QObject::tr("New lib directory installed"), LogLevel_INFO);
   }
 
+#if defined(Q_OS_WIN)
   if (!m_libdir.cd("python3.5")) {
     error = QObject::tr("Error changing directory to standard lib directory");
     return false;
   }
+#endif
 
   m_sitepackdir = m_libdir;
   if (!m_sitepackdir.cd("site-packages")) {
