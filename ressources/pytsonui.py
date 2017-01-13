@@ -248,20 +248,21 @@ class ConfigurationDialog(QDialog):
         super().__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setWindowTitle("pyTSon - Settings")
 
         self.cfg = cfg
         self.host = host
-
         self.rpd = None
 
-        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
+        try:
+            setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
+            self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
-        self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-
-        self.setWindowTitle("pyTSon - Settings")
-
-        self.setupValues()
-        self.setupSlots()
+            self.setupValues()
+            self.setupSlots()
+        except Exception as e:
+            self.delete()
+            raise e
 
     def setupList(self):
         self.pluginsTable.clear()
@@ -869,22 +870,26 @@ class RepositoryDialog(QDialog):
             _ts3print("Error opening repositorymaster", ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.RepositoryDialog", 0)
             raise Exception("Error opening repositorymaster")
 
-        setupUi(self, pytson.getPluginPath("ressources", "repository.ui"))
-        self.updateMasterlist()
+        try:
+            setupUi(self, pytson.getPluginPath("ressources", "repository.ui"))
+            self.updateMasterlist()
 
-        movie = QMovie(pytson.getPluginPath("ressources", "loading.gif"), "", self)
-        movie.start()
-        self.loadingLabel.setMovie(movie)
+            movie = QMovie(pytson.getPluginPath("ressources", "loading.gif"), "", self)
+            movie.start()
+            self.loadingLabel.setMovie(movie)
 
-        self.masterloadingLabel.setMovie(movie)
-        self.masterloadingLabel.hide()
+            self.masterloadingLabel.setMovie(movie)
+            self.masterloadingLabel.hide()
 
-        self.nwm = QNetworkAccessManager(self)
-        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+            self.nwm = QNetworkAccessManager(self)
+            self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
 
-        self.updateRepositories()
+            self.updateRepositories()
 
-        self.connect("finished(int)", self.onClosed)
+            self.connect("finished(int)", self.onClosed)
+        except Exception as e:
+            self.delete()
+            raise e
 
     def onClosed(self):
         with open(pytson.getConfigPath("repositorymaster.json"), "w") as f:
@@ -1156,14 +1161,18 @@ class InstallDialog(QDialog):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setModal(True)
 
-        setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
-
         self.host = host
         self.addon = None
 
-        self.pip = devtools.PluginInstaller(self.consoleEdit.append)
-        self.nwm = QNetworkAccessManager(self)
-        self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+        try:
+            setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
+
+            self.pip = devtools.PluginInstaller(self.consoleEdit.append)
+            self.nwm = QNetworkAccessManager(self)
+            self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+        except Exception as e:
+            self.delete()
+            raise e
 
     def install(self, addon):
         self.addon = addon
