@@ -227,6 +227,7 @@ class IconPack(object):
 
     def __enter__(self):
         self.open()
+        return self
 
     def __exit__(self, type, value, traceback):
         self.close()
