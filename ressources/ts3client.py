@@ -240,8 +240,6 @@ class IconPack(object):
         @return: the variable name
         @rtype: str
         """
-        name = None
-
         if var == "3D_SOUND_OTHER":
             var = "3D_SOUND_USER"
         elif var == "CHANNEL_COLLAPSE_SUB":
@@ -312,6 +310,8 @@ class IconPack(object):
             return var
         else:
             return ""
+
+        return var
 
         """
 not matched (not used anymore?):
