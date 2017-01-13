@@ -286,7 +286,7 @@ class ConfigurationDialog(QDialog):
 
                 if p.offersConfigure:
                     setbutton = QToolButton()
-                    setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p.name))
+                    setbutton.connect("clicked()", lambda n=p.name: self.onSettingsButtonClicked(n))
                     setbutton.setToolTip("Configure")
                     if ico:
                         setbutton.setIcon(QIcon(ico.icon("SETTINGS")))
@@ -298,7 +298,7 @@ class ConfigurationDialog(QDialog):
                 rembutton = QToolButton()
                 if ico:
                     rembutton.setIcon(QIcon(ico.icon("DELETE")))
-                rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p.name))
+                rembutton.connect("clicked()", lambda n=p.name: self.onRemoveButtonClicked(n))
                 rembutton.setToolTip("Remove")
                 self.pluginsTable.setCellWidget(row, 2, rembutton)
 
@@ -355,6 +355,7 @@ class ConfigurationDialog(QDialog):
     def onDifferentApiButtonChanged(self, state):
         self.cfg.set("general", "differentApi", "True" if state == Qt.Checked else "False")
         self.host.reload()
+        self.host.start()
         self.setupList()
 
     def onPluginsTableCurrentItemChanged(self, currow, curcol, prevrow, prevcol):
@@ -390,9 +391,14 @@ class ConfigurationDialog(QDialog):
             self.host.deactivate(name)
 
     def onRemoveButtonClicked(self, pluginname):
-        if pluginname in self.host.active:
-            self.host.deactivate(pluginname)
-        devtools.PluginInstaller.removePlugin(pluginname)
+        if pluginname in self.host.plugins:
+            if pluginname in self.host.active:
+                self.host.deactivate(pluginname)
+
+            devtools.PluginInstaller.removePlugin(pluginname)
+            self.host.reload()
+            self.host.start()
+            self.setupList()
 
     def onReloadButtonClicked(self):
         self.host.reload()
