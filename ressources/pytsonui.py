@@ -1150,9 +1150,20 @@ class RepositoryDialog(QDialog):
             QMessageBox.critical(self, "Internal error", "Can't find addon %s in list" % name)
             return
 
+        p = self.addons[name]
+
+        #update?, so remove the local one first
+        if name in self.host.plugins:
+            if p["version"] > self.host.plugins[name].version:
+                devtools.PluginInstaller.removePlugin(name)
+            else:
+                #should not happen (ui restricted)
+                QMessageBox.critical(self, "This plugin is already installed")
+                return
+
         self.installer = InstallDialog(self.host, self)
         self.installer.show()
-        self.installer.install(self.addons[name])
+        self.installer.install(p)
 
 
 class InstallDialog(QDialog):
