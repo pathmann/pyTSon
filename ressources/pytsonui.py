@@ -276,7 +276,7 @@ class ConfigurationDialog(QDialog):
 
         row = 0
         for key, p in self.host.plugins.items():
-            if self.cfg.getboolean("general", "differentApi", fallback=False) or p.apiVersion == 20:
+            if self.cfg.getboolean("general", "differentApi", fallback=False) or p.apiVersion == 21:
                 item = QTableWidgetItem(p.name)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
