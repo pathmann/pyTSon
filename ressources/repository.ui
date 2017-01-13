@@ -38,6 +38,9 @@
            <property name="text">
             <string>Update</string>
            </property>
+           <property name="pytsonicon" stdset="0">
+            <string>RELOAD</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -58,23 +61,21 @@
            <property name="text">
             <string>...</string>
            </property>
-           <property name="icon">
-            <iconset theme="list-add">
-             <normaloff>.</normaloff>.</iconset>
+           <property name="pytsonicon" stdset="0">
+            <string>ADD</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QToolButton" name="deleteButton">
            <property name="enabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="text">
             <string>...</string>
            </property>
-           <property name="icon">
-            <iconset theme="list-remove">
-             <normaloff>.</normaloff>.</iconset>
+           <property name="pytsonicon" stdset="0">
+            <string>ERROR</string>
            </property>
           </widget>
          </item>
@@ -108,12 +109,18 @@
             <property name="text">
              <string>Reload online repositories</string>
             </property>
+            <property name="pytsonicon" stdset="0">
+             <string>RELOAD</string>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="installButton">
             <property name="text">
              <string>Install</string>
+            </property>
+            <property name="pytsonicon" stdset="0">
+             <string>DOWNLOAD</string>
             </property>
            </widget>
           </item>
