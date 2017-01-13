@@ -49,7 +49,7 @@ class %s(ts3plugin):
         @return: The escaped string
         @rtype: str
         """
-        return ''.join([c if ord(c) in chain(range(65, 90), range(97, 122)) else '_' for c in name])
+        return ''.join([c if ord(c) in chain(range(48, 57), range(65, 90), range(97, 122)) else '_' for c in name])
 
     @staticmethod
     def createPlugin(name, withfile=True, content=None):
