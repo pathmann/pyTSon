@@ -265,7 +265,7 @@ class ConfigurationDialog(QDialog):
 
     def setupList(self):
         self.pluginsTable.clear()
-        self.pluginsTable.setRowCount(15)
+        self.pluginsTable.setRowCount(len(self.host.plugins))
 
         try:
             ico = ts3client.IconPack.current()
