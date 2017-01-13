@@ -275,8 +275,9 @@ class ConfigurationDialog(QDialog):
             _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ConfigurationDialog.setupList", 0)
 
         row = 0
+        diffapi = self.cfg.getboolean("general", "differentApi", fallback=False)
         for key, p in self.host.plugins.items():
-            if self.cfg.getboolean("general", "differentApi", fallback=False) or p.apiVersion == 21:
+            if diffapi or p.apiVersion == 21:
                 item = QTableWidgetItem(p.name)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
@@ -285,7 +286,7 @@ class ConfigurationDialog(QDialog):
 
                 if p.offersConfigure:
                     setbutton = QToolButton()
-                    setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p))
+                    setbutton.connect("clicked()", lambda: self.onSettingsButtonClicked(p.name))
                     setbutton.setToolTip("Configure")
                     if ico:
                         setbutton.setIcon(QIcon(ico.icon("SETTINGS")))
@@ -297,7 +298,7 @@ class ConfigurationDialog(QDialog):
                 rembutton = QToolButton()
                 if ico:
                     rembutton.setIcon(QIcon(ico.icon("DELETE")))
-                rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p))
+                rembutton.connect("clicked()", lambda: self.onRemoveButtonClicked(p.name))
                 rembutton.setToolTip("Remove")
                 self.pluginsTable.setCellWidget(row, 2, rembutton)
 
@@ -388,19 +389,19 @@ class ConfigurationDialog(QDialog):
                 self.pluginsTable.cellWidget(item.row(), 1).setEnabled(False)
             self.host.deactivate(name)
 
-    def onRemoveButtonClicked(self, plugin):
-        if plugin.name in self.host.active:
-            self.host.deactivate(plugin.name)
-        devtools.PluginInstaller.removePlugin(plugin.name)
+    def onRemoveButtonClicked(self, pluginname):
+        if pluginname in self.host.active:
+            self.host.deactivate(pluginname)
+        devtools.PluginInstaller.removePlugin(pluginname)
 
     def onReloadButtonClicked(self):
         self.host.reload()
         self.host.start()
         self.setupList()
 
-    def onSettingsButtonClicked(self, plugin):
-        if plugin.name in self.host.active:
-            plugin.configure(self)
+    def onSettingsButtonClicked(self, pluginname):
+        if pluginname in self.host.active:
+            self.host.active[pluginname].configure(self)
 
     def onBackgroundColorButtonClicked(self):
         c = QColorDialog.getColor(QColor(self.cfg.get("console", "backgroundColor")), self, "Console Background Color")

@@ -92,7 +92,6 @@ class %s(ts3plugin):
         ename = PluginInstaller._escapeString(name)
         p = pytson.getPluginPath("scripts", ename)
         if os.path.isdir(p):
-            print("removing %s" % p)
             shutil.rmtree(p)
 
     def _print(self, msg):
