@@ -989,7 +989,7 @@ class RepositoryDialog(QDialog):
                     self.replist[name]["url"] = r["url"]
                     _ts3print("url for repository %s updated" % name, ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.addRepository", 0)
             else:
-                _ts3print("Ignoring online repository %s, got a local one with that name", ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.addRepository", 0)
+                _ts3print("Ignoring online repository %s, got a local one with that name" % name, ts3defines.LogLevel.LogLevel_INFO, "pyTSon.RepositoryManager.addRepository", 0)
         else:
             self.replist[name] = r
 
