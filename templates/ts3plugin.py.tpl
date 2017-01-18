@@ -36,7 +36,7 @@ class PluginMount(type):
 
 
 class PluginHost(object):
-    defaultConfig = [("general", [("differentApi", "False")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
+    defaultConfig = [("general", [("differentApi", "False"), ("uninstallQuestion", "True")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
 
     @classmethod
     def setupConfig(cls):

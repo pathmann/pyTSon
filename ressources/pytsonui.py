@@ -393,6 +393,23 @@ class ConfigurationDialog(QDialog):
 
     def onRemoveButtonClicked(self, pluginname):
         if pluginname in self.host.plugins:
+            if self.cfg.getboolean("general", "uninstallQuestion"):
+                def cbox_state_changed(state):
+                    self.cfg.set("general", "uninstallQuestion", "False" if state == Qt.Checked else "True")
+
+                cbox = QCheckBox("Don't ask me again")
+                cbox.connect("stateChanged(int)", cbox_state_changed)
+
+                msgbox = QMessageBox(self)
+                msgbox.setInformativeText("Do you really want to delete plugin %s?\nThis will erase all script data of the plugin from disk." % pluginname)
+                msgbox.setIcon(4) #QMessageBox::Icon::Question = 4
+                msgbox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+                msgbox.setDefaultButton(QMessageBox.Cancel)
+                msgbox.setCheckBox(cbox)
+
+                if msgbox.exec_() != QMessageBox.Ok:
+                    return
+
             if pluginname in self.host.active:
                 self.host.deactivate(pluginname)
 
