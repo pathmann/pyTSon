@@ -5,7 +5,6 @@ from itertools import chain
 from zipfile import ZipFile
 
 import subprocess
-import platform
 
 
 class PluginInstaller(object):
@@ -116,11 +115,8 @@ class %s(ts3plugin):
         fp = self.createPlugin(addon["name"], withfile=False)
         self._print("Directory created.")
 
-        if platform.system() == "Mac":
-            plat = "Mac"
-        else:
-            plat = "%s-%s" % (platform.system(), platform.architecture()[0])
-        if addon["dependencies"] and plat in addon["dependencies"] and len(addon["dependencies"][plat]) > 0:
+        plat = pytson.platform()
+        if "dependencies" in addon and plat in addon["dependencies"] and len(addon["dependencies"][plat]) > 0:
             self._print("Installing dependencies ...")
             if not self.installPackages(addon["dependencies"][plat]):
                 self._print("Aborting, package installation might be broken and needs to be fixed manually")

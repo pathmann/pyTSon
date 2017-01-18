@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, platform
 import ts3lib as ts3
 
 
@@ -33,3 +33,15 @@ def _setup():
     confpath = getConfigPath("repositorymaster.json")
     if not os.path.exists(confpath):
         shutil.copy(respath, confpath)
+
+
+def platform():
+    """
+    Returns the platform pyTSon is currently running on.
+    @return: the platform (and architecture) string
+    @rtype: str
+    """
+    if platform.system() == "Mac":
+        return "Mac"
+    else:
+        return "%s-%s" % (platform.system(), platform.architecture()[0])

@@ -979,7 +979,7 @@ class RepositoryDialog(QDialog):
                     addons = json.loads(reply.readAll().data().decode('utf-8'))
 
                     for a in addons:
-                        if all(x in a for x in ["name", "author", "version", "apiVersion", "description", "url", "dependencies"]):
+                        if all(x in a for x in ["name", "author", "version", "apiVersion", "description", "url"]):
                             a["repository"] = repo["name"]
                             if not a["name"] in self.addons:
                                 self.addons[a["name"]] = a
@@ -1026,7 +1026,7 @@ class RepositoryDialog(QDialog):
         self.pluginsList.clear()
 
         for a in self.addons.values():
-            if self.replist[a["repository"]]["active"]:
+            if self.replist[a["repository"]]["active"] and ("platforms" not in a or pytson.platform() in a["platforms"]):
                 item = QListWidgetItem(a["name"], self.pluginsList)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setData(Qt.UserRole, a["name"])
