@@ -1026,7 +1026,7 @@ class RepositoryDialog(QDialog):
         self.pluginsList.clear()
 
         for a in self.addons.values():
-            if self.replist[a["repository"]]["active"] and ("platforms" not in a or pytson.platform() in a["platforms"]):
+            if self.replist[a["repository"]]["active"] and ("platforms" not in a or pytson.platformstr() in a["platforms"]):
                 item = QListWidgetItem(a["name"], self.pluginsList)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setData(Qt.UserRole, a["name"])

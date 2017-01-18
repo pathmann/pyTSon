@@ -35,7 +35,7 @@ def _setup():
         shutil.copy(respath, confpath)
 
 
-def platform():
+def platformstr():
     """
     Returns the platform pyTSon is currently running on.
     @return: the platform (and architecture) string
