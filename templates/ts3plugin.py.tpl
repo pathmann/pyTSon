@@ -370,7 +370,7 @@ class PluginHost(object):
 
     @classmethod
     def globalMenuID(cls, plugin, localid):
-        for key, (p, locid) in cls.items():
+        for key, (p, locid) in cls.menus.items():
             if p == plugin and locid == localid:
                 return key
 
