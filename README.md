@@ -68,7 +68,7 @@ TeamSpeak 3's library functions are available with the ts3 module (eg err, myid 
 Constants are available in the ts3defines module (see ts3defines.py in include/ directory).
 
 Below is a small example plugin:
-```
+```python
 from ts3plugin import ts3plugin
 
 import ts3, ts3defines
