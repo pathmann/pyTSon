@@ -1,5 +1,5 @@
 from pydoc import help as pydochelp
-import ts3
+import ts3lib
 
 
 def help(obj):
@@ -7,9 +7,9 @@ def help(obj):
     This is a wrapper around pydoc.help to display docstrings for the ts3 module.
     Note: Adding the docstrings directly in the cpython module blows up the data segment of the pyTSon library.
     """
-    if hasattr(obj, "__module__") and obj.__module__ == "ts3":
+    if hasattr(obj, "__module__") and obj.__module__ == "ts3lib":
         name = getattr(obj, "__name__", None)
-        
+
         txt = ""
         if name:
             if name == "requestClientDelPerm":
@@ -428,11 +428,11 @@ def help(obj):
                 txt = "Requests the channel description of a channel. Afterwards, getChannelVariableAsString can return it.\n@param serverConnectionHandlerID: the ID of the serverconnection\n@type serverConnectionHandlerID: int\n@param channelID: the ID of the channel\n@type channelID: int\n@param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.\n@type returnCode: string\n@return: the errorcode\n@rtype: int\n"
             elif name == "bandel":
                 txt = "Deletes a ban.\n@param serverConnectionHandlerID: the ID of the serverconnection\n@type serverConnectionHandlerID: int\n@param banID: the ID of the ban\n@type banID: int\n@param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.\n@type returnCode: string\n@return: the errorcode\n@rtype: int\n"
-                
+
         if txt != "":
             for l in txt.split("\n"):
                 print(l)
-                
-            return        
-            
+
+            return
+
     return pydochelp(obj)
