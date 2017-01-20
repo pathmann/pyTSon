@@ -9,7 +9,7 @@ import json
 from configparser import ConfigParser
 from pytsonui import PythonConsole, ConfigurationDialog
 from PythonQt.QtGui import QFont, QColor, QMessageBox
-from PythonQt.QtCore import QUrl
+from PythonQt.QtCore import QUrl, QTimer
 from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 class PluginMount(type):
@@ -36,7 +36,7 @@ class PluginMount(type):
 
 
 class PluginHost(object):
-    defaultConfig = [("general", [("differentApi", "False"), ("uninstallQuestion", "True")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
+    defaultConfig = [("general", [("differentApi", "False"), ("uninstallQuestion", "True"), ("loadAllMenus", "True")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
 
 
     @classmethod
@@ -365,13 +365,29 @@ class PluginHost(object):
         ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 2, "Check for update", "")]
         nextid = len(ret)
 
-        for key, p in cls.active.items():
+        loadall = cls.cfg.getboolean("general", "loadAllMenus")
+        deactmenus = []
+
+        for key, p in cls.plugins.items():
             for (atype, locid, text, icon) in p.menuItems:
                 ret.append((atype, nextid, text, icon))
-                cls.menus[nextid] = (p, locid)
+                if p.name in cls.active:
+                    cls.menus[nextid] = (cls.active[p.name], locid)
+                    if hasattr(cls.active[p.name], "menuCreated"):
+                        cls.active[p.name].menuCreated()
+                elif loadall:
+                    cls.menus[nextid] = (p.name, locid)
+                    #we have to remember the id, to disable it afterwards
+                    deactmenus.append(nextid)
+
                 nextid += 1
-            if hasattr(p, "menuCreated"):
-                p.menuCreated()
+
+        if loadall:
+            def deactivateMenus():
+                for key in deactmenus:
+                    ts3.setPluginMenuEnabled(key, False)
+
+            QTimer.singleShot(1000, deactivateMenus)
 
         return ret
 
