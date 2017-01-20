@@ -152,6 +152,7 @@ class PluginHost(object):
                 for globid, (p, locid) in cls.menus.items():
                     if type(p) is str and p == pname:
                         cls.menus[globid] = (cls.active[p], locid)
+                        ts3.setPluginMenuEnabled(globid, True)
 
                 for keyword, (p, lockey) in cls.hotkeys.items():
                     if type(p) is str and p == pname:
@@ -174,6 +175,7 @@ class PluginHost(object):
                 for key in cls.menus:
                     if cls.menus[key][0].name == pname:
                         cls.menus[key] = (pname, cls.menus[key][1])
+                        ts3.setPluginMenuEnabled(key, False)
 
                 cls.active[pname].stop()
                 del cls.active[pname]
