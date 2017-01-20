@@ -369,7 +369,7 @@ class PluginHost(object):
 
         for key, p in cls.plugins.items():
             for (atype, locid, text, icon) in p.menuItems:
-                ret.append((atype, nextid, text, os.path.join("scripts", p.name, icon)))
+                ret.append((atype, nextid, text, os.path.join("scripts", p.name, icon) if icon != "" else ""))
                 if p.name in cls.active:
                     cls.menus[nextid] = (cls.active[p.name], locid)
                     if hasattr(cls.active[p.name], "menuCreated"):
