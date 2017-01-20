@@ -94,6 +94,8 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
         if c.objectName in names:
             i = names.index(c.objectName)
             if stores[i]:
+                if hasattr(obj, names[i]):
+                    raise Exception("Widget objectName %s is not unique" % names[i])
                 setattr(obj, names[i], c)
 
             connectSignalSlotsByName(c, obj)
@@ -142,6 +144,8 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
 
     for c in parent.children():
         if c.isWidgetType() and c.objectName != "":
+            if hasattr(obj, c.objectName):
+                raise Exception("Widget objectName %s is not unique" % c.objectName)
             setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
