@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>760</width>
+    <width>752</width>
     <height>597</height>
    </rect>
   </property>
@@ -216,6 +216,20 @@
           </widget>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="generalTab">
+      <attribute name="title">
+       <string>General</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QCheckBox" name="loadMenusButton">
+         <property name="text">
+          <string>Load menuitems from inactive plugins on startup</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

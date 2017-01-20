@@ -221,6 +221,9 @@ class ConfigurationDialog(QDialog):
                           ("apiEdit", True, []),
                           ("requiredApiEdit", True, [])
                       ]),
+                      ("generalTab", False, [
+                          ("loadMenusButton", True, []),
+                      ]),
                       ("consoleTab", False, [
                           ("colorsBox", False, [
                               ("backgroundColorButton", True, []),
@@ -315,6 +318,8 @@ class ConfigurationDialog(QDialog):
         self.differentApiButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "differentApi", fallback=False) else Qt.Unchecked)
         self.requiredApiEdit.setText(21)
 
+        self.loadMenusButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "loadAllMenus", fallback=False) else Qt.Unchecked)
+
         self.backgroundColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "backgroundColor")).name())
         self.textColorButton.setStyleSheet("background-color: %s;" % QColor(self.cfg.get("console", "textColor")).name())
 
@@ -345,6 +350,8 @@ class ConfigurationDialog(QDialog):
         self.pluginsTable.connect("itemChanged(QTableWidgetItem*)", self.onPluginsTableItemChanged)
         self.reloadButton.connect("clicked()", self.onReloadButtonClicked)
 
+        self.loadMenusButton.connect("stateChanged(int)", self.onLoadMenusButtonChanged)
+
         self.backgroundColorButton.connect("clicked()", self.onBackgroundColorButtonClicked)
         self.textColorButton.connect("clicked()", self.onTextColorButtonClicked)
         self.fontFamilyCombo.connect("currentFontChanged(QFont)", self.onFontFamilyComboChanged)
@@ -352,6 +359,10 @@ class ConfigurationDialog(QDialog):
         self.tabcompleteButton.connect("stateChanged(int)", self.onTabcompleteButtonChanged)
         self.spacesButton.connect("stateChanged(int)", self.onSpacesButtonChanged)
         self.tabwidthSpin.connect("valueChanged(int)", self.onTabwidthSpinChanged)
+
+    def onLoadMenusButtonChanged(self, state):
+        self.cfg.set("general", "loadAllMenus", "True" if state == Qt.Checked else "False")
+        QMessageBox.information(self, "Restart required", "Changes only take effect after a restart.")
 
     def onDifferentApiButtonChanged(self, state):
         self.cfg.set("general", "differentApi", "True" if state == Qt.Checked else "False")
