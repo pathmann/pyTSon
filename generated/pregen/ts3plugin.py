@@ -83,7 +83,7 @@ class PluginHost(object):
                 load = True
 
             if load:
-                if cls.plugins[key].apiVersion != 20:
+                if cls.plugins[key].apiVersion != 21:
                     if not cls.cfg.getboolean("general", "differentApi", fallback=False):
                         continue
 
@@ -470,7 +470,7 @@ class ts3plugin(object, metaclass=PluginMount):
     requestAutoload = False
     name = "__ts3plugin__"
     version = "1.0"
-    apiVersion = 20
+    apiVersion = 21
     author = "Thomas \"PLuS\" Pathmann"
     description = "This is the baseclass for all ts3 python plugins"
     offersConfigure = False
