@@ -371,15 +371,16 @@ class PluginHost(object):
             for (atype, locid, text, icon) in p.menuItems:
                 ret.append((atype, nextid, text, os.path.join("scripts", p.name, icon) if icon != "" else ""))
                 if p.name in cls.active:
-                    cls.menus[nextid] = (cls.active[p.name], locid)
-                    if hasattr(cls.active[p.name], "menuCreated"):
-                        cls.active[p.name].menuCreated()
+                    cls.menus[nextid] = (cls.active[p.name], locid)           
                 elif loadall:
                     cls.menus[nextid] = (p.name, locid)
                     #we have to remember the id, to disable it afterwards
                     deactmenus.append(nextid)
 
                 nextid += 1
+
+            if p.name in cls.active and hasattr(cls.active[p.name], "menuCreated"):
+                cls.active[p.name].menuCreated()
 
         if loadall:
             def deactivateMenus():
