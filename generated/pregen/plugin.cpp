@@ -59,6 +59,11 @@ class ts3plugin(object):
         
         """
     
+    def menuCreated(self):
+        """
+
+        """
+
     def configure(self, qParentWidget):
         """
         

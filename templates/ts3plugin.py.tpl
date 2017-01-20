@@ -152,6 +152,8 @@ class PluginHost(object):
                     if type(p) is str and p == pname:
                         cls.menus[globid] = (cls.active[p], locid)
                         ts3.setPluginMenuEnabled(globid, True)
+                if hasattr(cls.active[pname], "menuCreated"):
+                    cls.active[pname].menuCreated()
 
                 for keyword, (p, lockey) in cls.hotkeys.items():
                     if type(p) is str and p == pname:
@@ -367,6 +369,8 @@ class PluginHost(object):
                 ret.append((atype, nextid, text, icon))
                 cls.menus[nextid] = (p, locid)
                 nextid += 1
+            if hasattr(p, "menuCreated"):
+                p.menuCreated()
 
         return ret
 
