@@ -175,9 +175,10 @@ class PluginHost(object):
 
                 #remove menuItems
                 for key in cls.menus:
-                    if cls.menus[key][0].name == pname:
-                        cls.menus[key] = (pname, cls.menus[key][1])
-                        ts3.setPluginMenuEnabled(key, False)
+                    if type(cls.menus[key][0]) is not str:
+                        if cls.menus[key][0].name == pname:
+                            cls.menus[key] = (pname, cls.menus[key][1])
+                            ts3.setPluginMenuEnabled(key, False)
 
                 cls.active[pname].stop()
                 del cls.active[pname]
