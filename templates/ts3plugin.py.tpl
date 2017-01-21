@@ -158,10 +158,14 @@ class PluginHost(object):
                 for keyword, (p, lockey) in cls.hotkeys.items():
                     if type(p) is str and p == pname:
                         cls.hotkeys[keyword] = (cls.active[p], lockey)
+
+                return True
             except:
                 err = ts3.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error starting python plugin %s: %s" % (pname, traceback.format_exc()))
+
+        return False
 
     @classmethod
     def deactivate(cls, pname):
