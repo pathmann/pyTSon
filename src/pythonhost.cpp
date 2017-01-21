@@ -447,8 +447,8 @@ void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) 
   }
 
   (*menuItems)[PyList_Size(pyret)] = NULL;
-  *menuIcon = (char*)malloc((strlen("pyTSon.png") +1)* sizeof(char));
-  strcpy(*menuIcon, "pyTSon.png");
+  *menuIcon = (char*)malloc((strlen("python.png") +1)* sizeof(char));
+  strcpy(*menuIcon, "python.png");
 
   Py_DECREF(pyret);
 }
