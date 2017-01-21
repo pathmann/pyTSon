@@ -362,35 +362,35 @@ class PluginHost(object):
     @classmethod
     def initMenus(cls):
         cls.menus = {}
-        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", ""), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Check for update", "")]
+        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", os.path.join("ressources", "octicons", "terminal.svg.png")), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", os.path.join("ressources", "octicons", "settings.svg.png")), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 2, "Check for update", os.path.join("ressources", "octicons", "cloud-download.svg.png"))]
         nextid = len(ret)
 
         loadall = cls.cfg.getboolean("general", "loadAllMenus")
-        deactmenus = []
+        menustates = []
 
         for key, p in cls.plugins.items():
             for (atype, locid, text, icon) in p.menuItems:
                 if p.name in cls.active:
-                    cls.menus[nextid] = (cls.active[p.name], locid)           
-                    ret.append((atype, nextid, text, os.path.join("scripts", p.name, icon) if icon != "" else ""))
+                    cls.menus[nextid] = (cls.active[p.name], locid)
+                    ret.append((atype, nextid, text, icon))
+                    menustates.append((nextid, True))
                 elif loadall:
                     cls.menus[nextid] = (p.name, locid)
-                    ret.append((atype, nextid, text, os.path.join("scripts", p.name, icon) if icon != "" else ""))
-
+                    ret.append((atype, nextid, text, icon))
                     #we have to remember the id, to disable it afterwards
-                    deactmenus.append(nextid)
+                    menustates.append((nextid, False))
 
                 nextid += 1
 
-            if p.name in cls.active and hasattr(cls.active[p.name], "menuCreated"):
-                cls.active[p.name].menuCreated()
+        def deactivateMenus():
+            for key, val in menustates:
+                ts3.setPluginMenuEnabled(key, val)
 
-        if loadall:
-            def deactivateMenus():
-                for key in deactmenus:
-                    ts3.setPluginMenuEnabled(key, False)
+            for key, p in cls.active.items():
+                if hasattr(p, "menuCreated"):
+                    p.menuCreated()
 
-            QTimer.singleShot(1000, deactivateMenus)
+        QTimer.singleShot(1000, deactivateMenus)
 
         return ret
 
