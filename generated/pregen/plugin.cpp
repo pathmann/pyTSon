@@ -659,15 +659,15 @@ void ts3plugin_onClientDisplayNameChanged(uint64 serverConnectionHandlerID, anyI
   /*
     def onClientDisplayNameChanged(self, serverConnectionHandlerID, clientID, displayName, uniqueClientIdentifier):
         """
-        
+        This is called whenever a client's displayname changed (nickname or friend/foe manager).
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param displayName:
-        @type displayName:
-        @param uniqueClientIdentifier:
-        @type uniqueClientIdentifier:
+        @param clientID: the id of the client
+        @type clientID: int
+        @param displayName: the new displayname
+        @type displayName: str
+        @param uniqueClientIdentifier: the uid of the client
+        @type uniqueClientIdentifier: str
         """
   */
   QString callerror;
@@ -680,15 +680,15 @@ void ts3plugin_onClientIDsEvent(uint64 serverConnectionHandlerID, const char *un
   /*
     def onClientIDsEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientID, clientName):
         """
-        
+        This is called for each client matching a specific uid requested by ts3lib.requestClientIDs.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param uniqueClientIdentifier:
-        @type uniqueClientIdentifier:
-        @param clientID:
-        @type clientID:
-        @param clientName:
-        @type clientName:
+        @param uniqueClientIdentifier: the uid of the client
+        @type uniqueClientIdentifier: str
+        @param clientID: the id of a client
+        @type clientID: int
+        @param clientName: the nick of the client
+        @type clientName: str
         """
   */
   QString callerror;
@@ -701,7 +701,7 @@ void ts3plugin_onClientIDsFinishedEvent(uint64 serverConnectionHandlerID) {
   /*
     def onClientIDsFinishedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called after each client yielded by onClientIDsEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -716,25 +716,25 @@ void ts3plugin_onClientKickFromChannelEvent(uint64 serverConnectionHandlerID, an
   /*
     def onClientKickFromChannelEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, kickMessage):
         """
-        
+        This is called whenever a client is kicked from a channel.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
-        @param kickerID:
-        @type kickerID:
-        @param kickerName:
-        @type kickerName:
-        @param kickerUniqueIdentifier:
-        @type kickerUniqueIdentifier:
-        @param kickMessage:
-        @type kickMessage:
+        @param clientID: the id of the kicked client
+        @type clientID: int
+        @param oldChannelID: the id of the channel the client was kicked from
+        @type oldChannelID: int
+        @param newChannelID: the id of the channel the client was kicked to (the default channel)
+        @type newChannelID: int
+        @param visibility: defines the new state of the client in the view (see ts3defines.Visibility)
+        @type visibility: int
+        @param kickerID: the id of the kicking client
+        @type kickerID: int
+        @param kickerName: the nick of the kicking client
+        @type kickerName: str
+        @param kickerUniqueIdentifier: the uid of the kicking client
+        @type kickerUniqueIdentifier: str
+        @param kickMessage: the kick reason
+        @type kickMessage: str
         """
   */
   QString callerror;
@@ -747,25 +747,25 @@ void ts3plugin_onClientKickFromServerEvent(uint64 serverConnectionHandlerID, any
   /*
     def onClientKickFromServerEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, kickerID, kickerName, kickerUniqueIdentifier, kickMessage):
         """
-        
+        This is called whenever a client is kicked from the server.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
-        @param kickerID:
-        @type kickerID:
-        @param kickerName:
-        @type kickerName:
-        @param kickerUniqueIdentifier:
-        @type kickerUniqueIdentifier:
-        @param kickMessage:
-        @type kickMessage:
+        @param clientID: the id of the kicked client
+        @type clientID: int
+        @param oldChannelID: the id of the channel the client was in
+        @type oldChannelID: int
+        @param newChannelID: always set to 0
+        @type newChannelID: int
+        @param visibility: always set to ts3defines.Visibility.LEAVE_VISIBILITY
+        @type visibility: int
+        @param kickerID: the id of the kicking client
+        @type kickerID: int
+        @param kickerName: nick of the kicking client
+        @type kickerName: str
+        @param kickerUniqueIdentifier: uid of the kicking client
+        @type kickerUniqueIdentifier: str
+        @param kickMessage: the kick reason
+        @type kickMessage: str
         """
   */
   QString callerror;
@@ -778,19 +778,19 @@ void ts3plugin_onClientMoveEvent(uint64 serverConnectionHandlerID, anyID clientI
   /*
     def onClientMoveEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moveMessage):
         """
-        
+        This is called whenever a client enters a another channel (moving, joining or leaving the server).
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
-        @param moveMessage:
-        @type moveMessage:
+        @param clientID: the id of the client
+        @type clientID: int
+        @param oldChannelID: the id of the former channel or 0 if the client joined the server
+        @type oldChannelID: int
+        @param newChannelID: the id of the new channel or 0 if the client disconnected
+        @type newChannelID: int
+        @param visibility: defines the new state of the client in the view (see ts3defines.Visibility)
+        @type visibility: int
+        @param moveMessage: the disconnect message if the client left the server or an empty string
+        @type moveMessage: str
         """
   */
   QString callerror;
@@ -803,25 +803,25 @@ void ts3plugin_onClientMoveMovedEvent(uint64 serverConnectionHandlerID, anyID cl
   /*
     def onClientMoveMovedEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, moverID, moverName, moverUniqueIdentifier, moveMessage):
         """
-        
+        This is called whenever a client is moved to another channel by another client.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
-        @param moverID:
-        @type moverID:
-        @param moverName:
-        @type moverName:
-        @param moverUniqueIdentifier:
-        @type moverUniqueIdentifier:
-        @param moveMessage:
-        @type moveMessage:
+        @param clientID: the id of the moved client
+        @type clientID: int
+        @param oldChannelID: the id of the former channel
+        @type oldChannelID: int
+        @param newChannelID: the id of the new channel
+        @type newChannelID: int
+        @param visibility: defines the new state of the client in the view (see ts3defines.Visibility)
+        @type visibility: int
+        @param moverID: the id of the moving client
+        @type moverID: int
+        @param moverName: nick of the moving client
+        @type moverName: str
+        @param moverUniqueIdentifier: uid of the moving client
+        @type moverUniqueIdentifier: str
+        @param moveMessage: always set to an empty string
+        @type moveMessage: str
         """
   */
   QString callerror;
