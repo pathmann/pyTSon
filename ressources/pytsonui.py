@@ -398,9 +398,12 @@ class ConfigurationDialog(QDialog):
         name = item.data(Qt.UserRole)
 
         if checked and name not in self.host.active:
-            self.host.activate(name)
-            if self.host.active[name].offersConfigure:
-                self.pluginsTable.cellWidget(item.row(), 1).setEnabled(True)
+            if self.host.activate(name):
+                if self.host.active[name].offersConfigure:
+                    self.pluginsTable.cellWidget(item.row(), 1).setEnabled(True)
+            else:
+                item.setCheckState(Qt.Unchecked)
+                QMessageBox.critical(self, "Activation failed", "Error starting plugin, check your client log for more information")
         elif not checked and name in self.host.active:
             if self.host.active[name].offersConfigure:
                 self.pluginsTable.cellWidget(item.row(), 1).setEnabled(False)
