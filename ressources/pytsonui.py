@@ -525,6 +525,7 @@ class PythonConsole(QPlainTextEdit):
         super().__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setWindowTitle("pyTSon Console")
 
         self.tabcomplete = tabcomplete
         self.spaces = spaces
