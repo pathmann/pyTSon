@@ -92,6 +92,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
         error = QObject::tr("Error appending item in tuple (3) in function bookMarksToPyList");
         return false;
       }
+      Py_INCREF(Py_None);
 
       PyObject* childs;
       if (!bookmarksToPyList(bm->items[i].folder, error, &childs)) {
@@ -123,6 +124,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
         error = QObject::tr("Error appending item in tuple (6) in function bookMarksToPyList");
         return false;
       }
+      Py_INCREF(Py_None);
     }
   }
 

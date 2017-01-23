@@ -867,7 +867,7 @@ PyObject* getBookmarkList(PyObject* /*self*/, PyObject* args) {
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
 
-  struct PluginBookmarkList* list;
+  struct PluginBookmarkList* list = new PluginBookmarkList;
   unsigned int res = ts3_funcs.getBookmarkList(&list);
 
   PyObject* pyret;
@@ -875,16 +875,19 @@ PyObject* getBookmarkList(PyObject* /*self*/, PyObject* args) {
     QString error;
     PyObject* pylist;
     if (!bookmarksToPyList(list, error, &pylist)) {
-      ts3_funcs.freeMemory(list);
+      ts3_funcs.freeMemory(list->items);
+      delete list;
       PyErr_SetString(PyExc_AttributeError, TRANS("Conversion failed with error \"%1\"").arg(error).toUtf8().data());
       return NULL;
     }
 
-    ts3_funcs.freeMemory(list);
     pyret = Py_BuildValue("(IO)", res, pylist);
     Py_DECREF(pylist);
   }
   else pyret = Py_BuildValue("(Is)", res, NULL);
+
+  ts3_funcs.freeMemory(list->items);
+  delete list;
 
   return pyret;
 }
