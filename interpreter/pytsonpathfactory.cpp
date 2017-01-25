@@ -5,6 +5,7 @@
 #endif
 
 #include <stdexcept>
+#include <stdlib.h>
 
 pytsonpathfactory::pytsonpathfactory(const char* execname) {
   std::string tmp(execname);
