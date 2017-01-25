@@ -29,6 +29,18 @@
 #define CPPDELARR(arr) delete[] arr
 #endif
 
+void freeBookmarkList(struct PluginBookmarkList* list) {
+  for (int i = 0; i < list->itemcount; ++i) {
+    ts3_funcs.freeMemory(list->items[i].name);
+
+    if (list->items[i].isFolder)
+      freeBookmarkList(list->items[i].folder);
+    else ts3_funcs.freeMemory(list->items[i].uuid);
+  }
+
+  ts3_funcs.freeMemory(list);
+}
+
 /*
 # coding: utf-8
 
