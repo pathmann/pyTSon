@@ -772,8 +772,6 @@ PyObject* createBookmark(PyObject* /*self*/, PyObject* args) {
     def createBookmark(bookmarkuuid, serverLabel, serverAddress, serverPassword, nickname, channel, channelPassword, captureProfile, playbackProfile, hotkeyProfile, soundProfile, uniqueUserId, oneTimeKey, phoneticName):
         """
         Creates a new bookmark.
-        @param bookmarkuuid: //FIXME: parent?
-        @type bookmarkuuid: string
         @param serverLabel: the label of the connection
         @type serverLabel: string
         @param serverAddress: host or ip address
@@ -804,7 +802,7 @@ PyObject* createBookmark(PyObject* /*self*/, PyObject* args) {
         @rtype: int
         """
   */
-  char* bookmarkuuid;
+  char* bookmarkuuid = NULL;
   char* serverLabel;
   char* serverAddress;
   char* serverPassword;
@@ -819,7 +817,7 @@ PyObject* createBookmark(PyObject* /*self*/, PyObject* args) {
   char* oneTimeKey;
   char* phoneticName;
 
-  if (!PyArg_ParseTuple(args, "ssssssssssssss", &bookmarkuuid, &serverLabel, &serverAddress, &serverPassword, &nickname, &channel, &channelPassword, &captureProfile, &playbackProfile, &hotkeyProfile, &soundProfile, &uniqueUserId, &oneTimeKey, &phoneticName))
+  if (!PyArg_ParseTuple(args, "sssssssssssss", &serverLabel, &serverAddress, &serverPassword, &nickname, &channel, &channelPassword, &captureProfile, &playbackProfile, &hotkeyProfile, &soundProfile, &uniqueUserId, &oneTimeKey, &phoneticName))
     return NULL;
 
   unsigned int res = ts3_funcs.createBookmark(bookmarkuuid, serverLabel, serverAddress, serverPassword, nickname, channel, channelPassword, captureProfile, playbackProfile, hotkeyProfile, soundProfile, uniqueUserId, oneTimeKey, phoneticName);
