@@ -159,16 +159,16 @@ class IconPack(object):
         if info[-4:].lower() == ".zip":
             self.zip = True
 
-            if os.path.isfile(os.path.join(ts3.getAppPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getAppPath(), "gfx", info)
+            if os.path.isfile(os.path.join(ts3.getResourcesPath(), "gfx", info)):
+                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info)
             elif os.path.isfile(os.path.join(ts3.getConfigPath(), "gfx", info)):
                 self.path = os.path.join(ts3.getConfigPath(), "gfx", info)
         else:
-            if os.path.isdir(os.path.join(ts3.getAppPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getAppPath(), "gfx", info)
-            elif os.path.isfile(os.path.join(ts3.getAppPath(), "gfx", info + ".zip")):
+            if os.path.isdir(os.path.join(ts3.getResourcesPath(), "gfx", info)):
+                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info)
+            elif os.path.isfile(os.path.join(ts3.getResourcesPath(), "gfx", info + ".zip")):
                 self.zip = True
-                self.path = os.path.join(ts3.getAppPath(), "gfx", info + ".zip")
+                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info + ".zip")
             elif os.path.isdir(os.path.join(ts3.getConfigPath(), "gfx", info)):
                 self.path = os.path.join(ts3.getConfigPath(), "gfx", info)
             elif os.path.isfile(os.path.join(ts3.getConfigPath(), "gfx", info + ".zip")):
