@@ -62,7 +62,7 @@
             <string>...</string>
            </property>
            <property name="pytsonicon" stdset="0">
-            <string>ADD</string>
+            <string>octicons:diff-added.svg.png</string>
            </property>
           </widget>
          </item>
@@ -75,7 +75,7 @@
             <string>...</string>
            </property>
            <property name="pytsonicon" stdset="0">
-            <string>ERROR</string>
+            <string>octicons:diff-removed.svg.png</string>
            </property>
           </widget>
          </item>
