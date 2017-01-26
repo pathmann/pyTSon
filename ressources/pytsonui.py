@@ -29,7 +29,7 @@ def _ts3print(msg, level, channel, aid):
 
 def setIcon(obj, iconpack):
     """
-    Sets the icon of a QWidget (if it has a property Icon) to an icon in the soundpack represented by a variable which is acquired by the property 'pytsonicon' of the object.
+    Sets the icon of a QWidget (if it has a property Icon) to an icon in the iconpack represented by a variable which is acquired by the property 'pytsonicon' of the object.
     If no such property is available, nothing is done.
     @param obj: the widget
     @type obj: QWidget
