@@ -143,9 +143,9 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
             _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.retrieveAllWidgets.%s" % obj.objectName, 0)
 
     for c in parent.children():
-        if c.isWidgetType() and c.objectName != "":
+        if c.isWidgetType() and c.objectName != "" and type(c) not in [QSplitterHandle] and c.objectName not in ["qt_scrollarea_viewport", "qt_scrollarea_hcontainer", "qt_scrollarea_vcontainer"]:
             if hasattr(obj, c.objectName):
-                raise Exception("Widget objectName %s is not unique" % c.objectName)
+                raise Exception("Widget objectName %s is not unique %s" % (c.objectName, type(c)))
             setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
