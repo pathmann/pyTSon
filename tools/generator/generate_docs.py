@@ -28,8 +28,9 @@ def main(inpdir, outdir):
                     elif incomment:
                         outf.write(l)
 
-    os.system("epydoc %s --parse-only -o %s -n pyTSon --html" % (" ".join(outfiles), outdir))
-    os.system("epydoc %s --parse-only -o %s -n pyTSon --pdf" % (" ".join(outfiles), outdir))
+    confpath = os.path.join(os.path.dirname(__file__), "epydoc.conf")
+    os.system("epydoc %s --parse-only -o %s --html --config %s" % (" ".join(outfiles), outdir, confpath))
+    os.system("epydoc %s --parse-only -o %s --pdf --config %s" % (" ".join(outfiles), outdir, confpath))
 
 
 if __name__ == "__main__":
