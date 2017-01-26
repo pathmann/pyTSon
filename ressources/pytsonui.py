@@ -29,7 +29,7 @@ def _ts3print(msg, level, channel, aid):
 
 def setIcon(obj, iconpack):
     """
-    Sets the icon of a QWidget (if it has a property Icon) to an icon in the iconpack represented by a variable which is acquired by the property 'pytsonicon' of the object.
+    Sets the icon of a QWidget (if it has a property Icon) to an icon in the iconpack represented by a variable which is acquired by the property 'pytsonicon' of the object. If the property instead contains a string formated as "octicons:filename.png", the icon is set to filename.png of the octicons pack.
     If no such property is available, nothing is done.
     @param obj: the widget
     @type obj: QWidget
@@ -39,7 +39,13 @@ def setIcon(obj, iconpack):
     if iconpack:
         if hasattr(obj, "setIcon") and hasattr(obj, "pytsonicon"):
             var = obj.pytsonicon
-            obj.setIcon(QIcon(iconpack.icon(var)))
+
+            if var.startswith("octicons:"):
+                fname = os.path.join(pytson.getPluginPath("ressources", "octicons", var.split(":")[1]))
+                if os.path.isfile(fname):
+                    obj.setIcon(QIcon(fname))
+            else:
+                obj.setIcon(QIcon(iconpack.icon(var)))
 
 
 def connectSignalSlotsByName(sender, receiver):
