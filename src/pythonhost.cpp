@@ -53,7 +53,7 @@ bool PythonHost::setupDirectories(QString &error) {
   }
 
 #ifdef Q_OS_UNIX
-  if (chmod(interpreterpath.toUtf8().data(), S_IRUSR | S_IWUSR | S_IWUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1)
+  if (chmod(interpreterpath.toUtf8().data(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1)
     ts3logdispatcher::instance()->add(QObject::tr("Setting file permissions of the python interpreter failed, you may need to manually set chmod u+x to %1 (%2)").arg(interpreterpath).arg(errno), LogLevel_ERROR);
 #endif
 
