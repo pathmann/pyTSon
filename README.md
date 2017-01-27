@@ -8,7 +8,7 @@ Current used python version is Python 3.5.2.
 
 Batteries included
 ==================
-The python standard library is included, either built in the plugin or bundled in include/Lib (which is in sys.path by default).
+The python standard library is included, either built in the plugin or bundled in the lib directory (which is in sys.path by default).
 pyTSon has PythonQt included, so that scripts can have UIs written in python, see pyTSon's own configdialog or the scripting console for examples.
 
 Dependencies
@@ -40,9 +40,8 @@ Running
 How to use
 ==========
 1. Get the latest release for your Teamspeak client [here](https://github.com/pathmann/pyTSon/releases/) or compile the source yourself.
-2. (On Windows move the `python35.dll` manually from `%APPDATA%\TS3Client\plugins\pyTSon\` to `%PROGRAMFILES%\Teamspeak 3 Client\` [This is only needed once per python version.]) This step can be omitted since the client now loads dependencies from pyTSon's directory.
 3. Restart your Teamspeak Client.
-4. Download or write any pyTSon script and place it in `%APPDATA%\TS3Client\plugins\pyTSon\scripts\` on windows resp. `~/.ts3client/plugins/pyTSon/scripts/` on unix.
+4. Download or write any pyTSon script and place it in `%APPDATA%\TS3Client\plugins\pyTSon\scripts\<your-plugin-dir>` on windows resp. `~/.ts3client/plugins/pyTSon/scripts/<your-plugin-dir>` on unix.
 5. In your client click on "Plugins" => "pyTSon" => "Settings" and on the settings dialog click on "Reload All" and check the plugins checkbox if it's not checked already.
 
 How to build
@@ -57,27 +56,27 @@ Done
 
 How to develop a python plugin
 ==============================
-Create a *.py file in \<TeamSpeak 3 client install\>/plugins/pyTSon/scripts with a subclass of ts3plugin.
+Create a *.py file in \<TeamSpeak 3 client install\>/plugins/pyTSon/scripts/\<your-plugin-dir\> with a subclass of ts3plugin.
 Needed class attributes are requestAutoload, name, version, apiVersion, author, description, offersConfigure, commandKeyword, infoTitle, menuItems, hotkeys.
 Otherwise pyTSon refuses to load the plugin. See ts3plugin.py or the documentation for a description of each attribute.
 
 On load, pyTSon will create an instance of your class (call the constructor), after that callbacks are called (if available) as methods of the created instance, eg if you were poked, onClientPokeEvent(self, schid, fromClientID, pokerName, pokerUniqueIdentity, message, ffIgnored) will be called.
 On unload, pyTSon will call stop and delete the instance of your class.
 
-TeamSpeak 3's library functions are available with the ts3 module (eg err, myid = ts3.getClientID(schid)).
+TeamSpeak 3's library functions are available with the ts3lib module (eg err, myid = ts3lib.getClientID(schid)).
 Constants are available in the ts3defines module (see ts3defines.py in include/ directory).
 
 Below is a small example plugin:
 ```python
 from ts3plugin import ts3plugin
 
-import ts3, ts3defines
+import ts3lib, ts3defines
 
 class testplugin(ts3plugin):
     name = "test"
     requestAutoload = False
     version = "1.0"
-    apiVersion = 20
+    apiVersion = 21
     author = "Thomas \"PLuS\" Pathmann"
     description = "This is a testplugin"
     offersConfigure = True
@@ -87,19 +86,21 @@ class testplugin(ts3plugin):
     hotkeys = []#[("keyword", "description")]
 
     def __init__(self):
-        ts3.printMessageToCurrentTab("Yay, we are running!")
+        ts3lib.printMessageToCurrentTab("Yay, we are running!")
 
     def stop(self):
-        ts3.printMessageToCurrentTab("Oh no, we were stopped :(")
+        ts3lib.printMessageToCurrentTab("Oh no, we were stopped :(")
 
     def onNewChannelEvent(self, schid, channelID, channelParentID):
-        err, name = ts3.getChannelVariableAsString(schid, channelID, ts3defines.ChannelProperties.CHANNEL_NAME)
+        err, name = ts3lib.getChannelVariableAsString(schid, channelID, ts3defines.ChannelProperties.CHANNEL_NAME)
         if err == ts3defines.ERROR_ok:
-            ts3.printMessageToCurrentTab("new channel %s" % name)
+            ts3lib.printMessageToCurrentTab("new channel %s" % name)
         else:
-            ts3.printMessageToCurrentTab("got error %s" % err)
+            ts3lib.printMessageToCurrentTab("got error %s" % err)
 ```
-Some demo plugins are available in [this repository](https://github.com/pathmann/pyTSon_plugins).
+Repository
+==========
+pyTSon can load plugins from online repositories. [pyTSon master](https://github.com/pathmann/pyTSon_repository) is included by default. Check [the Readme](https://github.com/pathmann/pyTSon_repository/blob/master/README.md) for more information, if you want to setup your own. 
 
 Releases
 ========
