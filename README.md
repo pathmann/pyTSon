@@ -99,7 +99,7 @@ class testplugin(ts3plugin):
         else:
             ts3.printMessageToCurrentTab("got error %s" % err)
 ```
-Some demo plugins are available in [this repository](https://github.com/pathmann/pyTSon_plugins).
+Some demo plugins are available in [this repository](https://github.com/pathmann/pyTSon_repository).
 
 Releases
 ========
