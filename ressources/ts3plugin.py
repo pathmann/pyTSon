@@ -38,6 +38,7 @@ class PluginMount(type):
 class PluginHost(object):
     defaultConfig = [("general", [("differentApi", "False"), ("uninstallQuestion", "True"), ("loadAllMenus", "True")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
 
+
     @classmethod
     def setupConfig(cls):
         for (section, options) in cls.defaultConfig:
@@ -492,39 +493,3 @@ class ts3plugin(object, metaclass=PluginMount):
 
     def stop(self):
         pass
-
-    """
-    def configure(self, qParentWidget):
-        pass
-
-    def infoData(self, schid, aid, atype):
-        return []
-
-    def processCommand(self, schid, command):
-        return True
-
-    def onServerErrorEvent(self, schid, errorMessage, error, returnCode, extraMessage):
-        return False
-
-    def onTextMessageEvent(self, schid, targetMode, toID, fromID, fromName, fromUniqueIdentifier, message, ffIgnored):
-        return False
-
-    def onClientPokeEvent(self, schid, fromClientID, pokerName, pokerUniqueIdentity, message, ffIgnored):
-        return False
-
-    def onServerPermissionErrorEvent(self, schid, errorMessage, error, returnCode, failedPermissionID):
-        pass
-
-    def onMenuItemEvent(self, schid, atype, menuItemID, selectedItemID):
-        pass
-
-    def onHotkeyEvent(self, keyword):
-        pass
-
-
-{% for name, c in callbacks|dictsort %}
-    def {{name}}(self, {{c.parameterNames | join(', ')}}):
-        pass
-
-{% endfor %}
-    """

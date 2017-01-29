@@ -31,7 +31,6 @@ OTHER_FILES += ../templates/ts3module.h.tpl \
     ../templates/plugin.h.tpl \
     ../templates/plugin.cpp.tpl \
     ../templates/ts3defines.py.tpl \
-    ../templates/ts3plugin.py.tpl \
     ../ressources/pyTSon-configdialog.ui \
     ../ressources/repository.ui \
     ../ressources/repository-manager.ui \
@@ -40,7 +39,8 @@ OTHER_FILES += ../templates/ts3module.h.tpl \
     ../ressources/devtools.py \
     ../ressources/repositorymaster.json \
     ../ressources/pytson.py \
-    ../ressources/ts3client.py
+    ../ressources/ts3client.py \
+    ../ressources/ts3plugin.py
 
 
 unix:!mac {
