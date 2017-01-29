@@ -267,7 +267,7 @@ class ConfigurationDialog(QDialog):
         self.rpd = None
 
         try:
-            setupUi(self, os.path.join(ts3lib.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
+            setupUi(self, pytson.getPluginPath("ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
             self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
             self.setupValues()
@@ -1217,7 +1217,7 @@ class InstallDialog(QDialog):
         self.addon = None
 
         try:
-            setupUi(self, os.path.join(ts3lib.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
+            setupUi(self, pytson.getPluginPath("ressources", "installer.ui"))
 
             self.pip = devtools.PluginInstaller(self.consoleEdit.append)
             self.nwm = QNetworkAccessManager(self)
