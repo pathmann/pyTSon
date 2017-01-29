@@ -3,7 +3,7 @@ import os
 from PythonQt.QtSql import QSqlDatabase
 from PythonQt.QtGui import QPixmap, QPainter, QPen
 
-import ts3lib as ts3
+import ts3lib
 
 from configparser import ConfigParser
 from zipfile import ZipFile
@@ -18,7 +18,7 @@ class Config(object):
     class _config(object):
         def __init__(self):
             self.db = QSqlDatabase.addDatabase("QSQLITE","__pyTSon_config__")
-            self.db.setDatabaseName(ts3.getConfigPath() + "settings.db")
+            self.db.setDatabaseName(ts3lib.getConfigPath() + "settings.db")
 
             if not self.db.isValid():
                 raise Exception("Database not valid")
@@ -159,21 +159,21 @@ class IconPack(object):
         if info[-4:].lower() == ".zip":
             self.zip = True
 
-            if os.path.isfile(os.path.join(ts3.getResourcesPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info)
-            elif os.path.isfile(os.path.join(ts3.getConfigPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getConfigPath(), "gfx", info)
+            if os.path.isfile(os.path.join(ts3lib.getResourcesPath(), "gfx", info)):
+                self.path = os.path.join(ts3lib.getResourcesPath(), "gfx", info)
+            elif os.path.isfile(os.path.join(ts3lib.getConfigPath(), "gfx", info)):
+                self.path = os.path.join(ts3lib.getConfigPath(), "gfx", info)
         else:
-            if os.path.isdir(os.path.join(ts3.getResourcesPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info)
-            elif os.path.isfile(os.path.join(ts3.getResourcesPath(), "gfx", info + ".zip")):
+            if os.path.isdir(os.path.join(ts3lib.getResourcesPath(), "gfx", info)):
+                self.path = os.path.join(ts3lib.getResourcesPath(), "gfx", info)
+            elif os.path.isfile(os.path.join(ts3lib.getResourcesPath(), "gfx", info + ".zip")):
                 self.zip = True
-                self.path = os.path.join(ts3.getResourcesPath(), "gfx", info + ".zip")
-            elif os.path.isdir(os.path.join(ts3.getConfigPath(), "gfx", info)):
-                self.path = os.path.join(ts3.getConfigPath(), "gfx", info)
-            elif os.path.isfile(os.path.join(ts3.getConfigPath(), "gfx", info + ".zip")):
+                self.path = os.path.join(ts3lib.getResourcesPath(), "gfx", info + ".zip")
+            elif os.path.isdir(os.path.join(ts3lib.getConfigPath(), "gfx", info)):
+                self.path = os.path.join(ts3lib.getConfigPath(), "gfx", info)
+            elif os.path.isfile(os.path.join(ts3lib.getConfigPath(), "gfx", info + ".zip")):
                 self.zip = True
-                self.path = os.path.join(ts3.getConfigPath(), "gfx", info + ".zip")
+                self.path = os.path.join(ts3lib.getConfigPath(), "gfx", info + ".zip")
 
         if not self.path:
             raise Exception("Iconpack %s not found" % info)

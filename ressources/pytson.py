@@ -1,5 +1,5 @@
 import os, shutil, platform
-import ts3lib as ts3
+import ts3lib
 
 
 def getConfigPath(*args):
@@ -10,7 +10,7 @@ def getConfigPath(*args):
     @return: The accumulated path
     @rtype: str
     """
-    return os.path.join(ts3.getConfigPath(), "pyTSon", *args)
+    return os.path.join(ts3lib.getConfigPath(), "pyTSon", *args)
 
 def getPluginPath(*args):
     """
@@ -20,7 +20,7 @@ def getPluginPath(*args):
     @return: The accumulated path
     @rtype: str
     """
-    return os.path.join(ts3.getPluginPath(), "pyTSon", *args)
+    return os.path.join(ts3lib.getPluginPath(), "pyTSon", *args)
 
 def _setup():
     """

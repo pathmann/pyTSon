@@ -1,6 +1,6 @@
 import sys, os, glob
 
-import ts3lib as ts3
+import ts3lib
 import ts3defines, pytson
 
 import importlib, traceback
@@ -21,7 +21,7 @@ class PluginMount(type):
         else:
             for a in ['requestAutoload', 'name', 'version', 'apiVersion', 'author', 'description', 'offersConfigure', 'commandKeyword', 'infoTitle', 'menuItems', 'hotkeys']:
                 if not hasattr(cls, a):
-                    err = ts3.logMessage("Plugin %s not loaded, missing required attribute %s" % (name, a), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
+                    err = ts3lib.logMessage("Plugin %s not loaded, missing required attribute %s" % (name, a), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Plugin %s not loaded, missing required attribute %s" % (name, a))
 
@@ -30,7 +30,7 @@ class PluginMount(type):
             if not cls.name in PluginHost.plugins:
                 PluginHost.plugins[cls.name] = cls
             else:
-                err = ts3.logMessage("Error loading python plugin %s, already registered or a plugin with that name already exist" % cls.name, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
+                err = ts3lib.logMessage("Error loading python plugin %s, already registered or a plugin with that name already exist" % cls.name, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error loading python plugin %s, already registered or a plugin with that name already exist" % cls.name)
 
@@ -91,7 +91,7 @@ class PluginHost(object):
                     cls.active[key] = cls.plugins[key]()
                     cls.cfg.set("plugins", key, "True")
                 except:
-                    err = ts3.logMessage("Error starting python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.start", 0)
+                    err = ts3lib.logMessage("Error starting python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.start", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
 
@@ -152,7 +152,7 @@ class PluginHost(object):
                 for globid, (p, locid) in cls.menus.items():
                     if type(p) is str and p == pname:
                         cls.menus[globid] = (cls.active[p], locid)
-                        ts3.setPluginMenuEnabled(globid, True)
+                        ts3lib.setPluginMenuEnabled(globid, True)
                 if hasattr(cls.active[pname], "menuCreated"):
                     cls.active[pname].menuCreated()
 
@@ -162,7 +162,7 @@ class PluginHost(object):
 
                 return True
             except:
-                err = ts3.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
+                err = ts3lib.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error starting python plugin %s: %s" % (pname, traceback.format_exc()))
 
@@ -182,13 +182,13 @@ class PluginHost(object):
                     if type(cls.menus[key][0]) is not str:
                         if cls.menus[key][0].name == pname:
                             cls.menus[key] = (pname, cls.menus[key][1])
-                            ts3.setPluginMenuEnabled(key, False)
+                            ts3lib.setPluginMenuEnabled(key, False)
 
                 cls.active[pname].stop()
                 del cls.active[pname]
                 cls.cfg.set("plugins", pname, "False")
             except:
-                err = ts3.logMessage("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.deactivate", 0)
+                err = ts3lib.logMessage("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.deactivate", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()))
 
@@ -199,7 +199,7 @@ class PluginHost(object):
             try:
                 p.stop()
             except:
-                err = ts3.logMessage("Error stopping python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.reload", 0)
+                err = ts3lib.logMessage("Error stopping python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.reload", 0)
                 if err != ts3defines.ERROR_ok:
                     print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
 
@@ -217,7 +217,7 @@ class PluginHost(object):
                     else:
                         cls.modules[base] = importlib.__import__(base)
                 except:
-                    err = ts3.logMessage("Error loading python plugin from %s: %s" % (d, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
+                    err = ts3lib.logMessage("Error loading python plugin from %s: %s" % (d, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error loading python plugin from %s: %s" % (d, traceback.format_exc()))
 
@@ -287,7 +287,7 @@ class PluginHost(object):
                 try:
                     return p.processCommand(schid, " ".join(tokens[1:]))
                 except:
-                    err = ts3.logMessage("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.processCommand", 0)
+                    err = ts3lib.logMessage("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.processCommand", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()))
 
@@ -302,7 +302,7 @@ class PluginHost(object):
                     ret.append(p.infoTitle)
                     ret += p.infoData(schid, aid, atype)
                 except:
-                    err = ts3.logMessage("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.infoData", 0)
+                    err = ts3lib.logMessage("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.infoData", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()))
 
@@ -337,7 +337,7 @@ class PluginHost(object):
 
                 QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release (at least for your platform)")
         except:
-            err = ts3.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseUpdateReply", 0)
+            err = ts3lib.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseUpdateReply", 0)
             if err != ts3defines.ERROR_ok:
                 print("Error parsing reply from update check: %s" % traceback.format_exc())
 
@@ -346,7 +346,7 @@ class PluginHost(object):
         if reply.error() == QNetworkReply.NoError:
             cls.parseUpdateReply(reply.readAll().data().decode('utf-8'))
         else:
-            err = ts3.logMessage("Error checking for update: %s" % reply.error(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.updateCheckFinished", 0)
+            err = ts3lib.logMessage("Error checking for update: %s" % reply.error(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.updateCheckFinished", 0)
             if err != ts3defines.ERROR_ok:
                 print("Error checking for update: %s" % reply.error())
 
@@ -389,7 +389,7 @@ class PluginHost(object):
 
         def deactivateMenus():
             for key, val in menustates:
-                ts3.setPluginMenuEnabled(key, val)
+                ts3lib.setPluginMenuEnabled(key, val)
 
             for key, p in cls.active.items():
                 if hasattr(p, "menuCreated"):
@@ -441,7 +441,7 @@ class PluginHost(object):
                 try:
                     plugin.onMenuItemEvent(schid, atype, locid, selectedItemID)
                 except:
-                    err = ts3.logMessage("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onMenuItemEvent", 0)
+                    err = ts3lib.logMessage("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onMenuItemEvent", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
 
@@ -468,7 +468,7 @@ class PluginHost(object):
                 try:
                     plugin.onHotkeyEvent(lockey)
                 except:
-                    err = ts3.logMessage("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onHotkeyEvent", 0)
+                    err = ts3lib.logMessage("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onHotkeyEvent", 0)
                     if err != ts3defines.ERROR_ok:
                         print("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
 

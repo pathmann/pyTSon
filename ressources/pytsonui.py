@@ -17,12 +17,11 @@ from zipfile import ZipFile
 import io
 import devtools
 
-import ts3lib as ts3
-import ts3defines, pytson, ts3client
+import ts3lib, ts3defines, pytson, ts3client
 
 
 def _ts3print(msg, level, channel, aid):
-    err = ts3.logMessage(msg, level, channel, aid)
+    err = ts3lib.logMessage(msg, level, channel, aid)
     if err != ts3defines.ERROR_ok:
         print(msg)
 
@@ -268,7 +267,7 @@ class ConfigurationDialog(QDialog):
         self.rpd = None
 
         try:
-            setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
+            setupUi(self, os.path.join(ts3lib.getPluginPath(), "pyTSon", "ressources", "pyTSon-configdialog.ui"), widgets=self.CONF_WIDGETS)
             self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
             self.setupValues()
@@ -1218,7 +1217,7 @@ class InstallDialog(QDialog):
         self.addon = None
 
         try:
-            setupUi(self, os.path.join(ts3.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
+            setupUi(self, os.path.join(ts3lib.getPluginPath(), "pyTSon", "ressources", "installer.ui"))
 
             self.pip = devtools.PluginInstaller(self.consoleEdit.append)
             self.nwm = QNetworkAccessManager(self)
