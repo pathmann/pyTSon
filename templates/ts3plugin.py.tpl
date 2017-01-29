@@ -82,7 +82,7 @@ class PluginHost(object):
                 load = True
 
             if load:
-                if cls.plugins[key].apiVersion != 21:
+                if cls.plugins[key].apiVersion != pytson.getCurrentApiVersion():
                     if not cls.cfg.getboolean("general", "differentApi", fallback=False):
                         continue
 
@@ -326,7 +326,7 @@ class PluginHost(object):
         try:
             obj = json.loads(repstr)
 
-            if obj["tag_name"] == "v1.1.0":
+            if obj["tag_name"] == "v%s" % pytson.getVersion():
                 QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release")
             else:
                 for a in obj["assets"]:

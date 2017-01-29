@@ -45,3 +45,21 @@ def platformstr():
         return "Mac"
     else:
         return "%s-%s" % (platform.system(), platform.architecture()[0])
+
+
+def getVersion():
+    """
+    Returns the current version of pyTSon.
+    @return: the version as string
+    @rtype: str
+    """
+    return "1.1.0"
+
+
+def getCurrentApiVersion():
+    """
+    Returns the current apiversion of the ts3 plugin sdk. This should not be used in ts3plugin.apiVersion. Be fair and update your plugin manually!
+    @return: the apiVersion
+    @rtype: str
+    """
+    return 21

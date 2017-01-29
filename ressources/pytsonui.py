@@ -291,7 +291,7 @@ class ConfigurationDialog(QDialog):
         row = 0
         diffapi = self.cfg.getboolean("general", "differentApi", fallback=False)
         for key, p in self.host.plugins.items():
-            if diffapi or p.apiVersion == 21:
+            if diffapi or p.apiVersion == pytson.getCurrentApiVersion():
                 item = QTableWidgetItem(p.name)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
                 item.setCheckState(Qt.Checked if key in self.host.active else Qt.Unchecked)
@@ -326,7 +326,7 @@ class ConfigurationDialog(QDialog):
 
     def setupValues(self):
         self.differentApiButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "differentApi", fallback=False) else Qt.Unchecked)
-        self.requiredApiEdit.setText(21)
+        self.requiredApiEdit.setText(pytson.getCurrentApiVersion())
 
         self.loadMenusButton.setChecked(Qt.Checked if self.cfg.getboolean("general", "loadAllMenus", fallback=False) else Qt.Unchecked)
 
