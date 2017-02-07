@@ -12,6 +12,8 @@ from PythonQt.QtGui import QFont, QColor, QMessageBox
 from PythonQt.QtCore import QUrl, QTimer
 from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
+from weakref import WeakSet
+
 class PluginMount(type):
     def __init__(cls, name, bases, attrs):
         super(PluginMount, cls).__init__(name, bases, attrs)
@@ -55,6 +57,8 @@ class PluginHost(object):
 
         cls.shell = None
         cls.confdlg = None
+
+        cls.proxies = WeakSet()
 
         cls.nwm = None
 
@@ -267,13 +271,33 @@ class PluginHost(object):
                 try:
                     ret.append(meth(*args))
                 except:
-                    print("Error calling method of plugin %s: %s" % (key, traceback.format_exc()))
+                    print("Error calling method %s of plugin %s: %s" % (name, key, traceback.format_exc()))
+
+        #call callback proxies; they can't affect the return value
+        for proxy in cls.proxies:
+            meth = getattr(proxy, name, None)
+
+            if meth:
+                try:
+                    meth(*args)
+                except:
+                    print("Error calling method %s in callbackproxy: %s" % (name, traceback.format_exc()))
 
         for r in ret:
             if r:
                 return True
 
         return False
+
+    @classmethod
+    def registerCallbackProxy(cls, obj):
+        if not obj in cls.proxies:
+            cls.proxies.add(obj)
+
+    @classmethod
+    def unregisterCallbackProxy(cls, obj):
+        if obj in cls.proxies:
+            cls.proxies.remove(obj)
 
     @classmethod
     def processCommand(cls, schid, command):
