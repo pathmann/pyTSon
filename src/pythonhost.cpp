@@ -383,7 +383,7 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
   }
 
   PyObject* pystr;
-  QString str;
+  QByteArray str;
   for (int i = 0; i < PyList_Size(pyret); ++i) {
     pystr = PyList_GetItem(pyret, i);
 
@@ -399,7 +399,7 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
   Py_DECREF(pyret);
 
   *data = (char*)malloc((str.length() +1) * sizeof(char));
-  strncpy(*data, str.toUtf8().data(), str.size() +1);
+  strncpy(*data, str.data(), str.size() +1);
 }
 
 void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
