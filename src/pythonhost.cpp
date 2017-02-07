@@ -11,7 +11,7 @@
 #include "pyconversion.h"
 #include "global_shared.h"
 #include "ts3logdispatcher.h"
-#include "ts3module.h"
+#include "ts3lib.h"
 
 
 #if defined(Q_OS_WIN)

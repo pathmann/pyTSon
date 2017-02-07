@@ -1,4 +1,4 @@
-#include "ts3module.h"
+#include "ts3lib.h"
 
 #include <QObject>
 #include <QString>

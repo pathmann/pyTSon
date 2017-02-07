@@ -1,5 +1,5 @@
-#ifndef TS3MODULE_H__
-#define TS3MODULE_H__
+#ifndef TS3LIB_H__
+#define TS3LIB_H__
 
 #include <Python.h>
 

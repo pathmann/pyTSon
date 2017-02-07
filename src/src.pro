@@ -26,10 +26,10 @@ HEADERS += pytson.h \
     ts3logdispatcher.h \
     pyconversion.h
 
-OTHER_FILES += ../templates/ts3module.h.tpl \
-    ../templates/ts3module.cpp.tpl \
-    ../templates/plugin.h.tpl \
-    ../templates/plugin.cpp.tpl \
+OTHER_FILES += ../templates/ts3lib.h.tpl \
+    ../templates/ts3lib.cpp.tpl \
+    ../templates/ts3plugin.h.tpl \
+    ../templates/ts3plugin.cpp.tpl \
     ../templates/ts3defines.py.tpl \
     ../ressources/pyTSon-configdialog.ui \
     ../ressources/repository.ui \
@@ -63,11 +63,11 @@ macx {
 
 
 #########GENERATED SOURCES#########
-SOURCES += ../generated/pregen/ts3module.cpp \
-    ../generated/pregen/plugin.cpp
+SOURCES += ../generated/pregen/ts3lib.cpp \
+    ../generated/pregen/ts3plugin.cpp
 
-HEADERS += ../generated/pregen/ts3module.h \
-    ../generated/pregen/plugin.h
+HEADERS += ../generated/pregen/ts3lib.h \
+    ../generated/pregen/ts3plugin.h
 
 INCLUDEPATH += ../generated/pregen
 

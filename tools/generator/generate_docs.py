@@ -4,8 +4,8 @@ import sys, os
 
 from argparse import ArgumentParser
 
-DOC_FILES = ["ts3module.cpp", "plugin.cpp"]
-EXTRA_FILES = [("..", "..", "ressources", "pytsonui.py"), ("..", "..", "ressources", "pytson.py"), ("..", "..", "ressources", "devtools.py"), ("..", "..", "ressources", "ts3client.py")]
+DOC_FILES = ["ts3lib.cpp", "ts3plugin.cpp"]
+EXTRA_FILES = [("..", "..", "ressources", "pytsonui.py"), ("..", "..", "ressources", "pytson.py"), ("..", "..", "ressources", "devtools.py"), ("..", "..", "ressources", "ts3client.py"), ("..", "..", "ressources", "pluginhost.py")]
 
 def main(inpdir, outdir):
     outfiles = [os.path.join(inpdir, os.path.join(*t)) for t in EXTRA_FILES]

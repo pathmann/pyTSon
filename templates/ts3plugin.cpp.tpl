@@ -1,4 +1,4 @@
-#include "plugin.h"
+#include "ts3plugin.h"
 
 #include "pythonhost.h"
 #include "ts3logdispatcher.h"

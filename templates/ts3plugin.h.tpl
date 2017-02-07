@@ -1,5 +1,5 @@
-#ifndef PLUGIN_H__
-#define PLUGIN_H__
+#ifndef TS3PLUGIN_H__
+#define TS3PLUGIN_H__
 
 #ifdef WIN32
 #define EXPORT_SYMBOL __declspec(dllexport)
