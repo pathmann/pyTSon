@@ -21,7 +21,7 @@
   #define INTERPRETER "python"
 #endif
 
-PythonHost::PythonHost(): m_interpreter(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
+PythonHost::PythonHost(): m_interpreter(NULL), m_pluginmod(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
 
 }
 
@@ -136,7 +136,7 @@ bool PythonHost::setupDirectories(QString &error) {
 }
 
 bool PythonHost::isReady() {
-  return (m_inited && m_pmod && m_pyhost && m_callmeth && m_trace);
+  return (m_inited && m_pluginmod && m_pmod && m_pyhost && m_callmeth && m_trace);
 }
 
 QString PythonHost::formatError(const QString &fallback) {
@@ -270,14 +270,20 @@ bool PythonHost::init(QString& error) {
     return false;
   }
 
-  //import ts3plugin module
-  m_pmod = PyImport_ImportModule("ts3plugin");
-  if (!m_pmod) {
+  m_pluginmod = PyImport_ImportModule("ts3plugin");
+  if (!m_pluginmod) {
     error = formatError(QObject::tr("Error importing ts3plugin module"));
     return false;
   }
 
-  //get PluginHost of ts3plugin module
+  //import pluginhost module
+  m_pmod = PyImport_ImportModule("pluginhost");
+  if (!m_pmod) {
+    error = formatError(QObject::tr("Error importing pluginhost module"));
+    return false;
+  }
+
+  //get PluginHost class of module
   m_pyhost = PyObject_GetAttrString(m_pmod, "PluginHost");
   if (!m_pyhost) {
     error = formatError(QObject::tr("Error getting PluginHost class"));
@@ -321,6 +327,9 @@ void PythonHost::shutdown() {
 
   Py_XDECREF(m_pmod);
   m_pmod = NULL;
+
+  Py_XDECREF(m_pluginmod);
+  m_pluginmod = NULL;
 
   Py_XDECREF(m_trace);
   m_trace = NULL;

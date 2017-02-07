@@ -55,6 +55,7 @@ class PythonHost: public singleton<PythonHost> {
     QDir m_sitepackdir;
     QDir m_base;
     wchar_t* m_interpreter;
+    PyObject* m_pluginmod;
     PyObject* m_pmod;
     PyObject* m_pyhost;
     PyObject* m_callmeth;

@@ -40,7 +40,8 @@ OTHER_FILES += ../templates/ts3module.h.tpl \
     ../ressources/repositorymaster.json \
     ../ressources/pytson.py \
     ../ressources/ts3client.py \
-    ../ressources/ts3plugin.py
+    ../ressources/ts3plugin.py \
+    ../ressources/pluginhost.py
 
 
 unix:!mac {
