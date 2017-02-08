@@ -3,10 +3,12 @@ import os
 from PythonQt.QtSql import QSqlDatabase
 from PythonQt.QtGui import QPixmap, QPainter, QPen
 
-import ts3lib
+import ts3lib, ts3defines
 
 from configparser import ConfigParser
 from zipfile import ZipFile
+
+import base64
 
 
 class Config(object):
@@ -444,3 +446,34 @@ TALK_POWER_REVOKE_ALL_GRANT_NEXT
                     return QPixmap(os.path.join(self.path, empath))
 
         return QPixmap()
+
+
+class ServerCache:
+    """
+    Offers an interface to the cached data of a TeamSpeak 3 server.
+    """
+
+    def __init__(self, schid):
+        """
+        Instantiates a new ServerCache object referenced by the server connection handler id (an Exception is raised if the path in the filesystem could not be located).
+        @param schid: the ID of the serverconnection
+        @type schid: int
+        """
+        err, uid = ts3lib.getServerVariableAsString(schid, ts3defines.VirtualServerProperties.VIRTUALSERVER_UNIQUE_IDENTIFIER)
+
+        if err != ts3defines.ERROR_ok:
+            raise Exception("Error getting Server unique identifier: %s" % err)
+
+        self.path = os.path.join(ts3lib.getConfigPath(), "cache", base64.b64encode(uid.encode("utf-8")).decode("utf-8"))
+        if not os.path.isdir(self.path):
+            raise Exception("No such file or directory: %s" % self.path)
+
+    def icon(self, iconid):
+        """
+        Returns an icon cached on disk.
+        @param iconid: ID of the icon
+        @type iconid: int
+        @return: the icon
+        @rtype: QPixmap
+        """
+        return QPixmap(os.path.join(self.path, "icons", "icon_%s" % iconid))
