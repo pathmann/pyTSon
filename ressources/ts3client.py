@@ -477,3 +477,53 @@ class ServerCache:
         @rtype: QPixmap
         """
         return QPixmap(os.path.join(self.path, "icons", "icon_%s" % iconid))
+
+
+class CountryFlags:
+    """
+    Offers an interface to get the client's country flags. CountryFlags is also a context manager.
+    """
+
+    def __init__(self):
+        """
+        Instantiates a new object. This will raise an exception, if the Zipfile could not be located.
+        """
+        self.path = os.path.join(ts3lib.getResourcesPath(), "gfx", "countries.zip")
+        if not os.path.isfile(self.path):
+            raise Exception("Could not locate countries.zip")
+
+    def open(self):
+        """
+        Opens the Zipfile for reading. This must be called before any flag is requested with flag.
+        """
+        self.zip = ZipFile(self.path)
+
+    def close(self):
+        """
+        Closes the Zipfile.
+        """
+        self.zip.close()
+
+    def flag(self, code):
+        """
+        Returns a QPixmap containing the flag of the given country code if exist.
+        @param code: the country code
+        @rtype code: str
+        @returns: the flag
+        @rtype: QPixmap
+        """
+        fname = "%s.png" % code.lower()
+        if fname in self.zip.namelist():
+            with self.zip.open(fname) as f:
+                ret = QPixmap()
+                if ret.loadFromData(f.read()):
+                    return ret
+
+        return QPixmap()
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
