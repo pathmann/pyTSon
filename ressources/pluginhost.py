@@ -12,7 +12,7 @@ from PythonQt.QtGui import QFont, QColor, QMessageBox
 from PythonQt.QtCore import QUrl, QTimer
 from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
-from weakref import WeakSet
+from weakref import WeakValueDictionary
 
 
 class PluginHost(object):
@@ -35,7 +35,7 @@ class PluginHost(object):
         cls.shell = None
         cls.confdlg = None
 
-        cls.proxies = WeakSet()
+        cls.proxies = WeakValueDictionary()
 
         cls.nwm = None
 
@@ -251,14 +251,21 @@ class PluginHost(object):
                     print("Error calling method %s of plugin %s: %s" % (name, key, traceback.format_exc()))
 
         #call callback proxies; they can't affect the return value
-        for proxy in cls.proxies:
-            meth = getattr(proxy, name, None)
+        zombies = []
+        for p in cls.proxies.values():
+            if not p:
+                zombies.append(id(p))
+            else:
+                meth = getattr(p, name, None)
 
-            if meth:
-                try:
-                    meth(*args)
-                except:
-                    print("Error calling method %s in callbackproxy: %s" % (name, traceback.format_exc()))
+                if meth:
+                    try:
+                        meth(*args)
+                    except:
+                        print("Error calling method %s in callbackproxy: %s" % (name, traceback.format_exc()))
+
+        for z in zombies:
+            del cls.proxies[z]
 
         for r in ret:
             if r:
@@ -268,13 +275,13 @@ class PluginHost(object):
 
     @classmethod
     def registerCallbackProxy(cls, obj):
-        if not obj in cls.proxies:
-            cls.proxies.add(obj)
+        if not id(obj) in cls.proxies:
+            cls.proxies[id(obj)] = obj
 
     @classmethod
     def unregisterCallbackProxy(cls, obj):
         if obj in cls.proxies:
-            cls.proxies.remove(obj)
+            cls.proxies.remove(id(obj))
 
     @classmethod
     def processCommand(cls, schid, command):
