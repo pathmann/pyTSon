@@ -305,7 +305,7 @@ class PluginHost(object):
     def infoData(cls, schid, aid, atype):
         ret = []
         for key, p in cls.active.items():
-            if p.infoTitle is not None:
+            if p.infoTitle is not None and hasattr(p, "infoData"):
                 try:
                     ret.append(p.infoTitle)
                     ret += p.infoData(schid, aid, atype)
