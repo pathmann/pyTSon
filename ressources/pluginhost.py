@@ -307,7 +307,8 @@ class PluginHost(object):
         for key, p in cls.active.items():
             if p.infoTitle is not None and hasattr(p, "infoData"):
                 try:
-                    ret.append(p.infoTitle)
+                    if p.infoTitle != "":
+                        ret.append(p.infoTitle)
                     ret += p.infoData(schid, aid, atype)
                 except:
                     err = ts3lib.logMessage("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.infoData", 0)
