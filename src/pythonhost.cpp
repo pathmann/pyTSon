@@ -13,6 +13,8 @@
 #include "ts3logdispatcher.h"
 #include "ts3lib.h"
 
+#include "pythonqt/pythonqtpytson.h"
+#include "pythonqt/eventfilterobject.h"
 
 #if defined(Q_OS_WIN)
   #define INTERPRETER "python.exe"
@@ -235,6 +237,14 @@ bool PythonHost::setModuleSearchpath(QString& error) {
   return true;
 }
 
+void PythonHost::initPythonQt() {
+  PythonQt::init(PythonQt::PythonAlreadyInitialized);
+  PythonQt_QtAll::init();
+
+  PythonQt::self()->registerClass(&EventFilterObject::staticMetaObject, "pytson");
+  PythonQt::self()->addDecorators(new pytsondecorator());
+}
+
 bool PythonHost::init(QString& error) {
   if (!setupDirectories(error))
     return false;
@@ -261,8 +271,7 @@ bool PythonHost::init(QString& error) {
   if (!setSysPath(error))
     return false;
 
-  PythonQt::init(PythonQt::PythonAlreadyInitialized);
-  PythonQt_QtAll::init();
+  initPythonQt();
 
   m_trace = PyImport_ImportModule("traceback");
   if (!m_trace) {

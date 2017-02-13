@@ -17,14 +17,18 @@ SOURCES += pytson.cpp \
     pythonhost.cpp \
     global_shared.cpp \
     ts3logdispatcher.cpp \
-    pyconversion.cpp
+    pyconversion.cpp \
+    pythonqt/pythonqtpytson.cpp \
+    pythonqt/eventfilterobject.cpp
 
 HEADERS += pytson.h \
     pythonhost.h \
     singleton.h \
     global_shared.h \
     ts3logdispatcher.h \
-    pyconversion.h
+    pyconversion.h \
+    pythonqt/pythonqtpytson.h \
+    pythonqt/eventfilterobject.h
 
 OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../templates/ts3lib.cpp.tpl \
@@ -41,7 +45,8 @@ OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../ressources/pytson.py \
     ../ressources/ts3client.py \
     ../ressources/ts3plugin.py \
-    ../ressources/pluginhost.py
+    ../ressources/pluginhost.py \
+    ../ressources/pythonqtpytson.py
 
 
 unix:!mac {

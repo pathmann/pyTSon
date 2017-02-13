@@ -44,6 +44,8 @@ class PythonHost: public singleton<PythonHost> {
     bool setSysPath(QString& error);
 
     QString formatError(const QString& fallback);
+
+    void initPythonQt();
   private:
     PythonHost();
     ~PythonHost();
