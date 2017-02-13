@@ -1279,7 +1279,7 @@ class Serverview(QTreeView):
         super().__init__(parent)
 
         try:
-            model = ServerviewModel(schid, None, self)
+            self.svmodel = ServerviewModel(schid, None, self)
             delegate = ServerviewDelegate(self)
         except Exception as e:
             self.delete()
@@ -1288,7 +1288,17 @@ class Serverview(QTreeView):
         self.header().hide()
 
         self.setItemDelegate(delegate)
-        self.setModel(model)
+        self.setModel(self.svmodel)
 
         self.expandAll()
+
+    def indexToObject(self, index):
+        """
+        Returns the underlying object of a QModelIndex.
+        @param index: the index of the model
+        @type index: QModelIndex
+        @return: the wrapped viewitem
+        @rtype: Server or Channel or Client
+        """
+        return self.svmodel._indexObject(index)
 
