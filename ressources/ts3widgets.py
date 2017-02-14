@@ -958,6 +958,21 @@ class ServerviewModel(QAbstractItemModel):
         newpar.append(chan)
         self.endMoveRows()
 
+    def onDelChannelEvent(self, schid, cid, invokerID, invokerName, invokerUniqueIdentifier):
+        if schid != self.schid:
+            return
+
+        chan = self.allchans[cid]
+        row = chan.rowOf()
+        paridx = self._createIndex(chan.parentNode.rowOf(), 0, chan.parentNode)
+
+        self.beginRemoveRows(paridx, row, row)
+        chan.parentNode.remove(chan)
+        del self.allchans[cid]
+        if id(chan) in self.objs:
+            del self.objs[id(chan)]
+        self.endRemoveRows()
+
     def onClientMoveEvent(self, schid, clientID, oldChannelID, newChannelID, visibility, moveMessage):
         if schid != self.schid:
             return
