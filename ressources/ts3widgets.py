@@ -1047,7 +1047,7 @@ class ServerviewModel(QAbstractItemModel):
         self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID, visibility, "")
 
     def onClientDisplayNameChanged(self, schid, clientID, displayName, uniqueClientIdentifier):
-        self.onUpdateClientEvent(self, schid, clientID, 0, "", "")
+        self.onUpdateClientEvent(schid, clientID, 0, "", "")
 
     def onTalkStatusChangeEvent(self, schid, status, isReceivedWhisper, clientID):
         if schid != self.schid:
