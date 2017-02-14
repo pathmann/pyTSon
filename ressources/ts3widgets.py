@@ -993,7 +993,8 @@ class ServerviewModel(QAbstractItemModel):
             self.beginRemoveRows(oldidx, oldrow, oldrow)
             oldchan.remove(obj)
             del self.allclients[clientID]
-            del self.objs[id(obj)]
+            if id(obj) in self.objs:
+                del self.objs[id(obj)]
             self.endRemoveRows()
 
     def onChannelUnsubscribeEvent(self, schid, channelID):
@@ -1008,7 +1009,8 @@ class ServerviewModel(QAbstractItemModel):
         for c in clients:
             chan.remove(c)
             del self.allclients[c.clid]
-            del self.objs[id(c)]
+            if id(c) in self.objs:
+                del self.objs[id(c)]
         self.endRemoveRows()
 
         chan.update()
