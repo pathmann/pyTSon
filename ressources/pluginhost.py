@@ -382,7 +382,7 @@ class PluginHost(object):
         loadall = cls.cfg.getboolean("general", "loadAllMenus")
         menustates = []
 
-        for key, p in cls.plugins.items():
+        for key, p in sorted(cls.plugins.items()):
             for (atype, locid, text, icon) in p.menuItems:
                 if p.name in cls.active:
                     cls.menus[nextid] = (cls.active[p.name], locid)
