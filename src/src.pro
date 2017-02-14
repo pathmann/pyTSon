@@ -46,7 +46,8 @@ OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../ressources/ts3client.py \
     ../ressources/ts3plugin.py \
     ../ressources/pluginhost.py \
-    ../ressources/pythonqtpytson.py
+    ../ressources/pythonqtpytson.py \
+    ../ressources/ts3widgets.py
 
 
 unix:!mac {

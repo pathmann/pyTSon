@@ -8,7 +8,7 @@ from PythonQt.QtCore import Qt, QAbstractItemModel, QModelIndex, QSize
 from PythonQt.QtGui import QStyledItemDelegate, QStyle, QFont, QFontMetrics, QApplication, QIcon, QBrush, QColor, QTreeView
 
 
-def _errprint(msg, errcode, aid, secid):
+def _errprint(msg, errcode, aid, secid=None):
     if secid:
         err = ts3lib.logMessage("%s (%s): %s" % (msg, secid, errcode), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ts3widgets", aid)
     else:
