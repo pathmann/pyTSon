@@ -41,15 +41,6 @@ void freeBookmarkList(struct PluginBookmarkList* list) {
   ts3_funcs.freeMemory(list);
 }
 
-/*
-# coding: utf-8
-
-class ts3:
-    """
-
-    """
-
-*/
 
 #ifndef PYTSON_PARSER
 static PyMethodDef ts3modfuncs[] = {
@@ -79,13 +70,12 @@ PyMODINIT_FUNC PyInit_ts3lib(void) {
 
 PyObject* getPluginID(PyObject* /*self*/, PyObject* args) {
   /*
-    @staticmethod
-    def getPluginID():
-        """
-        Returns pyTSon's plugin id
-        @return: the plugin id
-        @rtype: string
-        """
+def getPluginID():
+    """
+    Returns pyTSon's plugin id
+    @return: the plugin id
+    @rtype: string
+    """
   */
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
@@ -98,15 +88,14 @@ PyObject* {{f.name}}(PyObject* /*self*/, PyObject* args) {
 {% if f.body == "" %}
   //{{f.signature}}
   /*
-    @staticmethod
-    def {{f.name}}({{f.parameterNames | join(", ")}}):
-        """
-        
-        {% for p in f.parameterNames %}
-        @param {{p}}:
-        @type {{p}}:
-        {% endfor %}
-        """
+def {{f.name}}({{f.parameterNames | join(", ")}}):
+    """
+
+    {% for p in f.parameterNames %}
+    @param {{p}}:
+    @type {{p}}:
+    {% endfor %}
+    """
 
   */
 
