@@ -309,8 +309,8 @@ PyObject* acquireCustomPlaybackData(PyObject* /*self*/, PyObject* args) {
         @type deviceName: string
         @param samples: specifies how long the resultbuffer should be, which is passed to the clientlib
         @type samples: int
-        @return: the errorcode
-        @rtype: int
+        @return: a tuple containing the errorcode and the buffer as list of ints
+        @rtype: tuple(int, list[int])
         """
   */
   char* deviceName;
@@ -548,8 +548,9 @@ PyObject* channelPropertyStringToFlag(PyObject* /*self*/, PyObject* args) {
 
   size_t resultFlag;
   unsigned int res = ts3_funcs.channelPropertyStringToFlag(channelPropertyString, &resultFlag);
-
-  return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* channelset3DAttributes(PyObject* /*self*/, PyObject* args) {
@@ -689,8 +690,9 @@ PyObject* clientPropertyStringToFlag(PyObject* /*self*/, PyObject* args) {
 
   size_t resultFlag;
   unsigned int res = ts3_funcs.clientPropertyStringToFlag(clientPropertyString, &resultFlag);
-
-  return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* closeCaptureDevice(PyObject* /*self*/, PyObject* args) {
@@ -866,7 +868,7 @@ PyObject* destroyServerConnectionHandler(PyObject* /*self*/, PyObject* args) {
         Destroys a server connection handler.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @return: The errorcode
+        @return: the errorcode
         @rtype: int
         """
   */
@@ -1028,7 +1030,10 @@ PyObject* getAvatar(PyObject* /*self*/, PyObject* args) {
   char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getAvatar((uint64)schid, (anyID)clientID, result, (size_t)maxLen);
 
-  PyObject* ret = Py_BuildValue("(Is)", res, result);
+  PyObject* ret;
+  if (res == ERROR_ok)
+    ret = Py_BuildValue("(Is)", res, result);
+  else ret = Py_BuildValue("(Is)", res, NULL);
   CPPDELARR(result);
 
   return ret;
@@ -1054,9 +1059,9 @@ PyObject* getAverageTransferSpeed(PyObject* /*self*/, PyObject* args) {
 
   float result = 0;
   unsigned int res = ts3_funcs.getAverageTransferSpeed((anyID)transferID, &result);
-
-  return Py_BuildValue("(If)", res, result);
-
+  if (res == ERROR_ok)
+    return Py_BuildValue("(If)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getBookmarkList(PyObject* /*self*/, PyObject* args) {
@@ -1264,7 +1269,10 @@ PyObject* getChannelConnectInfo(PyObject* /*self*/, PyObject* args) {
   char* password = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getChannelConnectInfo((uint64)schid, (uint64)channelID, path, password, (size_t)maxLen);
 
-  PyObject* ret = Py_BuildValue("(Iss)", res, path, password);
+  PyObject* ret;
+  if (res == ERROR_ok)
+    ret = Py_BuildValue("(Iss)", res, path, password);
+  else ret = Py_BuildValue("(Iss)", res, NULL, NULL);
   CPPDELARR(path);
   CPPDELARR(password);
 
@@ -1305,7 +1313,9 @@ PyObject* getChannelIDFromChannelNames(PyObject* /*self*/, PyObject* args) {
     free(channelNameArray);
   free(channelNameArray);
 
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getChannelList(PyObject* /*self*/, PyObject* args) {
@@ -1371,8 +1381,9 @@ PyObject* getChannelOfClient(PyObject* /*self*/, PyObject* args) {
 
   uint64 result;
   unsigned int res = ts3_funcs.getChannelOfClient((uint64)schid, (anyID)clientID, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getChannelVariableAsInt(PyObject* /*self*/, PyObject* args) {
@@ -1401,8 +1412,9 @@ PyObject* getChannelVariableAsInt(PyObject* /*self*/, PyObject* args) {
 
   int result;
   unsigned int res = ts3_funcs.getChannelVariableAsInt((uint64)schid, (uint64)channelID, (size_t)flag, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getChannelVariableAsString(PyObject* /*self*/, PyObject* args) {
@@ -1437,7 +1449,7 @@ PyObject* getChannelVariableAsString(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -1468,8 +1480,9 @@ PyObject* getChannelVariableAsUInt64(PyObject* /*self*/, PyObject* args) {
 
   uint64 result;
   unsigned int res = ts3_funcs.getChannelVariableAsUInt64((uint64)schid, (uint64)channelID, (size_t)flag, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientDisplayName(PyObject* /*self*/, PyObject* args) {
@@ -1504,7 +1517,10 @@ PyObject* getClientDisplayName(PyObject* /*self*/, PyObject* args) {
   char* result = CPPALLOC(char, maxLen);
   unsigned int res = ts3_funcs.getClientDisplayName((uint64)schid, (anyID)clientID, result, maxLen);
 
-  PyObject* ret = Py_BuildValue("(Is)", res, result);
+  PyObject* ret;
+  if (res == ERROR_ok)
+    ret = Py_BuildValue("(Is)", res, result);
+  else ret = Py_BuildValue("(Is)", res, NULL);
   CPPDELARR(result);
 
   return ret;
@@ -1530,8 +1546,9 @@ PyObject* getClientID(PyObject* /*self*/, PyObject* args) {
 
   anyID result = 0;
   unsigned int res = ts3_funcs.getClientID((uint64)schid, &result);
-
-  return Py_BuildValue("(II)", res, (unsigned int)result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, (unsigned int)result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientLibVersion(PyObject* /*self*/, PyObject* args) {
@@ -1556,7 +1573,7 @@ PyObject* getClientLibVersion(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -1578,8 +1595,9 @@ PyObject* getClientLibVersionNumber(PyObject* /*self*/, PyObject* args) {
     return NULL;
 
   unsigned int res = ts3_funcs.getClientLibVersionNumber(&result);
-
-  return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientList(PyObject* /*self*/, PyObject* args) {
@@ -1646,8 +1664,9 @@ PyObject* getClientNeededPermission(PyObject* /*self*/, PyObject* args) {
 
   int result;
   unsigned int res = ts3_funcs.getClientNeededPermission((uint64)schid, permissionName, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientSelfVariableAsInt(PyObject* /*self*/, PyObject* args) {
@@ -1673,8 +1692,9 @@ PyObject* getClientSelfVariableAsInt(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.getClientSelfVariableAsInt((uint64)schid, (size_t)flag, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientSelfVariableAsString(PyObject* /*self*/, PyObject* args) {
@@ -1706,7 +1726,7 @@ PyObject* getClientSelfVariableAsString(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -1737,8 +1757,9 @@ PyObject* getClientVariableAsInt(PyObject* /*self*/, PyObject* args) {
 
   int result;
   unsigned int res = ts3_funcs.getClientVariableAsInt((uint64)schid, (anyID)clientID, (size_t)flag, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getClientVariableAsString(PyObject* /*self*/, PyObject* args) {
@@ -1773,7 +1794,7 @@ PyObject* getClientVariableAsString(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -1804,8 +1825,9 @@ PyObject* getClientVariableAsUInt64(PyObject* /*self*/, PyObject* args) {
 
   uint64 result;
   unsigned int res = ts3_funcs.getClientVariableAsUInt64((uint64)schid, (anyID)clientID, (size_t)flag, &result);
-
-  return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getConfigPath(PyObject* /*self*/, PyObject* args) {
@@ -1860,8 +1882,9 @@ PyObject* getConnectionStatus(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.getConnectionStatus((uint64)schid, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getConnectionVariableAsDouble(PyObject* /*self*/, PyObject* args) {
@@ -1888,8 +1911,9 @@ PyObject* getConnectionVariableAsDouble(PyObject* /*self*/, PyObject* args) {
 
   double result;
   unsigned int res = ts3_funcs.getConnectionVariableAsDouble((uint64)schid, (anyID)clientID, (size_t)flag, &result);
-
-  return Py_BuildValue("(Id)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Id)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getConnectionVariableAsString(PyObject* /*self*/, PyObject* args) {
@@ -1922,7 +1946,7 @@ PyObject* getConnectionVariableAsString(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -1951,8 +1975,9 @@ PyObject* getConnectionVariableAsUInt64(PyObject* /*self*/, PyObject* args) {
 
   uint64 result;
   unsigned int res = ts3_funcs.getConnectionVariableAsUInt64((uint64)schid, (anyID)clientID, (size_t)flag, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getCurrentCaptureDeviceName(PyObject* /*self*/, PyObject* args) {
@@ -1982,7 +2007,7 @@ PyObject* getCurrentCaptureDeviceName(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Isi)", res, result, isDefault);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Isi)", res, "", isDefault);
+  else pyret = Py_BuildValue("(Iss)", res, NULL, NULL);
 
   return pyret;
 }
@@ -2013,7 +2038,7 @@ PyObject* getCurrentCaptureMode(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2045,7 +2070,7 @@ PyObject* getCurrentPlaybackDeviceName(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Isi)", res, result, isDefault);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Isi)", res, "", isDefault);
+  else pyret = Py_BuildValue("(Iss)", res, NULL, NULL);
 
   return pyret;
 }
@@ -2076,7 +2101,7 @@ PyObject* getCurrentPlayBackMode(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2118,8 +2143,9 @@ PyObject* getCurrentTransferSpeed(PyObject* /*self*/, PyObject* args) {
 
   float result = 0;
   unsigned int res = ts3_funcs.getCurrentTransferSpeed((anyID)transferID, &result);
-
-  return Py_BuildValue("(If)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(If)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getDefaultCaptureDevice(PyObject* /*self*/, PyObject* args) {
@@ -2150,7 +2176,7 @@ PyObject* getDefaultCaptureDevice(PyObject* /*self*/, PyObject* args) {
     ts3_funcs.freeMemory(result[1]);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(I(ss))", res, "", "");
+  else pyret = Py_BuildValue("(I(ss))", res, NULL, NULL);
 
   return pyret;
 }
@@ -2177,7 +2203,7 @@ PyObject* getDefaultCaptureMode(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2210,7 +2236,7 @@ PyObject* getDefaultPlaybackDevice(PyObject* /*self*/, PyObject* args) {
     ts3_funcs.freeMemory(result[1]);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(I(ss))", res, "", "");
+  else pyret = Py_BuildValue("(I(ss))", res, NULL, NULL);
 
   return pyret;
 }
@@ -2237,7 +2263,7 @@ PyObject* getDefaultPlayBackMode(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2306,7 +2332,7 @@ PyObject* getEncodeConfigValue(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2332,9 +2358,12 @@ PyObject* getErrorMessage(PyObject* /*self*/, PyObject* args) {
 
   unsigned int res = ts3_funcs.getErrorMessage((unsigned int)errorCode, &error);
 
-  PyObject* pyret = Py_BuildValue("(Is)", res, error);
-  if (res == ERROR_ok)
+  PyObject* pyret;
+  if (res == ERROR_ok) {
+    pyret = Py_BuildValue("(Is)", res, error);
     ts3_funcs.freeMemory(error);
+  }
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2345,11 +2374,11 @@ PyObject* getHotkeyFromKeyword(PyObject* /*self*/, PyObject* args) {
     @staticmethod
     def getHotkeyFromKeyword(keywords):
         """
-
-        @param keywords:
-        @type keywords:
-        @return:
-        @rtype:
+        Returns a list of hotkeys by its keywords.
+        @param keywords: a list of keywords
+        @type keywords: list[str]
+        @return: a tuple containing the errorcode and the list of hotkeys
+        @rtype: tuple(int, list[str])
         """
   */
   PyObject* pykeywords;
@@ -2417,8 +2446,9 @@ PyObject* getParentChannelOfChannel(PyObject* /*self*/, PyObject* args) {
 
   uint64 result = 0;
   unsigned int res = ts3_funcs.getParentChannelOfChannel((uint64)schid, (uint64)channelID, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getPermissionIDByName(PyObject* /*self*/, PyObject* args) {
@@ -2444,8 +2474,9 @@ PyObject* getPermissionIDByName(PyObject* /*self*/, PyObject* args) {
 
   unsigned int result;
   unsigned int res = ts3_funcs.getPermissionIDByName((uint64)schid, permissionName, &result);
-
-  return Py_BuildValue("(II)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getPlaybackConfigValueAsFloat(PyObject* /*self*/, PyObject* args) {
@@ -2471,8 +2502,9 @@ PyObject* getPlaybackConfigValueAsFloat(PyObject* /*self*/, PyObject* args) {
 
   float result = 0;
   unsigned int res = ts3_funcs.getPlaybackConfigValueAsFloat((uint64)schid, ident, &result);
-
-  return Py_BuildValue("(If)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(If)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getPlaybackDeviceList(PyObject* /*self*/, PyObject* args) {
@@ -2574,13 +2606,11 @@ PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
     @staticmethod
     def getPluginPath(path, maxLen, pluginID):
         """
-        
-        @param path:
-        @type path:
-        @param maxLen:
-        @type maxLen:
-        @param pluginID:
-        @type pluginID:
+        Returns the TeamSpeak 3 client's pluginpath.
+        @param maxLen: the size of the buffer passed to the clientlib. Optional, defaults to 256
+        @type maxLen: int
+        @return: the pluginpath
+        @rtype: str
         """
 
   */
@@ -2632,7 +2662,7 @@ PyObject* getPreProcessorConfigValue(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2660,8 +2690,9 @@ PyObject* getPreProcessorInfoValueFloat(PyObject* /*self*/, PyObject* args) {
 
   float result = 0;
   unsigned int res = ts3_funcs.getPreProcessorInfoValueFloat((uint64)schid, ident, &result);
-
-  return Py_BuildValue("(If)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(If)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getProfileList(PyObject* /*self*/, PyObject* args) {
@@ -2705,7 +2736,7 @@ PyObject* getProfileList(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(IiO)", res, defaultProfileIdx, pyresult);
     Py_DECREF(pyresult);
   }
-  else pyret = Py_BuildValue("(Iis)", res, NULL);
+  else pyret = Py_BuildValue("(Iss)", res, NULL, NULL);
 
   return pyret;
 }
@@ -2717,7 +2748,7 @@ PyObject* getResourcesPath(PyObject* /*self*/, PyObject* args) {
     def getResourcesPath(maxLen = 256):
         """
         Returns the ts3 resources path.
-        @param maxLen: length of the buffer, passed to the clientlib to store the path to, default value is 256
+        @param maxLen: length of the buffer, passed to the clientlib to store the path to. Optional, defaults to 256
         @type maxLen: int
         @return: the resources path
         @rtype: string
@@ -2776,7 +2807,10 @@ PyObject* getServerConnectInfo(PyObject* /*self*/, PyObject* args) {
 
   unsigned res = ts3_funcs.getServerConnectInfo((uint64)schid, host, &port, password, (size_t)maxLen);
 
-  PyObject* ret = Py_BuildValue("(IsHs)", res, host, port, password);
+  PyObject* ret;
+  if (res == ERROR_ok)
+    ret = Py_BuildValue("(IsHs)", res, host, port, password);
+  else ret = Py_BuildValue("(Isss)", res, NULL, NULL, NULL);
   CPPDELARR(host);
   CPPDELARR(password);
 
@@ -2843,8 +2877,9 @@ PyObject* getServerVariableAsInt(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.getServerVariableAsInt((uint64)schid, (size_t)flag, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getServerVariableAsString(PyObject* /*self*/, PyObject* args) {
@@ -2876,7 +2911,7 @@ PyObject* getServerVariableAsString(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2904,8 +2939,9 @@ PyObject* getServerVariableAsUInt64(PyObject* /*self*/, PyObject* args) {
 
   uint64 result = 0;
   unsigned int res = ts3_funcs.getServerVariableAsUInt64((uint64)schid, (size_t)flag, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getServerVersion(PyObject* /*self*/, PyObject* args) {
@@ -2955,7 +2991,7 @@ PyObject* getTransferFileName(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -2986,7 +3022,7 @@ PyObject* getTransferFilePath(PyObject* /*self*/, PyObject* args) {
     pyret = Py_BuildValue("(Is)", res, result);
     ts3_funcs.freeMemory(result);
   }
-  else pyret = Py_BuildValue("(Is)", res, "");
+  else pyret = Py_BuildValue("(Is)", res, NULL);
 
   return pyret;
 }
@@ -3011,8 +3047,9 @@ PyObject* getTransferFileSize(PyObject* /*self*/, PyObject* args) {
 
   uint64 result = 0;
   unsigned int res = ts3_funcs.getTransferFileSize((anyID)transferID, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getTransferFileSizeDone(PyObject* /*self*/, PyObject* args) {
@@ -3035,8 +3072,9 @@ PyObject* getTransferFileSizeDone(PyObject* /*self*/, PyObject* args) {
 
   uint64 result = 0;
   unsigned int res = ts3_funcs.getTransferFileSizeDone((anyID)transferID, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getTransferRunTime(PyObject* /*self*/, PyObject* args) {
@@ -3059,8 +3097,9 @@ PyObject* getTransferRunTime(PyObject* /*self*/, PyObject* args) {
 
   uint64 result = 0;
   unsigned int res = ts3_funcs.getTransferRunTime((anyID)transferID, &result);
-
-  return Py_BuildValue("(IK)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* getTransferStatus(PyObject* /*self*/, PyObject* args) {
@@ -3083,9 +3122,9 @@ PyObject* getTransferStatus(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.getTransferStatus((anyID)transferID, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
-
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* guiConnect(PyObject* /*self*/, PyObject* args) {
@@ -3145,8 +3184,9 @@ PyObject* guiConnect(PyObject* /*self*/, PyObject* args) {
 
   uint64 schid;
   unsigned int res = ts3_funcs.guiConnect((enum PluginConnectTab)connectTab, serverLabel, serverAddress, serverPassword, nickname, channel, channelPassword, captureProfile, playbackProfile, hotkeyProfile, soundProfile, userIdentity, oneTimeKey, phoneticName, &schid);
-
-  return Py_BuildValue("(IK)", res, schid);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, schid);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* guiConnectBookmark(PyObject* /*self*/, PyObject* args) {
@@ -3172,8 +3212,9 @@ PyObject* guiConnectBookmark(PyObject* /*self*/, PyObject* args) {
 
   uint64 schid;
   unsigned int res = ts3_funcs.guiConnectBookmark((enum PluginConnectTab)connectTab, bookmarkuuid, &schid);
-
-  return Py_BuildValue("(IK)", res, schid);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, schid);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* haltTransfer(PyObject* /*self*/, PyObject* args) {
@@ -3191,8 +3232,8 @@ PyObject* haltTransfer(PyObject* /*self*/, PyObject* args) {
         @type deleteUnfinishedFile: int or bool
         @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
         @type returnCode: string
-        @return:
-        @rtype:
+        @return: the errorcode
+        @rtype: int
         """
   */
   unsigned long long schid;
@@ -3204,7 +3245,6 @@ PyObject* haltTransfer(PyObject* /*self*/, PyObject* args) {
     return NULL;
 
   unsigned int res = ts3_funcs.haltTransfer((uint64)schid, (anyID)transferID, deleteUnfinishedFile, returnCode);
-
   return Py_BuildValue("I", res);
 }
 
@@ -3255,9 +3295,9 @@ PyObject* isReceivingWhisper(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.isReceivingWhisper((uint64)schid, (anyID)clientID, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
-
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* isTransferSender(PyObject* /*self*/, PyObject* args) {
@@ -3280,8 +3320,9 @@ PyObject* isTransferSender(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.isTransferSender((anyID)transferID, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* isWhispering(PyObject* /*self*/, PyObject* args) {
@@ -3305,8 +3346,9 @@ PyObject* isWhispering(PyObject* /*self*/, PyObject* args) {
 
   int result = 0;
   unsigned int res = ts3_funcs.isWhispering((uint64)schid, (anyID)clientID, &result);
-
-  return Py_BuildValue("(Ii)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(Ii)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* logMessage(PyObject* /*self*/, PyObject* args) {
@@ -3480,8 +3522,9 @@ PyObject* playWaveFileHandle(PyObject* /*self*/, PyObject* args) {
 
   uint64 waveHandle;
   unsigned int res = ts3_funcs.playWaveFileHandle((uint64)schid, path, loop, &waveHandle);
-
-  return Py_BuildValue("(IK)", res, (unsigned long long)waveHandle);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, (unsigned long long)waveHandle);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* printMessage(PyObject* /*self*/, PyObject* args) {
@@ -4608,8 +4651,8 @@ PyObject* requestClientKickFromServer(PyObject* /*self*/, PyObject* args) {
         @type kickReason: string
         @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
         @type returnCode: string
-        @return:
-        @rtype:
+        @return: the errorcode
+        @rtype: int
         """
   */
   unsigned long long schid;
@@ -5058,8 +5101,8 @@ PyObject* requestCreateDirectory(PyObject* /*self*/, PyObject* args) {
         @type directoryPath: string
         @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
         @type returnCode: string
-        @return:
-        @rtype:
+        @return: the errorcode
+        @rtype: int
         """
   */
   unsigned long long schid;
@@ -5162,8 +5205,9 @@ PyObject* requestFile(PyObject* /*self*/, PyObject* args) {
 
   anyID result = 0;
   unsigned int res = ts3_funcs.requestFile((uint64)schid, (uint64)channelID, channelPW, file, overwrite, resume, destinationDirectory, &result, returnCode);
-
-  return Py_BuildValue("(II)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* requestFileInfo(PyObject* /*self*/, PyObject* args) {
@@ -5242,13 +5286,13 @@ PyObject* requestHotkeyInputDialog(PyObject* /*self*/, PyObject* args) {
     @staticmethod
     def requestHotkeyInputDialog(keyword, isDown, qParentWindow):
         """
-
-        @param keyword:
-        @type keyword:
-        @param isDown:
-        @type isDown:
-        @param qParentWindow:
-        @type qParentWindow:
+        Shows the hotkeyinputdialog to set the hotkey for a hotkey keyword.
+        @param keyword: the global keyword (see PluginHost.globalHotkeyKeyword)
+        @type keyword: str
+        @param isDown: if True, the hotkey will be triggered on keypress, on keyrelease otherwise
+        @type isDown: bool
+        @param qParentWindow: the window on which the dialog is shown modal to, optional
+        @type qParentWindow: QWidget
         """
   */
   char* keyword;
@@ -5934,8 +5978,8 @@ PyObject* requestServerGroupDel(PyObject* /*self*/, PyObject* args) {
         @type force: int or bool
         @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
         @type returnCode: string
-        @return:
-        @rtype:
+        @return: the errorcode
+        @rtype: int
         """
   */
   unsigned long long schid;
@@ -6164,8 +6208,8 @@ PyObject* requestServerTemporaryPasswordDel(PyObject* /*self*/, PyObject* args) 
         @type password: string
         @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
         @type returnCode: string
-        @return:
-        @rtype:
+        @return: the errorcode
+        @rtype: int
         """
   */
   unsigned long long schid;
@@ -6373,8 +6417,9 @@ PyObject* sendFile(PyObject* /*self*/, PyObject* args) {
 
   anyID result = 0;
   unsigned int res = ts3_funcs.sendFile((uint64)schid, (uint64)channelID, channelPW, file, overwrite, resume, sourceDirectory, &result, returnCode);
-
-  return Py_BuildValue("(II)", res, result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* sendPluginCommand(PyObject* /*self*/, PyObject* args) {
@@ -6436,8 +6481,9 @@ PyObject* serverPropertyStringToFlag(PyObject* /*self*/, PyObject* args) {
 
   size_t resultFlag;
   unsigned int res = ts3_funcs.serverPropertyStringToFlag(serverPropertyString, &resultFlag);
-
-  return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(II)", res, (unsigned int)resultFlag);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* set3DWaveAttributes(PyObject* /*self*/, PyObject* args) {
@@ -6453,7 +6499,7 @@ PyObject* set3DWaveAttributes(PyObject* /*self*/, PyObject* args) {
         @type waveHandle: int
         @param position: A tuple defining the 3D position of the sound
         @type position: tuple (float, float, float)
-        @return: the errorcod
+        @return: the errorcode
         @rtype: int
         """
   */
@@ -6740,7 +6786,7 @@ PyObject* showHotkeySetup(PyObject* /*self*/, PyObject* args) {
     @staticmethod
     def showHotkeySetup():
         """
-
+        Opens the hotkey settings in the TeamSpeak 3 client's settings dialog.
         """
   */
   if (!PyArg_ParseTuple(args, ""))
@@ -6770,8 +6816,9 @@ PyObject* spawnNewServerConnectionHandler(PyObject* /*self*/, PyObject* args) {
 
   uint64 result;
   unsigned int res = ts3_funcs.spawnNewServerConnectionHandler(port, &result);
-
-  return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  if (res == ERROR_ok)
+    return Py_BuildValue("(IK)", res, (unsigned long long)result);
+  else return Py_BuildValue("(Is)", res, NULL);
 }
 
 PyObject* startConnection(PyObject* /*self*/, PyObject* args) {
