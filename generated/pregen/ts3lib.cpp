@@ -5123,7 +5123,7 @@ PyObject* requestHotkeyInputDialog(PyObject* /*self*/, PyObject* args) {
   /*
 def requestHotkeyInputDialog(keyword, isDown, qParentWindow):
     """
-    Shows the hotkeyinputdialog to set the hotkey for a hotkey keyword.
+    Shows the hotkeyinputdialog to set the hotkey for a hotkey keyword. When finished ts3plugin.onHotkeyRecordedEvent will be called with the recorded hotkey.
     @param keyword: the global keyword (see PluginHost.globalHotkeyKeyword)
     @type keyword: str
     @param isDown: if True, the hotkey will be triggered on keypress, on keyrelease otherwise
