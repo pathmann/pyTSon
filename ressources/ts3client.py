@@ -183,7 +183,8 @@ class IconPack(object):
     def _loadEmoticonSettings(self, f):
         self.emos.clear()
         for line in f:
-            line = line.decode('utf-8')
+            if self.zip:
+                line = line.decode('utf-8')
             e = line.split('=')
             if len(e) == 2:
                 txt = e[1].strip()
