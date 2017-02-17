@@ -67,7 +67,7 @@ class Config(object):
             Config.instance = None
 
     def __getattr__(self, name):
-        return getattr(self.instance, name)
+        return getattr(Config.instance, name)
 
 
 class IconPack(object):
