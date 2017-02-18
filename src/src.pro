@@ -19,7 +19,8 @@ SOURCES += pytson.cpp \
     ts3logdispatcher.cpp \
     pyconversion.cpp \
     pythonqt/pythonqtpytson.cpp \
-    pythonqt/eventfilterobject.cpp
+    pythonqt/eventfilterobject.cpp \
+    ts3callbackarguments.cpp
 
 HEADERS += pytson.h \
     pythonhost.h \
@@ -28,7 +29,8 @@ HEADERS += pytson.h \
     ts3logdispatcher.h \
     pyconversion.h \
     pythonqt/pythonqtpytson.h \
-    pythonqt/eventfilterobject.h
+    pythonqt/eventfilterobject.h \
+    ts3callbackarguments.h
 
 OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../templates/ts3lib.cpp.tpl \
