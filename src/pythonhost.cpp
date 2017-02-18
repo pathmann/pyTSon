@@ -1077,7 +1077,6 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
 }
 
 void PythonHost::onCallInMainThread(ts3callbackarguments* args) {
-  qDebug() << "calling queued";
   if (std::this_thread::get_id() == m_mainthread) {
     if (!isReady()) {
       ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, PythonHost not ready anymore"), LogLevel_ERROR);
