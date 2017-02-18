@@ -199,6 +199,38 @@ class ts3plugin(object):
         @return: True, if the plugin handled the error, so the client will ignore it. If no returnCode was passed, this return value will be ignored
         @rtype: bool
         """
+
+    def onUserLoggingMessageEvent(self, logMessage, logLevel, logChannel, logID, logTime, completeLogString):
+        """
+        This is called whenever a message is added to the clientlog. You should not call ts3lib.logMessage in this event to prevent infinite loops. This event can be called asynchronous if called from another thread than the mainthread.
+        @param logMessage: the message that has been logged
+        @type logMessage: str
+        @param logLevel: the level of the message (see ts3defines.LogLevel)
+        @type logLevel: int
+        @param logChannel: the logchannel of the message
+        @type logChannel: str
+        @param logID: the id of the server connection handler it the message is connected to one, otherwise set to 0
+        @type logID: int
+        @param logTime: the time of the message as unix timestamp
+        @type logTime: int
+        @param completeLogString: all infos concatenated as string
+        @type completeLogString: str
+        """
+
+    def onFileTransferStatusEvent(self, transferID, status, statusMessage, remotefileSize, schid):
+        """
+        This is called whenever a filetransfer's status changed. This event is called asynchronous.
+        @param transferID: the id of the filetransfer
+        @type transferID: int
+        @param status: the new status
+        @type status: int
+        @param statusMessage: a statusmessage
+        @type statusMessage: str
+        @param remotefileSize: size of the file on the remote site (if uploading, this is the incompletefilesize)
+        @type remotefileSize: int
+        @param schid: the ID of the serverconnection
+        @type schid: int
+        """
 */
 
 void ts3plugin_currentServerConnectionChanged(uint64 serverConnectionHandlerID) {
