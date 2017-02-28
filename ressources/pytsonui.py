@@ -148,7 +148,7 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
             _ts3print("Error loading iconpack: %s" % e, ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.retrieveAllWidgets.%s" % obj.objectName, 0)
 
     for c in parent.children():
-        if c.isWidgetType() and c.objectName != "" and type(c) not in [QSplitterHandle] and c.objectName not in ["qt_scrollarea_viewport", "qt_scrollarea_hcontainer", "qt_scrollarea_vcontainer", "qt_spinbox_lineedit"]:
+        if c.isWidgetType() and c.objectName != "" and type(c) not in [QSplitterHandle] and c.objectName not in ["qt_scrollarea_viewport", "qt_scrollarea_hcontainer", "qt_scrollarea_vcontainer", "qt_spinbox_lineedit", "qt_toolbox_toolboxbutton"]:
             if hasattr(obj, c.objectName):
                 raise Exception("Widget objectName %s is not unique %s" % (c.objectName, type(c)))
             setattr(obj, c.objectName, c)
