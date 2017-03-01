@@ -246,6 +246,8 @@ void PythonHost::initPythonQt() {
 }
 
 bool PythonHost::init(QString& error) {
+  qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
+
   m_mainthread = std::this_thread::get_id();
   connect(this, &PythonHost::callInMainThread, this, &PythonHost::onCallInMainThread, Qt::QueuedConnection);
 
@@ -1038,16 +1040,13 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
     va_start(vl, format);
 
     if (std::this_thread::get_id() != m_mainthread) {
-      ts3callbackarguments* cbargs = new ts3callbackarguments();
-      if (cbargs->init(error, format, vl)) {
+      ts3callbackarguments cbargs;
+      if (cbargs.init(error, format, vl)) {
         emit callInMainThread(cbargs);
         error = QObject::tr("Event is queued");
         return true;
       }
-      else {
-        delete cbargs;
-        return false;
-      }
+      else return false;
     }
     else {
       args = Py_VaBuildValue(format, vl);
@@ -1076,14 +1075,14 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
   return true;
 }
 
-void PythonHost::onCallInMainThread(ts3callbackarguments* args) {
+void PythonHost::onCallInMainThread(const ts3callbackarguments args) {
   if (std::this_thread::get_id() == m_mainthread) {
     if (!isReady()) {
       ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, PythonHost not ready anymore"), LogLevel_ERROR);
     }
     else {
       QString err;
-      PyObject* pyargs = args->toPythonTuple(err);
+      PyObject* pyargs = args.toPythonTuple(err);
 
       if (!pyargs)
         ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, error creating argument tuple: \"%1\"").arg(err), LogLevel_ERROR);
@@ -1098,6 +1097,4 @@ void PythonHost::onCallInMainThread(ts3callbackarguments* args) {
     }
   }
   else ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, not in mainthread"), LogLevel_ERROR);
-
-  delete args;
 }

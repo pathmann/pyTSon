@@ -44,9 +44,9 @@ class PythonHost: public QObject, public singleton<PythonHost> {
     bool callMethod(PyObject** ret, QString& error, const char* format, ...);
 
   signals:
-    void callInMainThread(ts3callbackarguments* args);
+    void callInMainThread(const ts3callbackarguments args);
   protected slots:
-    void onCallInMainThread(ts3callbackarguments* args);
+    void onCallInMainThread(const ts3callbackarguments args);
   protected:
     bool setupDirectories(QString& error);
     bool isReady();
