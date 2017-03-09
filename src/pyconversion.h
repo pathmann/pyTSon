@@ -215,7 +215,6 @@ inline bool pyListToArray<char*>(PyObject* list, QString& error, char*** ret, bo
   }
   else *ret = (char**)malloc(sizeof(char*) * len);
 
-  *ret = (char**)malloc(sizeof(char*) * len);
   PyObject* item;
   const char* str;
   for (unsigned int i = 0; i < len; ++i) {
