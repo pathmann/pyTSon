@@ -37,19 +37,24 @@ OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../templates/ts3plugin.h.tpl \
     ../templates/ts3plugin.cpp.tpl \
     ../templates/ts3defines.py.tpl \
-    ../ressources/pyTSon-configdialog.ui \
-    ../ressources/repository.ui \
-    ../ressources/repository-manager.ui \
-    ../ressources/installer.ui \
-    ../ressources/pytsonui.py \
-    ../ressources/devtools.py \
+    ../ressources/ui/pyTSon-configdialog.ui \
+    ../ressources/ui/repository.ui \
+    ../ressources/ui/repository-manager.ui \
+    ../ressources/ui/installer.ui \
+    ../ressources/python/pytsonui/__init__.py \
+    ../ressources/python/pytsonui/console.py \
+    ../ressources/python/pytsonui/config.py \
+    ../ressources/python/pytsonui/dialogs.py \
+    ../ressources/python/pytsonui/repository.py \
+    ../ressources/python/devtools.py \
     ../ressources/repositorymaster.json \
-    ../ressources/pytson.py \
-    ../ressources/ts3client.py \
-    ../ressources/ts3plugin.py \
-    ../ressources/pluginhost.py \
-    ../ressources/pythonqtpytson.py \
-    ../ressources/ts3widgets.py
+    ../ressources/python/pytson.py \
+    ../ressources/python/ts3client.py \
+    ../ressources/python/ts3plugin.py \
+    ../ressources/python/pluginhost.py \
+    ../ressources/python/pythonqtpytson.py \
+    ../ressources/python/ts3widgets/__init__.py \
+    ../ressources/python/ts3widgets/serverview.py
 
 
 unix:!mac {
