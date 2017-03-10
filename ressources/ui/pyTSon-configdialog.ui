@@ -250,12 +250,12 @@
              <string>Bac&amp;kground:</string>
             </property>
             <property name="buddy">
-             <cstring>backgroundColorButton</cstring>
+             <cstring>bgColorButton</cstring>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QToolButton" name="backgroundColorButton">
+           <widget class="QToolButton" name="bgColorButton">
             <property name="text">
              <string/>
             </property>

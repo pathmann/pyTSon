@@ -2,15 +2,21 @@
 Module PythonQt.pytson
 """
 
+from PythonQt.QtCore import QObject
+
+
 class EventFilterObject(QObject):
     """
-    Class to install as eventfilter on QObject-based objects. Connect to the signal eventFiltered(QObject*, QEvent*) to receive the filtered event per installEventFilter.
+    Class to install as eventfilter on QObject-based objects. Connect to the
+    signal eventFiltered(QObject*, QEvent*) to receive the filtered event per
+    installEventFilter.
     """
 
     def __init__(self, typelist=list(), parent=None):
         """
         Instantiates a new object.
-        @param typelist: list of Eventtypes to filter (see QEvent::Type). Defaults to an empty list.
+        @param typelist: list of Eventtypes to filter (see QEvent::Type).
+        Defaults to an empty list.
         @type typelist: list(int)
         @param parent: QObject-parent
         @type parent: QObject
@@ -19,7 +25,8 @@ class EventFilterObject(QObject):
 
     def setFilterResult(self, val):
         """
-        Sets the return value the object should return in the eventFilter-method. If not set, False will be returned
+        Sets the return value the object should return in the
+        eventFilter-method. If not set, False will be returned
         @param val: the value
         @type val: bool
         """
@@ -48,4 +55,3 @@ class EventFilterObject(QObject):
         @type eventtype: int
         """
         pass
-

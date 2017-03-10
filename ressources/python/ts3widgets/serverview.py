@@ -1,18 +1,26 @@
 from ts3plugin import PluginHost
 
-import ts3lib, ts3defines, pytson
+import ts3lib
+import ts3defines
+
 import ts3client
+
 import re
 
-from PythonQt.QtCore import Qt, QAbstractItemModel, QModelIndex, QSize
-from PythonQt.QtGui import QStyledItemDelegate, QStyle, QFont, QFontMetrics, QApplication, QIcon, QBrush, QColor, QTreeView
+from PythonQt.QtCore import Qt, QAbstractItemModel, QModelIndex
+from PythonQt.QtGui import (QStyledItemDelegate, QStyle, QFontMetrics,
+                            QApplication, QIcon, QColor, QTreeView)
 
 
 def _errprint(msg, errcode, aid, secid=None):
     if secid:
-        err = ts3lib.logMessage("%s (%s): %s" % (msg, secid, errcode), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ts3widgets", aid)
+        err = ts3lib.logMessage("%s (%s): %s" % (msg, secid, errcode),
+                                ts3defines.LogLevel.LogLevel_ERROR,
+                                "pyTSon.ts3widgets", aid)
     else:
-        err = ts3lib.logMessage("%s: %s" % (msg, errcode), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.ts3widgets", aid)
+        err = ts3lib.logMessage("%s: %s" % (msg, errcode),
+                                ts3defines.LogLevel.LogLevel_ERROR,
+                                "pyTSon.ts3widgets", aid)
 
     if err != ts3defines.ERROR_ok:
         if secid:
@@ -23,15 +31,16 @@ def _errprint(msg, errcode, aid, secid=None):
 
 class ServerViewRoles:
     """
-    Additional roles used in ServerviewModel to deliver icons and spacer properties.
+    Additional roles used in ServerviewModel to deliver icons and spacer
+    properties.
     """
 
     itemtype = Qt.UserRole
-    statusicons = Qt.UserRole +1
-    isspacer = Qt.UserRole +2
-    spacertype = Qt.UserRole +3
-    spaceralignment = Qt.UserRole +4
-    spacercustomtext = Qt.UserRole +5
+    statusicons = Qt.UserRole + 1
+    isspacer = Qt.UserRole + 2
+    spacertype = Qt.UserRole + 3
+    spaceralignment = Qt.UserRole + 4
+    spacercustomtext = Qt.UserRole + 5
 
 
 class Channel(object):
@@ -59,8 +68,10 @@ class Channel(object):
             if so == 0:
                 self.subchans.insert(0, obj)
             else:
-                self.subchans.insert(self.subchans.index(self.allsubchans[so]) +1, obj)
-                #if exists, the sortorder of the previous successor is not valid anymore, as long it is not updated
+                self.subchans.insert(self.subchans.index(
+                    self.allsubchans[so]) + 1, obj)
+                # if exists, the sortorder of the previous successor is not
+                # valid anymore, as long it is not updated
         else:
             self.subchans.append(obj)
 
@@ -99,7 +110,8 @@ class Channel(object):
                     if obj.sortOrder == 0:
                         return 0
                     else:
-                        return self.subchans.index(self.allsubchans[obj.sortOrder]) +1
+                        return self.subchans.index(
+                            self.allsubchans[obj.sortOrder]) + 1
                 else:
                     return self.subchans.index(obj)
 
@@ -118,7 +130,8 @@ class Channel(object):
         if "name" in self.cache:
             return self.cache["name"]
 
-        err, n = ts3lib.getChannelVariableAsString(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_NAME)
+        err, n = ts3lib.getChannelVariableAsString(self.schid, self.cid,
+                                                   ts3defines.ChannelProperties.CHANNEL_NAME)
         if err != ts3defines.ERROR_ok:
             _errprint("Error getting channel name", err, self.schid, self.cid)
             return "ERROR_GETTING_NAME: %s" % err
@@ -131,22 +144,26 @@ class Channel(object):
         if "sortOrder" in self.cache:
             return self.cache["sortOrder"]
 
-        err, sortOrder = ts3lib.getChannelVariableAsUInt64(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_ORDER)
+        err, so = ts3lib.getChannelVariableAsUInt64(self.schid, self.cid,
+                                                    ts3defines.ChannelProperties.CHANNEL_ORDER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel sortorder", err, self.schid, self.cid)
+            _errprint("Error getting channel sortorder", err, self.schid,
+                      self.cid)
             return 0
         else:
-            self.cache["sortOrder"] = sortOrder
-            return sortOrder
+            self.cache["sortOrder"] = so
+            return so
 
     @property
     def isPermanent(self):
         if "isPermanent" in self.cache:
             return self.cache["isPermanent"]
 
-        err, permanent = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_FLAG_PERMANENT)
+        err, permanent = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                        ts3defines.ChannelProperties.CHANNEL_FLAG_PERMANENT)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel ispermanent flag", err, self.schid, self.cid)
+            _errprint("Error getting channel ispermanent flag", err,
+                      self.schid, self.cid)
             return True
         else:
             self.cache["isPermanent"] = permanent == 1
@@ -226,9 +243,11 @@ class Channel(object):
         if "isPasswordProtected" in self.cache:
             return self.cache["isPasswordProtected"]
 
-        err, p = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_FLAG_PASSWORD)
+        err, p = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelProperties.CHANNEL_FLAG_PASSWORD)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel ispasswordprotected flag", err, self.schid, self.cid)
+            _errprint("Error getting channel ispasswordprotected flag", err,
+                      self.schid, self.cid)
             return False
         else:
             self.cache["isPasswordProtected"] = p == 1
@@ -239,9 +258,11 @@ class Channel(object):
         if "isSubscribed" in self.cache:
             return self.cache["isSubscribed"]
 
-        err, sub = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelPropertiesRare.CHANNEL_FLAG_ARE_SUBSCRIBED)
+        err, sub = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                  ts3defines.ChannelPropertiesRare.CHANNEL_FLAG_ARE_SUBSCRIBED)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel issubscribed flag", err, self.schid, self.cid)
+            _errprint("Error getting channel issubscribed flag", err,
+                      self.schid, self.cid)
             return False
         else:
             self.cache["isSubscribed"] = sub == 1
@@ -252,9 +273,11 @@ class Channel(object):
         if "neededTalkPower" in self.cache:
             return self.cache["neededTalkPower"]
 
-        err, p = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelPropertiesRare.CHANNEL_NEEDED_TALK_POWER)
+        err, p = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelPropertiesRare.CHANNEL_NEEDED_TALK_POWER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel neededtalkpower", err, self.schid, self.cid)
+            _errprint("Error getting channel neededtalkpower", err, self.schid,
+                      self.cid)
             return 0
         else:
             self.cache["neededTalkPower"] = p
@@ -265,9 +288,11 @@ class Channel(object):
         if "isDefault" in self.cache:
             return self.cache["isDefault"]
 
-        err, d = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_FLAG_DEFAULT)
+        err, d = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelProperties.CHANNEL_FLAG_DEFAULT)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel isdefault flag", err, self.schid, self.cid)
+            _errprint("Error getting channel isdefault flag", err, self.schid,
+                      self.cid)
             return False
         else:
             self.cache["isDefault"] = d == 1
@@ -278,9 +303,11 @@ class Channel(object):
         if "iconID" in self.cache:
             return self.cache["iconID"]
 
-        err, i = ts3lib.getChannelVariableAsUInt64(self.schid, self.cid, ts3defines.ChannelPropertiesRare.CHANNEL_ICON_ID)
+        err, i = ts3lib.getChannelVariableAsUInt64(self.schid, self.cid,
+                                                   ts3defines.ChannelPropertiesRare.CHANNEL_ICON_ID)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel iconid", err, self.schid, self.cid)
+            _errprint("Error getting channel iconid", err, self.schid,
+                      self.cid)
             return 0
         else:
             if i < 0:
@@ -294,18 +321,22 @@ class Channel(object):
         if "maxClients" in self.cache:
             return self.cache["maxClients"]
 
-        err, m = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelPropertiesRare.CHANNEL_FLAG_MAXCLIENTS_UNLIMITED)
+        err, m = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelPropertiesRare.CHANNEL_FLAG_MAXCLIENTS_UNLIMITED)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel maxclientsunlimited flag", err, self.schid, self.cid)
+            _errprint("Error getting channel maxclientsunlimited flag", err,
+                      self.schid, self.cid)
             return 300
         else:
             if m == 1:
                 self.cache["maxClients"] = -1
                 return -1
 
-        err, m = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_MAXCLIENTS)
+        err, m = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelProperties.CHANNEL_MAXCLIENTS)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting channel maxclients", err, self.schid, self.cid)
+            _errprint("Error getting channel maxclients", err, self.schid,
+                      self.cid)
             return 0
         else:
             self.cache["maxClients"] = m
@@ -316,7 +347,8 @@ class Channel(object):
         if "codec" in self.cache:
             return self.cache["codec"]
 
-        err, c = ts3lib.getChannelVariableAsInt(self.schid, self.cid, ts3defines.ChannelProperties.CHANNEL_CODEC)
+        err, c = ts3lib.getChannelVariableAsInt(self.schid, self.cid,
+                                                ts3defines.ChannelProperties.CHANNEL_CODEC)
         if err != ts3defines.ERROR_ok:
             _errprint("Error getting channel codec", err, self.schid, self.cid)
             return 0
@@ -402,7 +434,8 @@ class Server(Channel):
         if "name" in self.cache:
             return self.cache["name"]
 
-        err, n = ts3lib.getServerVariableAsString(self.schid, ts3defines.VirtualServerProperties.VIRTUALSERVER_NAME)
+        err, n = ts3lib.getServerVariableAsString(self.schid,
+                                                  ts3defines.VirtualServerProperties.VIRTUALSERVER_NAME)
         if err != ts3defines.ERROR_ok:
             _errprint("Error getting server name", err, self.schid)
             return "ERROR_UNABLE_TO_GET_SERVERNAME"
@@ -415,7 +448,8 @@ class Server(Channel):
         if "iconID" in self.cache:
             return self.cache["iconID"]
 
-        err, i = ts3lib.getServerVariableAsUInt64(self.schid, ts3defines.VirtualServerPropertiesRare.VIRTUALSERVER_ICON_ID)
+        err, i = ts3lib.getServerVariableAsUInt64(self.schid,
+                                                  ts3defines.VirtualServerPropertiesRare.VIRTUALSERVER_ICON_ID)
         if err != ts3defines.ERROR_ok:
             _errprint("Error getting server iconid", err, self.schid)
             return 0
@@ -476,7 +510,8 @@ class Client(object):
         if "name" in self.cache:
             return self.cache["name"]
 
-        err, n = ts3lib.getClientVariableAsString(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_NICKNAME)
+        err, n = ts3lib.getClientVariableAsString(self.schid, self.clid,
+                                                  ts3defines.ClientProperties.CLIENT_NICKNAME)
         if err != ts3defines.ERROR_ok:
             _errprint("Error getting client name", err, self.schid, self.clid)
             return "ERROR_GETTING_NICKNAME: %s" % err
@@ -491,7 +526,8 @@ class Client(object):
 
         err, n = ts3lib.getClientDisplayName(self.schid, self.clid)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client displayname", err, self.schid, self.clid)
+            _errprint("Error getting client displayname", err, self.schid,
+                      self.clid)
             return "ERROR_GETTING_DISPLAYNAME: %s" % err
         else:
             self.cache["displayName"] = n
@@ -502,9 +538,11 @@ class Client(object):
         if "talkPower" in self.cache:
             return self.cache["talkPower"]
 
-        err, p = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_TALK_POWER)
+        err, p = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientPropertiesRare.CLIENT_TALK_POWER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client talkpower", err, self.schid, self.clid)
+            _errprint("Error getting client talkpower", err, self.schid,
+                      self.clid)
             return 0
         else:
             self.cache["talkPower"] = p
@@ -515,9 +553,11 @@ class Client(object):
         if "isRecording" in self.cache:
             return self.cache["isRecording"]
 
-        err, rec = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_IS_RECORDING)
+        err, rec = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                                 ts3defines.ClientProperties.CLIENT_IS_RECORDING)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client isrecording flag", err, self.schid, self.clid)
+            _errprint("Error getting client isrecording flag", err, self.schid,
+                      self.clid)
             return False
         else:
             self.cache["isRecording"] = rec == 1
@@ -528,9 +568,11 @@ class Client(object):
         if "isChannelCommander" in self.cache:
             return self.cache["isChannelCommander"]
 
-        err, cc = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_IS_CHANNEL_COMMANDER)
+        err, cc = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                                ts3defines.ClientPropertiesRare.CLIENT_IS_CHANNEL_COMMANDER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client channelcommander flag", err, self.schid, self.clid)
+            _errprint("Error getting client channelcommander flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["isChannelCommander"] = cc == 1
@@ -549,9 +591,11 @@ class Client(object):
         if "iconID" in self.cache:
             return self.cache["iconID"]
 
-        err, i = ts3lib.getClientVariableAsUInt64(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_ICON_ID)
+        err, i = ts3lib.getClientVariableAsUInt64(self.schid, self.clid,
+                                                  ts3defines.ClientPropertiesRare.CLIENT_ICON_ID)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client iconid", err, self.schid, self.clid)
+            _errprint("Error getting client iconid", err, self.schid,
+                      self.clid)
             return 0
         else:
             if i < 0:
@@ -565,9 +609,11 @@ class Client(object):
         if "isPrioritySpeaker" in self.cache:
             return self.cache["isPrioritySpeaker"]
 
-        err, p = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_IS_PRIORITY_SPEAKER)
+        err, p = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientPropertiesRare.CLIENT_IS_PRIORITY_SPEAKER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client ispriorityspeaker flag", err, self.schid, self.clid)
+            _errprint("Error getting client ispriorityspeaker flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["isPrioritySpeaker"] = p == 1
@@ -578,9 +624,11 @@ class Client(object):
         if "isAway" in self.cache:
             return self.cache["isAway"]
 
-        err, a = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_AWAY)
+        err, a = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientPropertiesRare.CLIENT_AWAY)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client isaway flag", err, self.schid, self.clid)
+            _errprint("Error getting client isaway flag", err, self.schid,
+                      self.clid)
             return False
         else:
             self.cache["isAway"] = a == 1
@@ -591,9 +639,11 @@ class Client(object):
         if "country" in self.cache:
             return self.cache["country"]
 
-        err, c = ts3lib.getClientVariableAsString(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_COUNTRY)
+        err, c = ts3lib.getClientVariableAsString(self.schid, self.clid,
+                                                  ts3defines.ClientPropertiesRare.CLIENT_COUNTRY)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client country", err, self.schid, self.clid)
+            _errprint("Error getting client country", err, self.schid,
+                      self.clid)
             return ""
         else:
             self.cache["country"] = c
@@ -604,9 +654,11 @@ class Client(object):
         if "isRequestingTalkPower" in self.cache:
             return self.cache["isRequestingTalkPower"]
 
-        err, r = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_TALK_REQUEST)
+        err, r = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientPropertiesRare.CLIENT_TALK_REQUEST)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client isrequestingtalkpower flag", err, self.schid, self.clid)
+            _errprint("Error getting client isrequestingtalkpower flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["isRequestingTalkPower"] = r == 1
@@ -617,9 +669,11 @@ class Client(object):
         if "isTalker" in self.cache:
             return self.cache["isTalker"]
 
-        err, t = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_IS_TALKER)
+        err, t = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientPropertiesRare.CLIENT_IS_TALKER)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client istalker flag", err, self.schid, self.clid)
+            _errprint("Error getting client istalker flag", err, self.schid,
+                      self.clid)
             return False
         else:
             self.cache["isTalker"] = t == 1
@@ -630,9 +684,11 @@ class Client(object):
         if "outputMuted" in self.cache:
             return self.cache["outputMuted"]
 
-        err, o = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_OUTPUT_MUTED)
+        err, o = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientProperties.CLIENT_OUTPUT_MUTED)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client outputmuted flag", err, self.schid, self.clid)
+            _errprint("Error getting client outputmuted flag", err, self.schid,
+                      self.clid)
             return False
         else:
             self.cache["outputMuted"] = o == 1
@@ -643,9 +699,11 @@ class Client(object):
         if "inputMuted" in self.cache:
             return self.cache["inputMuted"]
 
-        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_INPUT_MUTED)
+        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientProperties.CLIENT_INPUT_MUTED)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client inputmuted flag", err, self.schid, self.clid)
+            _errprint("Error getting client inputmuted flag", err, self.schid,
+                      self.clid)
             return False
         else:
             self.cache["inputMuted"] = i == 1
@@ -656,9 +714,11 @@ class Client(object):
         if "hardwareInputMuted" in self.cache:
             return self.cache["hardwareInputMuted"]
 
-        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_INPUT_HARDWARE)
+        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientProperties.CLIENT_INPUT_HARDWARE)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client hardwareinputmuted flag", err, self.schid, self.clid)
+            _errprint("Error getting client hardwareinputmuted flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["hardwareInputMuted"] = i == 0
@@ -669,9 +729,11 @@ class Client(object):
         if "hardwareOutputMuted" in self.cache:
             return self.cache["hardwareOutputMuted"]
 
-        err, o = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_OUTPUT_HARDWARE)
+        err, o = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientProperties.CLIENT_OUTPUT_HARDWARE)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client hardwareoutputmuted flag", err, self.schid, self.clid)
+            _errprint("Error getting client hardwareoutputmuted flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["hardwareOutputMuted"] = o == 0
@@ -682,9 +744,11 @@ class Client(object):
         if "inputDeactivated" in self.cache:
             return self.cache["inputDeactivated"]
 
-        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid, ts3defines.ClientProperties.CLIENT_INPUT_DEACTIVATED)
+        err, i = ts3lib.getClientVariableAsInt(self.schid, self.clid,
+                                               ts3defines.ClientProperties.CLIENT_INPUT_DEACTIVATED)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client inputdeactivated flag", err, self.schid, self.clid)
+            _errprint("Error getting client inputdeactivated flag", err,
+                      self.schid, self.clid)
             return False
         else:
             self.cache["hardwareOutputMuted"] = i == 1
@@ -695,9 +759,11 @@ class Client(object):
         if "channelGroup" in self.cache:
             return self.cache["channelGroup"]
 
-        err, g = ts3lib.getClientVariableAsUInt64(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_CHANNEL_GROUP_ID)
+        err, g = ts3lib.getClientVariableAsUInt64(self.schid, self.clid,
+                                                  ts3defines.ClientPropertiesRare.CLIENT_CHANNEL_GROUP_ID)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client channelgroup", err, self.schid, self.clid)
+            _errprint("Error getting client channelgroup", err, self.schid,
+                      self.clid)
             return 0
         else:
             self.cache["channelGroup"] = g
@@ -708,9 +774,11 @@ class Client(object):
         if "serverGroups" in self.cache:
             return self.cache["serverGroups"]
 
-        err, gs = ts3lib.getClientVariableAsString(self.schid, self.clid, ts3defines.ClientPropertiesRare.CLIENT_SERVERGROUPS)
+        err, gs = ts3lib.getClientVariableAsString(self.schid, self.clid,
+                                                   ts3defines.ClientPropertiesRare.CLIENT_SERVERGROUPS)
         if err != ts3defines.ERROR_ok:
-            _errprint("Error getting client servergroups", err, self.schid, self.clid)
+            _errprint("Error getting client servergroups", err, self.schid,
+                      self.clid)
             return []
         else:
             self.cache["serverGroups"] = list(map(int, gs.split(',')))
@@ -749,16 +817,20 @@ class Client(object):
 
 class ServerviewModel(QAbstractItemModel):
     """
-    ItemModel to deliver data of a serverview to ItemWidgets. The data is delivered in one column.
+    ItemModel to deliver data of a serverview to ItemWidgets. The data is
+    delivered in one column.
     Limitations: no badges, no friend/foe status
     """
 
     def __init__(self, schid, iconpack=None, parent=None):
         """
-        Instantiates a new ServerviewModel object. This raises an exception if the iconpack could not be opened. The object registers itself as callbackproxy to the PythonHost.
+        Instantiates a new ServerviewModel object. This raises an exception if
+        the iconpack could not be opened. The object registers itself as
+        callbackproxy to the PythonHost.
         @param schid: the ID of the serverconnection
         @type schid: int
-        @param iconpack: the iconpack to use icons from. defaults to None to use the TS3 client's current IconPack
+        @param iconpack: the iconpack to use icons from. defaults to None to
+        use the TS3 client's current IconPack
         @type iconpack: ts3client.IconPack
         @param parent: the QObject-parent. defaults to None
         @type parent: QObject
@@ -778,7 +850,11 @@ class ServerviewModel(QAbstractItemModel):
         err, self.myid = ts3lib.getClientID(schid)
 
         err = ts3lib.requestServerGroupList(schid)
+        if err != ts3defines.ERROR_ok:
+            _errprint("Error requesting servergrouplist", err, self.schid)
         err = ts3lib.requestChannelGroupList(schid)
+        if err != ts3defines.ERROR_ok:
+            _errprint("Error requesting channelgroups", err, self.schid)
 
         self._reload()
 
@@ -883,7 +959,9 @@ class ServerviewModel(QAbstractItemModel):
         for c in clids:
             err, parent = ts3lib.getChannelOfClient(self.schid, c)
             if err == ts3defines.ERROR_ok:
-                self.onClientMoveEvent(self.schid, c, 0, parent, ts3defines.Visibility.ENTER_VISIBILITY, "")
+                self.onClientMoveEvent(self.schid, c, 0, parent,
+                                       ts3defines.Visibility.ENTER_VISIBILITY,
+                                       "")
             else:
                 _errprint("Error getting client channel", err, self.schid, c)
                 pass
@@ -905,21 +983,25 @@ class ServerviewModel(QAbstractItemModel):
         elif pcid in self.allchans:
             parent = self.allchans[pcid]
         else:
-            _errprint("Error, event on unrecognised channel", err, self.schid, pcid)
+            _errprint("Error, event on unrecognised channel", 0, self.schid,
+                      pcid)
             return
 
         obj = Channel(schid, cid)
         self.allchans[cid] = obj
 
         newrow = parent.rowOf(obj)
-        self.beginInsertRows(self._createIndex(parent.rowOf(), 0, parent), newrow, newrow)
+        self.beginInsertRows(self._createIndex(parent.rowOf(), 0, parent),
+                             newrow, newrow)
         parent.append(obj)
         self.endInsertRows()
 
-    def onNewChannelCreatedEvent(self, schid, cid, parent, invokerID, invokerName, invokerUniqueIdentifier):
+    def onNewChannelCreatedEvent(self, schid, cid, parent, invokerID,
+                                 invokerName, invokerUniqueIdentifier):
         self.onNewChannelEvent(schid, cid, parent)
 
-    def onUpdateChannelEditedEvent(self, schid, cid, invokerID, invokerName, invokerUniqueIdentifier):
+    def onUpdateChannelEditedEvent(self, schid, cid, invokerID, invokerName,
+                                   invokerUniqueIdentifier):
         if schid != self.schid:
             return
 
@@ -930,9 +1012,10 @@ class ServerviewModel(QAbstractItemModel):
         chan.update()
 
         if oldsort != chan.sortOrder:
-            #the channel (propably) has moved inside the parent
+            # the channel (propably) has moved inside the parent
             newrow = chan.parentNode.rowOf(chan, True)
-            pidx = self._createIndex(chan.parentNode.rowOf(), 0, chan.parentNode)
+            pidx = self._createIndex(chan.parentNode.rowOf(), 0,
+                                     chan.parentNode)
             self.beginMoveRows(pidx, oldrow, oldrow, pidx, newrow)
             chan.parentNode.remove(chan)
             chan.parentNode.append(chan)
@@ -943,22 +1026,26 @@ class ServerviewModel(QAbstractItemModel):
             idx = self._createIndex(row, 0, chan)
             self.dataChanged(idx, idx)
 
-    def onChannelMoveEvent(self, schid, cid, newpcid, invokerID, invokerName, invokerUniqueIdentifier):
+    def onChannelMoveEvent(self, schid, cid, newpcid, invokerID, invokerName,
+                           invokerUniqueIdentifier):
         if schid != self.schid:
             return
 
         chan = self.allchans[cid]
-        oldpidx = self._createIndex(chan.parentNode.rowOf(), 0, chan.parentNode)
+        oldpidx = self._createIndex(chan.parentNode.rowOf(), 0,
+                                    chan.parentNode)
         oldrow = chan.rowOf()
         newpar = self.allchans[newpcid]
         newpidx = self._createIndex(newpar.rowOf(), 0, newpar)
 
-        self.beginMoveRows(oldpidx, oldrow, oldrow, newpidx, newpar.rowOf(chan))
+        self.beginMoveRows(oldpidx, oldrow, oldrow, newpidx,
+                           newpar.rowOf(chan))
         chan.parentNode.remove(chan)
         newpar.append(chan)
         self.endMoveRows()
 
-    def onDelChannelEvent(self, schid, cid, invokerID, invokerName, invokerUniqueIdentifier):
+    def onDelChannelEvent(self, schid, cid, invokerID, invokerName,
+                          invokerUID):
         if schid != self.schid:
             return
 
@@ -973,7 +1060,8 @@ class ServerviewModel(QAbstractItemModel):
             del self.objs[id(chan)]
         self.endRemoveRows()
 
-    def onClientMoveEvent(self, schid, clientID, oldChannelID, newChannelID, visibility, moveMessage):
+    def onClientMoveEvent(self, schid, clientID, oldChannelID, newChannelID,
+                          visibility, moveMessage):
         if schid != self.schid:
             return
 
@@ -983,7 +1071,8 @@ class ServerviewModel(QAbstractItemModel):
             chan = self.allchans[newChannelID]
 
             newrow = chan.rowOf(obj)
-            self.beginInsertRows(self._createIndex(chan.rowOf(), 0, chan), newrow, newrow)
+            self.beginInsertRows(self._createIndex(chan.rowOf(), 0, chan),
+                                 newrow, newrow)
             chan.append(obj)
             self.endInsertRows()
         elif visibility == ts3defines.Visibility.RETAIN_VISIBILITY:
@@ -1040,10 +1129,14 @@ class ServerviewModel(QAbstractItemModel):
         chan.update()
         self.dataChanged(idx, idx)
 
-    def onClientMoveMovedEvent(self, schid, clientID, oldChannelID, newChannelID, visibility, moverID, moverName, moverUniqueIdentifier, moveMessage):
-        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID, visibility, "")
+    def onClientMoveMovedEvent(self, schid, clientID, oldChannelID,
+                               newChannelID, visibility, moverID, moverName,
+                               moverUniqueIdentifier, moveMessage):
+        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID,
+                               visibility, "")
 
-    def onUpdateClientEvent(self, schid, clientID, invokerID, invokerName, invokerUniqueIdentifier):
+    def onUpdateClientEvent(self, schid, clientID, invokerID, invokerName,
+                            invokerUniqueIdentifier):
         if schid != self.schid:
             return
 
@@ -1055,27 +1148,32 @@ class ServerviewModel(QAbstractItemModel):
     def onClientSelfVariableUpdateEvent(self, schid, flag, oldValue, newValue):
         self.onUpdateClientEvent(schid, self.myid, 0, "", "")
 
-    def onClientMoveSubscriptionEvent(self, schid, clientID, oldChannelID, newChannelID, visibility):
-        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID, visibility, "")
+    def onClientMoveSubscriptionEvent(self, schid, clientID, oldChannelID,
+                                      newChannelID, visibility):
+        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID,
+                               visibility, "")
 
-    def onClientMoveTimeoutEvent(self, schid, clientID, oldChannelID, newChannelID, visibility, timeoutMessage):
-        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID, visibility, "")
+    def onClientMoveTimeoutEvent(self, schid, clientID, oldChannelID,
+                                 newChannelID, visibility, timeoutMessage):
+        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID,
+                               visibility, "")
 
-    def onClientDisplayNameChanged(self, schid, clientID, displayName, uniqueClientIdentifier):
+    def onClientDisplayNameChanged(self, schid, clientID, displayName, uid):
         self.onUpdateClientEvent(schid, clientID, 0, "", "")
 
-    def onTalkStatusChangeEvent(self, schid, status, isReceivedWhisper, clientID):
+    def onTalkStatusChangeEvent(self, schid, status, isReceivedWhisper, clid):
         if schid != self.schid:
             return
 
-        obj = self.allclients[clientID]
+        obj = self.allclients[clid]
         talks = status == ts3defines.TalkStatus.STATUS_TALKING
         if obj.isTalking != talks:
             obj.isTalking = talks
             idx = self._createIndex(obj.rowOf(), 0, obj)
             self.dataChanged(idx, idx)
 
-    def onServerGroupListEvent(self, schid, serverGroupID, name, atype, iconID, saveDB):
+    def onServerGroupListEvent(self, schid, serverGroupID, name, atype, iconID,
+                               saveDB):
         if schid != self.schid:
             return
 
@@ -1085,8 +1183,8 @@ class ServerviewModel(QAbstractItemModel):
 
             self.sgicons[serverGroupID] = iconID
 
-
-    def onChannelGroupListEvent(self, schid, channelGroupID, name, atype, iconID, saveDB):
+    def onChannelGroupListEvent(self, schid, channelGroupID, name, atype,
+                                iconID, saveDB):
         if schid != self.schid:
             return
 
@@ -1164,29 +1262,30 @@ class ServerviewModel(QAbstractItemModel):
                 if obj.iconID != 0:
                     ret.append(QIcon(self.icons.icon(obj.iconID)))
             elif type(obj) is Client:
-                #badges
-                #priority speaker
+                # badges
+                # priority speaker
                 if obj.isPrioritySpeaker:
                     ret.append(QIcon(self.iconpack.icon("CAPTURE")))
-                #istalker
+                # istalker
                 if obj.isTalker:
                     ret.append(QIcon(self.iconpack.icon("IS_TALKER")))
                 elif obj.talkPower < obj.parentNode.neededTalkPower:
                     ret.append(QIcon(self.iconpack.icon("INPUT_MUTED")))
-                #channelgroup
+                # channelgroup
                 if obj.channelGroup in self.cgicons:
-                    ret.append(QIcon(self.icons.icon(self.cgicons[obj.channelGroup])))
-                #servergroups
+                    ret.append(QIcon(self.icons.icon(
+                        self.cgicons[obj.channelGroup])))
+                # servergroups
                 for sg in obj.serverGroups:
                     if sg in self.sgicons:
                         ret.append(QIcon(self.icons.icon(self.sgicons[sg])))
-                #clienticon
+                # clienticon
                 if obj.iconID != 0:
                     ret.append(QIcon(self.icons.icon(obj.iconID)))
-                #talkrequest
+                # talkrequest
                 if obj.isRequestingTalkPower:
                     ret.append(QIcon(self.iconpack.icon("REQUEST_TALK_POWER")))
-                #flag
+                # flag
                 if obj.country != "":
                     ret.append(QIcon(self.countries.flag(obj.country)))
             else:
@@ -1209,7 +1308,8 @@ class ServerviewModel(QAbstractItemModel):
 
 class ServerviewDelegate(QStyledItemDelegate):
     """
-    Delegate to display Serverview items and query the properties and icons from the model to display and show them in one column.
+    Delegate to display Serverview items and query the properties and icons
+    from the model to display and show them in one column.
     """
 
     def _paintSpacer(self, painter, option, index):
@@ -1217,13 +1317,18 @@ class ServerviewDelegate(QStyledItemDelegate):
 
         if st != Qt.CustomDashLine:
             painter.setPen(st)
-            painter.drawLine(option.rect.x(), option.rect.y() + option.rect.height() / 2, option.rect.x() + option.rect.width(), option.rect.y() + option.rect.height() / 2)
+            painter.drawLine(option.rect.x(),
+                             option.rect.y() + option.rect.height() / 2,
+                             option.rect.x() + option.rect.width(),
+                             option.rect.y() + option.rect.height() / 2)
         else:
             align = index.data(ServerViewRoles.spaceralignment)
             ctext = index.data(ServerViewRoles.spacercustomtext)
 
             if align != Qt.AlignJustify:
-                painter.drawText(option.rect.x(), option.rect.y(), option.rect.width(), option.rect.height(), align, ctext)
+                painter.drawText(option.rect.x(), option.rect.y(),
+                                 option.rect.width(), option.rect.height(),
+                                 align, ctext)
             else:
                 fm = QFontMetrics(QApplication.font())
                 w = l = fm.width(ctext)
@@ -1232,7 +1337,9 @@ class ServerviewDelegate(QStyledItemDelegate):
                     txt += ctext
                     l += w
 
-                painter.drawText(option.rect.x(), option.rect.y(), option.rect.width(), option.rect.height(), Qt.AlignLeft, txt)
+                painter.drawText(option.rect.x(), option.rect.y(),
+                                 option.rect.width(), option.rect.height(),
+                                 Qt.AlignLeft, txt)
 
     def paint(self, painter, option, index):
         if option.state & QStyle.State_Selected:
@@ -1274,7 +1381,8 @@ class ServerviewDelegate(QStyledItemDelegate):
         nextx = 18
         if statusicons:
             for ico in reversed(statusicons):
-                ico.paint(painter, option.rect.right() - nextx, option.rect.y(), iconsize.width(), iconsize.height())
+                ico.paint(painter, option.rect.right() - nextx,
+                          option.rect.y(), iconsize.width(), iconsize.height())
                 nextx += 18
 
         painter.restore()
@@ -1318,4 +1426,3 @@ class Serverview(QTreeView):
         @rtype: Server or Channel or Client
         """
         return self.svmodel._indexObject(index)
-

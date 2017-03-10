@@ -1,10 +1,14 @@
-import os, shutil, platform
+import os
+import shutil
+import platform
+
 import ts3lib
 
 
 def getConfigPath(*args):
     """
-    Returns pyTSon's configpath, that is, the subdirectory 'pyTSon' in the TeamSpeak 3 config directory.
+    Returns pyTSon's configpath, that is, the subdirectory 'pyTSon' in the
+    TeamSpeak 3 config directory.
     @param args: path fields joined to the result as list of strings
     @type args: list[str]
     @return: The accumulated path
@@ -12,15 +16,18 @@ def getConfigPath(*args):
     """
     return os.path.join(ts3lib.getConfigPath(), "pyTSon", *args)
 
+
 def getPluginPath(*args):
     """
-    Returns pyTSon's pluginpath, that is, the subdirectory 'pyTSon' in the TeamSpeak 3 plugins directory.
+    Returns pyTSon's pluginpath, that is, the subdirectory 'pyTSon' in the
+    TeamSpeak 3 plugins directory.
     @param args: path fields joined to the result as list of strings
     @type args: list[str]
     @return: The accumulated path
     @rtype: str
     """
     return os.path.join(ts3lib.getPluginPath(), "pyTSon", *args)
+
 
 def _setup():
     """
@@ -58,7 +65,8 @@ def getVersion():
 
 def getCurrentApiVersion():
     """
-    Returns the current apiversion of the ts3 plugin sdk. This should not be used in ts3plugin.apiVersion. Be fair and update your plugin manually!
+    Returns the current apiversion of the ts3 plugin sdk. This should not be
+    used in ts3plugin.apiVersion. Be fair and update your plugin manually!
     @return: the apiVersion
     @rtype: str
     """

@@ -1,22 +1,48 @@
-import sys, os, glob
+import sys
+import os
+import glob
 
 import ts3lib
-import ts3defines, pytson
+import ts3defines
+import pytson
 
-import importlib, traceback
+import importlib
+import traceback
 import json
 
 from configparser import ConfigParser
-from pytsonui import PythonConsole, ConfigurationDialog
+from pytsonui.console import PythonConsole
+from pytsonui.config import ConfigurationDialog
 from PythonQt.QtGui import QFont, QColor, QMessageBox
 from PythonQt.QtCore import QUrl, QTimer
-from PythonQt.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PythonQt.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
+                                QNetworkReply)
 
 from weakref import WeakValueDictionary
 
 
+REL_URL = QUrl("https://api.github.com/repos/pathmann/pyTSon/releases/latest")
+
+
+def logprint(msg, loglevel, channel):
+    err = ts3lib.logMessage(msg, loglevel, channel, 0)
+    if err != ts3defines.ERROR_ok:
+        print(msg)
+
+
 class PluginHost(object):
-    defaultConfig = [("general", [("differentApi", "False"), ("uninstallQuestion", "True"), ("loadAllMenus", "True")]), ("plugins", []), ("console", [("backgroundColor", "#000000"), ("textColor", "#FFFFFF"), ("fontFamily", "Monospace"), ("fontSize", "12"), ("tabcomplete", "True"), ("spaces", "True"), ("tabwidth", "2"), ("width", "800"), ("height", "600"), ("startup", ""), ("silentStartup", "False")])]
+    defaultConfig = [("general", [("differentApi", "False"),
+                                  ("uninstallQuestion", "True"),
+                                  ("loadAllMenus", "True")]),
+                     ("plugins", []),
+                     ("console", [("backgroundColor", "#000000"),
+                                  ("textColor", "#FFFFFF"),
+                                  ("fontFamily", "Monospace"),
+                                  ("fontSize", "12"), ("tabcomplete", "True"),
+                                  ("spaces", "True"), ("tabwidth", "2"),
+                                  ("width", "800"), ("height", "600"),
+                                  ("startup", ""),
+                                  ("silentStartup", "False")])]
 
     @classmethod
     def setupConfig(cls):
@@ -53,8 +79,20 @@ class PluginHost(object):
         cls.start()
 
     @classmethod
+    def startPlugin(cls, key):
+        try:
+            cls.active[key] = cls.plugins[key]()
+            cls.cfg.set("plugins", key, "True")
+        except:
+            logprint("Error starting python plugin %s: %s" %
+                     (key, traceback.format_exc()),
+                     ts3defines.LogLevel.LogLevel_ERROR,
+                     "pyTSon.PluginHost.start")
+
+    @classmethod
     def start(cls):
-        #start plugin if config says so, or if new plugin and requestAutoload is True
+        # start plugin if config says so, or if new plugin and
+        # requestAutoload is True
         for key in cls.plugins:
             load = False
             if not cls.cfg.has_option("plugins", key):
@@ -64,24 +102,20 @@ class PluginHost(object):
                 load = True
 
             if load:
-                if cls.plugins[key].apiVersion != pytson.getCurrentApiVersion():
-                    if not cls.cfg.getboolean("general", "differentApi", fallback=False):
+                if (cls.plugins[key].apiVersion !=
+                   pytson.getCurrentApiVersion()):
+                    if not cls.cfg.getboolean("general", "differentApi",
+                                              fallback=False):
                         continue
 
-                try:
-                    cls.active[key] = cls.plugins[key]()
-                    cls.cfg.set("plugins", key, "True")
-                except:
-                    err = ts3lib.logMessage("Error starting python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.start", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error starting python plugin %s: %s" % (key, traceback.format_exc()))
+                cls.startPlugin(key)
 
-        #restore reloaded menus
+        # restore reloaded menus
         for globid, (p, locid) in cls.menus.items():
             if p in cls.active:
                 cls.menus[globid] = (cls.active[p], locid)
 
-        #restore reloaded hotkeys
+        # restore reloaded hotkeys
         for keyword, (p, lockey) in cls.hotkeys.items():
             if p in cls.active:
                 cls.hotkeys[keyword] = (cls.active[p], lockey)
@@ -99,26 +133,27 @@ class PluginHost(object):
             cls.nwm.delete()
         cls.nwm = None
 
-        #store config
+        # store config
         with open(pytson.getConfigPath("pyTSon.conf"), "w") as f:
             cls.cfg.write(f)
 
-        #stop all plugins
+        # stop all plugins
         for key, p in cls.active.items():
             try:
                 p.stop()
             except:
-                print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
+                print("Error stopping python plugin %s: %s" %
+                      (key, traceback.format_exc()))
 
         cls.active = {}
 
-        #save local menu ids
+        # save local menu ids
         for globid, (p, locid) in cls.menus.items():
-            #previously reloaded?
+            # previously reloaded?
             if not type(p) is str:
                 cls.menus[globid] = (p.name, locid)
 
-        #save local hotkeys
+        # save local hotkeys
         for keyword, (p, lockey) in cls.hotkeys.items():
             if not type(p) is str:
                 cls.hotkeys[keyword] = (p.name, lockey)
@@ -143,9 +178,10 @@ class PluginHost(object):
 
                 return True
             except:
-                err = ts3lib.logMessage("Error starting python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.activate", 0)
-                if err != ts3defines.ERROR_ok:
-                    print("Error starting python plugin %s: %s" % (pname, traceback.format_exc()))
+                logprint("Error starting python plugin %s: %s" %
+                         (pname, traceback.format_exc()),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.activate")
 
         return False
 
@@ -153,12 +189,12 @@ class PluginHost(object):
     def deactivate(cls, pname):
         if pname in cls.active:
             try:
-                #remove hotkeys
+                # remove hotkeys
                 for key in cls.hotkeys:
                     if cls.hotkeys[key][0].name == pname:
                         cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
 
-                #remove menuItems
+                # remove menuItems
                 for key in cls.menus:
                     if type(cls.menus[key][0]) is not str:
                         if cls.menus[key][0].name == pname:
@@ -169,46 +205,51 @@ class PluginHost(object):
                 del cls.active[pname]
                 cls.cfg.set("plugins", pname, "False")
             except:
-                err = ts3lib.logMessage("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.deactivate", 0)
-                if err != ts3defines.ERROR_ok:
-                    print("Error stopping python plugin %s: %s" % (pname, traceback.format_exc()))
+                logprint("Error stopping python plugin %s: %s" %
+                         (pname, traceback.format_exc()),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.deactivate")
 
     @classmethod
     def reload(cls):
-        #stop all running modules
+        # stop all running modules
         for key, p in cls.active.items():
             try:
                 p.stop()
             except:
-                err = ts3lib.logMessage("Error stopping python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.reload", 0)
-                if err != ts3defines.ERROR_ok:
-                    print("Error stopping python plugin %s: %s" % (key, traceback.format_exc()))
+                logprint("Error stopping python plugin %s: %s" %
+                         (key, traceback.format_exc()),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.reload")
 
         cls.active = {}
         cls.plugins = {}
 
-        #import all modules
+        # import all modules
         spath = pytson.getPluginPath("scripts")
         for d in glob.glob(os.path.join(spath, "*/")):
-            if os.path.isdir(d):
-                base = os.path.relpath(d, spath)
-                try:
-                    if base in cls.modules:
-                        cls.modules[base] = importlib.reload(cls.modules[base])
-                    else:
-                        cls.modules[base] = importlib.__import__(base)
-                except:
-                    err = ts3lib.logMessage("Error loading python plugin from %s: %s" % (d, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.init", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error loading python plugin from %s: %s" % (d, traceback.format_exc()))
+            if not os.path.isdir(d):
+                continue
 
-        #save local menu ids
+            base = os.path.relpath(d, spath)
+            try:
+                if base in cls.modules:
+                    cls.modules[base] = importlib.reload(cls.modules[base])
+                else:
+                    cls.modules[base] = importlib.__import__(base)
+            except:
+                logprint("Error loading python plugin from %s: %s" %
+                         (d, traceback.format_exc()),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.init")
+
+        # save local menu ids
         for globid, (p, locid) in cls.menus.items():
-            #previously reloaded?
+            # previously reloaded?
             if not type(p) is str:
                 cls.menus[globid] = (p.name, locid)
 
-        #save local hotkeys
+        # save local hotkeys
         for keyword, (p, lockey) in cls.hotkeys.items():
             if not type(p) is str:
                 cls.hotkeys[keyword] = (p.name, lockey)
@@ -216,7 +257,19 @@ class PluginHost(object):
     @classmethod
     def showScriptingConsole(cls):
         if not cls.shell:
-            cls.shell = PythonConsole(cls.cfg.getboolean("console", "tabcomplete"), cls.cfg.getboolean("console", "spaces"), cls.cfg.getint("console", "tabwidth"), QFont(cls.cfg.get("console", "fontFamily"), cls.cfg.getint("console", "fontSize")), QColor(cls.cfg.get("console", "backgroundColor")), QColor(cls.cfg.get("console", "textColor")), cls.cfg.getint("console", "width"), cls.cfg.getint("console", "height"), cls.cfg.get("console", "startup"), cls.cfg.getboolean("console", "silentStartup"))
+            tabcomp = cls.cfg.getboolean("console", "tabcomplete")
+            spaces = cls.cfg.getboolean("console", "spaces")
+            tabwidth = cls.cfg.getint("console", "tabwidth")
+            font = QFont(cls.cfg.get("console", "fontFamily"),
+                         cls.cfg.getint("console", "fontSize"))
+            bgcolor = QColor(cls.cfg.get("console", "backgroundColor"))
+            txtcolor = QColor(cls.cfg.get("console", "textColor"))
+            w = cls.cfg.getint("console", "width")
+            h = cls.cfg.getint("console", "height")
+            startup = cls.cfg.get("console", "startup")
+            silent = cls.cfg.getboolean("console", "silentStartup")
+            cls.shell = PythonConsole(tabcomp, spaces, tabwidth, font, bgcolor,
+                                      txtcolor, w, h, startup, silent)
             cls.shell.connect("destroyed()", cls.scriptingConsoleDestroyed)
         cls.shell.show()
 
@@ -248,9 +301,10 @@ class PluginHost(object):
                 try:
                     ret.append(meth(*args))
                 except:
-                    print("Error calling method %s of plugin %s: %s" % (name, key, traceback.format_exc()))
+                    print("Error calling method %s of plugin %s: %s" %
+                          (name, key, traceback.format_exc()))
 
-        #call callback proxies; they can't affect the return value
+        # call callback proxies; they can't affect the return value
         zombies = []
         for p in cls.proxies.values():
             if not p:
@@ -262,7 +316,8 @@ class PluginHost(object):
                     try:
                         meth(*args)
                     except:
-                        print("Error calling method %s in callbackproxy: %s" % (name, traceback.format_exc()))
+                        print("Error calling method %s in callbackproxy: %s" %
+                              (name, traceback.format_exc()))
 
         for z in zombies:
             del cls.proxies[z]
@@ -295,9 +350,10 @@ class PluginHost(object):
                 try:
                     return p.processCommand(schid, " ".join(tokens[1:]))
                 except:
-                    err = ts3lib.logMessage("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.processCommand", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error calling processCommand of python plugin %s: %s" % (p.name, traceback.format_exc()))
+                    logprint("Error calling processCommand of python plugin "
+                             "%s: %s" % (p.name, traceback.format_exc()),
+                             ts3defines.LogLevel.LogLevel_ERROR,
+                             "pyTSon.PluginHost.processCommand")
 
         return False
 
@@ -311,9 +367,10 @@ class PluginHost(object):
                         ret.append(p.infoTitle)
                     ret += p.infoData(schid, aid, atype)
                 except:
-                    err = ts3lib.logMessage("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.infoData", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error calling infoData of python plugin %s: %s" % (key, traceback.format_exc()))
+                    logprint("Error calling infoData of python plugin %s: %s" %
+                             (key, traceback.format_exc()),
+                             ts3defines.LogLevel.LogLevel_ERROR,
+                             "pyTSon.PluginHost.infoData")
 
         return ret
 
@@ -321,13 +378,15 @@ class PluginHost(object):
     def parseUpdateReply(cls, repstr):
         def platform_str():
             try:
-                import sys, platform
+                import platform
             except:
-                #sys can't really fail to load
                 raise Exception("Error importing platform module")
 
             if sys.platform == "linux":
-                return "linux_%s" % "amd64" if platform.architecture()[0] == "64bit" else "x86"
+                if platform.architecture()[0] == "64bit":
+                    return "linux_amd64"
+                else:
+                    return "linux_x86"
             elif sys.platform == "win32":
                 return "win%s" % platform.architecture()[0][:2]
             else:
@@ -337,27 +396,36 @@ class PluginHost(object):
             obj = json.loads(repstr)
 
             if obj["tag_name"] == "v%s" % pytson.getVersion():
-                QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release")
+                QMessageBox.information(None, "pyTSon Update Check",
+                                        "You are running the latest pyTSon "
+                                        "release")
             else:
                 for a in obj["assets"]:
                     if a["name"] == "pyTSon_%s.ts3_plugin" % platform_str():
-                        QMessageBox.information(None, "pyTSon Update Check", "There is an update of pyTSon for your platform. Get it from <a href='%s'>here</a>" % obj["html_url"])
+                        QMessageBox.information(None, "pyTSon Update Check",
+                                                "There is an update of pyTSon "
+                                                "for your platform. Get it "
+                                                "from <a href='%s'>here</a>" %
+                                                obj["html_url"])
                         return
 
-                QMessageBox.information(None, "pyTSon Update Check", "You are running the latest pyTSon release (at least for your platform)")
+                QMessageBox.information(None, "pyTSon Update Check",
+                                        "You are running the latest pyTSon "
+                                        "release (at least for your platform)")
         except:
-            err = ts3lib.logMessage("Error parsing reply from update check: %s" % traceback.format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.parseUpdateReply", 0)
-            if err != ts3defines.ERROR_ok:
-                print("Error parsing reply from update check: %s" % traceback.format_exc())
+            logprint("Error parsing reply from update check: %s" %
+                     traceback.format_exc(),
+                     ts3defines.LogLevel.LogLevel_ERROR,
+                     "pyTSon.PluginHost.parseUpdateReply")
 
     @classmethod
     def updateCheckFinished(cls, reply):
         if reply.error() == QNetworkReply.NoError:
             cls.parseUpdateReply(reply.readAll().data().decode('utf-8'))
         else:
-            err = ts3lib.logMessage("Error checking for update: %s" % reply.error(), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.updateCheckFinished", 0)
-            if err != ts3defines.ERROR_ok:
-                print("Error checking for update: %s" % reply.error())
+            logprint("Error checking for update: %s" % reply.error(),
+                     ts3defines.LogLevel.LogLevel_ERROR,
+                     "pyTSon.PluginHost.updateCheckFinished")
 
         reply.deleteLater()
         cls.nwm.delete()
@@ -366,17 +434,25 @@ class PluginHost(object):
     @classmethod
     def updateCheck(cls):
         if cls.nwm:
-            #there is a pending updatecheck
+            # there is a pending updatecheck
             return
 
         cls.nwm = QNetworkAccessManager()
         cls.nwm.connect("finished(QNetworkReply*)", cls.updateCheckFinished)
-        cls.nwm.get(QNetworkRequest(QUrl("https://api.github.com/repos/pathmann/pyTSon/releases/latest")))
+        cls.nwm.get(QNetworkRequest(REL_URL))
 
     @classmethod
     def initMenus(cls):
         cls.menus = {}
-        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0, "Console", os.path.join("ressources", "octicons", "terminal.svg.png")), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1, "Settings", os.path.join("ressources", "octicons", "settings.svg.png")), (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 2, "Check for update", os.path.join("ressources", "octicons", "cloud-download.svg.png"))]
+        ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0,
+                "Console", os.path.join("ressources", "octicons",
+                                        "terminal.svg.png")),
+               (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 1,
+                "Settings", os.path.join("ressources", "octicons",
+                                         "settings.svg.png")),
+               (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 2,
+                "Check for update", os.path.join("ressources", "octicons",
+                                                 "cloud-download.svg.png"))]
         nextid = len(ret)
 
         loadall = cls.cfg.getboolean("general", "loadAllMenus")
@@ -391,7 +467,7 @@ class PluginHost(object):
                 elif loadall:
                     cls.menus[nextid] = (p.name, locid)
                     ret.append((atype, nextid, text, icon))
-                    #we have to remember the id, to disable it afterwards
+                    # we have to remember the id, to disable it afterwards
                     menustates.append((nextid, False))
 
                 nextid += 1
@@ -420,7 +496,8 @@ class PluginHost(object):
     def initHotkeys(cls):
         nextkey = 2
         cls.hotkeys = {}
-        ret = [("0", "Show the python scripting console"), ("1", "Show the pyTSon settings dialog")]
+        ret = [("0", "Show the python scripting console"),
+               ("1", "Show the pyTSon settings dialog")]
 
         for key, p in cls.active.items():
             for (lockey, description) in p.hotkeys:
@@ -429,7 +506,6 @@ class PluginHost(object):
                 nextkey += 1
 
         return ret
-
 
     @classmethod
     def onMenuItemEvent(cls, schid, atype, menuItemID, selectedItemID):
@@ -446,13 +522,15 @@ class PluginHost(object):
         if menuItemID in cls.menus:
             (plugin, locid) = cls.menus[menuItemID]
             if type(plugin) is not str:
-                #if plugin was reloaded, but menuItem does not exist anymore
+                # if plugin was reloaded, but menuItem does not exist anymore
                 try:
                     plugin.onMenuItemEvent(schid, atype, locid, selectedItemID)
                 except:
-                    err = ts3lib.logMessage("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onMenuItemEvent", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error calling onMenuItemEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
+                    logprint("Error calling onMenuItemEvent of python "
+                             "plugin %s: %s" % (plugin.name,
+                                                traceback.format_exc()),
+                             ts3defines.LogLevel.LogLevel_ERROR,
+                             "pyTSon.PluginHost.onMenuItemEvent")
 
     @classmethod
     def globalHotkeyKeyword(cls, plugin, localkeyword):
@@ -477,7 +555,8 @@ class PluginHost(object):
                 try:
                     plugin.onHotkeyEvent(lockey)
                 except:
-                    err = ts3lib.logMessage("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginHost.onHotkeyEvent", 0)
-                    if err != ts3defines.ERROR_ok:
-                        print("Error calling onHotkeyEvent of python plugin %s: %s" % (plugin.name, traceback.format_exc()))
-
+                    logprint("Error calling onHotkeyEvent of python "
+                             "plugin %s: %s" % (plugin.name,
+                                                traceback.format_exc()),
+                             ts3defines.LogLevel.LogLevel_ERROR,
+                             "pyTSon.PluginHost.onHotkeyEvent")
