@@ -197,7 +197,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
  */
 template<typename T>
 inline bool pyListToArray(PyObject* , QString& error, T** , bool ) {
-  error = QObject::tr("pyListToArray not implemented for this datatime");
+  error = QObject::tr("pyListToArray not implemented for this datatype");
   return false;
 }
 
