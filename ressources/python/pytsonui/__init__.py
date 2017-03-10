@@ -168,7 +168,8 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
             c.objectName not in ["qt_scrollarea_viewport",
                                  "qt_scrollarea_hcontainer",
                                  "qt_scrollarea_vcontainer",
-                                 "qt_spinbox_lineedit"]):
+                                 "qt_spinbox_lineedit",
+                                 "qt_toolbox_toolboxbutton"]):
             if hasattr(obj, c.objectName):
                 raise Exception("Widget objectName %s is not unique %s" %
                                 (c.objectName, type(c)))
