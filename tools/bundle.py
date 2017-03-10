@@ -38,9 +38,10 @@ def main(root, pythondir, outdir, arches):
                 zip.write(locpath, inzip)
             else:
                 for base, dirs, files in os.walk(locpath):
-                    for f in files:
-                        fn = os.path.join(base, f)
-                        zip.write(fn, inzip + fn[len(locpath):])
+                    if not os.path.basename(base) == "__pycache__":
+                        for f in files:
+                            fn = os.path.join(base, f)
+                            zip.write(fn, inzip + fn[len(locpath):])
 
         for loc, inzip in PYTHONFILES[a]:
             locpath = os.path.join(pythondir, loc)
