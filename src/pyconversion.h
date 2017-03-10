@@ -6,6 +6,8 @@
 #include <QString>
 #include <QObject>
 
+#include <QDebug>
+
 
 #include "teamspeak/public_definitions.h"
 #include "plugin_definitions.h"
@@ -210,14 +212,19 @@ inline bool pyListToArray<char*>(PyObject* list, QString& error, char*** ret, bo
 
   unsigned int len = PyList_Size(list);
   if (appendNull) {
+    qDebug() << "allocating array of size " << (len +1);
     *ret = (char**)malloc(sizeof(char*) * (len +1));
     (*ret)[len] = NULL;
   }
-  else *ret = (char**)malloc(sizeof(char*) * len);
+  else {
+    qDebug() << "allocating array of size " << len;
+    *ret = (char**)malloc(sizeof(char*) * len);
+  }
 
   PyObject* item;
   const char* str;
   for (unsigned int i = 0; i < len; ++i) {
+    qDebug() << i;
     item = PyList_GetItem(list, i);
 
     if (!item || !PyUnicode_Check(item)) {
@@ -229,8 +236,11 @@ inline bool pyListToArray<char*>(PyObject* list, QString& error, char*** ret, bo
     }
 
     str = PyUnicode_AsUTF8(item);
+    qDebug() << "str is " << str;
     (*ret[i]) = (char*)malloc(sizeof(char) * (strlen(str) +1));
+    qDebug() << "malloced";
     strcpy((*ret)[i], str);
+    qDebug() << "copied " << *ret[i];
   }
 
   return true;
