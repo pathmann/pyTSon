@@ -2,7 +2,7 @@
 
 bool deviceArrayToPyList(char*** devices, QString& error, PyObject** ret) {
   if (!devices) {
-    error = QObject::tr("No array given in function arrayToPyList<anyID>");
+    error = QObject::tr("No array given in function deviceArrayToPyList");
     return false;
   }
 
