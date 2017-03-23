@@ -9,19 +9,47 @@ from PythonQt.QtGui import QApplication
 
 def tr(sourcetext, *, disambiguation="", n=-1, context=None):
     """
-
+    Returns the current translation for a string. This function calls can be
+    extracted by pyTSon's pylupdate.py.
+    @param sourcetext: translatable string, must be a raw string, not the
+    return value of another function, an attribute or such
+    @type sourcetext: str
+    @param disambiguation: used to distinguish between two equal sourcetexts
+    int the same context, or as comment, optional, defaults to an empty string,
+    must be a raw string, not the return value of another function, an
+    attribute or such
+    @type disambiguation: str
+    @param n: used for strings containing plurals, optional, defaults to -1
+    @type n: int
+    @param context: context of the string literal, must be a raw string, not
+    the return value of another function, an attribute or such
+    @type context: str
     """
     return QApplication.translate(context, sourcetext, disambiguation, n)
 
 
 class Translatable(object):
     """
-
+    Baseclass for a class using translatable string literals.
     """
     @classmethod
     def _tr(cls, sourcetext, *, disambiguation="", n=-1, context=None):
         """
-
+        Returns the current translation for a string. This method calls can be
+        extracted by pyTSon's pylupdate.py.
+        @param sourcetext: translatable string, must be a raw string, not the
+        return value of another function, an attribute or such
+        @type sourcetext: str
+        @param disambiguation: used to distinguish between two equal
+        sourcetexts int the same context, or as comment, optional, defaults
+        to an empty string, must be a raw string, not the return value of
+        another function, an attribute or such
+        @type disambiguation: str
+        @param n: used for strings containing plurals, optional, defaults to -1
+        @type n: int
+        @param context: context to use for the string, optional, if set to
+        None, the classname is used as context, defaults to None
+        @type context: str
         """
         if not context:
             return tr(sourcetext, disambiguation=disambiguation, n=n,
