@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QWidget" name="Dialog">
+ <class>repositorydialog</class>
+ <widget class="QWidget" name="repositorydialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string notr="true">Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -29,7 +29,7 @@
          <item>
           <widget class="QLabel" name="masterloadingLabel">
            <property name="text">
-            <string/>
+            <string notr="true"/>
            </property>
           </widget>
          </item>
@@ -39,7 +39,7 @@
             <string>Update</string>
            </property>
            <property name="pytsonicon" stdset="0">
-            <string>RELOAD</string>
+            <string notr="true">RELOAD</string>
            </property>
           </widget>
          </item>
@@ -59,10 +59,10 @@
          <item>
           <widget class="QToolButton" name="addButton">
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
            <property name="pytsonicon" stdset="0">
-            <string>octicons:diff-added.svg.png</string>
+            <string notr="true">octicons:diff-added.svg.png</string>
            </property>
           </widget>
          </item>
@@ -72,10 +72,10 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>...</string>
+            <string notr="true">...</string>
            </property>
            <property name="pytsonicon" stdset="0">
-            <string>octicons:diff-removed.svg.png</string>
+            <string notr="true">octicons:diff-removed.svg.png</string>
            </property>
           </widget>
          </item>
@@ -97,7 +97,7 @@
           <item>
            <widget class="QLabel" name="loadingLabel">
             <property name="text">
-             <string/>
+             <string notr="true"/>
             </property>
            </widget>
           </item>
@@ -110,7 +110,7 @@
              <string>Reload online repositories</string>
             </property>
             <property name="pytsonicon" stdset="0">
-             <string>RELOAD</string>
+             <string notr="true">RELOAD</string>
             </property>
            </widget>
           </item>
@@ -120,7 +120,7 @@
              <string>Install</string>
             </property>
             <property name="pytsonicon" stdset="0">
-             <string>DOWNLOAD</string>
+             <string notr="true">DOWNLOAD</string>
             </property>
            </widget>
           </item>
@@ -142,8 +142,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -152,8 +161,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -162,8 +180,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -179,8 +206,21 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="documentTitle">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="html">
+           <string notr="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Cantarell'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -203,8 +243,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -220,11 +269,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
           <property name="text">
-           <string>21</string>
+           <string notr="true">21</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -247,8 +302,17 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string notr="true"/>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
