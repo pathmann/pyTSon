@@ -3,8 +3,10 @@ import ts3defines
 
 from pluginhost import PluginHost
 
+import pytson
 
-class PluginMount(type):
+
+class PluginMount(type, pytson.Translatable):
     def __init__(cls, name, bases, attrs):
         super(PluginMount, cls).__init__(name, bases, attrs)
         if not hasattr(PluginHost, 'plugins'):
@@ -15,27 +17,28 @@ class PluginMount(type):
                       'author', 'description', 'offersConfigure',
                       'commandKeyword', 'infoTitle', 'menuItems', 'hotkeys']:
                 if not hasattr(cls, a):
-                    err = ts3lib.logMessage("Plugin %s not loaded, missing "
-                                            "required attribute %s" % (name, a),
+                    msg = cls._tr("Plugin {name} not loaded, missing required "
+                                  "attribute {attrib}").format(name=name,
+                                                               attrib=a)
+                    err = ts3lib.logMessage(msg,
                                             ts3defines.LogLevel.LogLevel_ERROR,
                                             "pyTSon.PluginMount.init", 0)
                     if err != ts3defines.ERROR_ok:
-                        print("Plugin %s not loaded, missing required "
-                              "attribute %s" % (name, a))
+                        print(msg)
 
                     return
 
             if cls.name not in PluginHost.plugins:
                 PluginHost.plugins[cls.name] = cls
             else:
-                err = ts3lib.logMessage("Error loading python plugin %s, "
-                                        "already registered or a plugin with "
-                                        "that name already exist" % cls.name,
+                msg = cls._tr("Error loading python plugin {name}, already "
+                              "registered or a plugin with that name already "
+                              "exists").format(name=cls.name)
+                err = ts3lib.logMessage(msg,
                                         ts3defines.LogLevel.LogLevel_ERROR,
                                         "pyTSon.PluginMount.init", 0)
                 if err != ts3defines.ERROR_ok:
-                    print("Error loading python plugin %s, already registered "
-                          "or a plugin with that name already exist" % cls.name)
+                    print(msg)
 
 
 class ts3plugin(object, metaclass=PluginMount):

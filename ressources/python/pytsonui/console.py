@@ -11,6 +11,8 @@ from PythonQt.QtCore import Qt
 from PythonQt.QtGui import (QFont, QFontMetrics, QPlainTextEdit, QPalette,
                             QTextCursor, QApplication)
 
+import pytson
+
 
 class StdRedirector:
     def __init__(self, callback):
@@ -30,15 +32,15 @@ def defaultFont():
         return QFont("Monospace", 12)
 
 
-class PythonConsole(QPlainTextEdit):
+class PythonConsole(QPlainTextEdit, pytson.Translatable):
     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
                  font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
                  width=800, height=600, startup="", silentStartup=False,
                  parent=None):
-        super().__init__(parent)
+        super(QPlainTextEdit, self).__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle("pyTSon Console")
+        self.setWindowTitle(self._tr("pyTSon Console"))
 
         self.tabcomplete = tabcomplete
         self.spaces = spaces

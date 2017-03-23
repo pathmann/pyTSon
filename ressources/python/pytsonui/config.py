@@ -15,7 +15,7 @@ import ts3client
 import devtools
 
 
-class ConfigurationDialog(QDialog):
+class ConfigurationDialog(QDialog, pytson.Translatable):
     # [(objectName, store, [children])]
     CONF_WIDGETS = [("tabWidget", False, [
                     ("pluginsTab", False, [
@@ -58,10 +58,10 @@ class ConfigurationDialog(QDialog):
                     ])]
 
     def __init__(self, cfg, host, parent=None):
-        super().__init__(parent)
+        super(QDialog, self).__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle("pyTSon - Settings")
+        self.setWindowTitle(self._tr("pyTSon - Settings"))
 
         self.cfg = cfg
         self.host = host
@@ -88,8 +88,8 @@ class ConfigurationDialog(QDialog):
             ico.open()
         except Exception as e:
             ico = None
-            ts3print("Error loading iconpack: %s" % e,
-                     ts3defines.LogLevel.LogLevel_ERROR,
+            ts3print(self._tr("Error loading iconpack: {exception}").
+                     format(exception=e), ts3defines.LogLevel.LogLevel_ERROR,
                      "pyTSon.ConfigurationDialog.setupList", 0)
 
         row = 0
@@ -109,7 +109,7 @@ class ConfigurationDialog(QDialog):
                     setbutton = QToolButton()
                     setbutton.connect("clicked()", lambda n=p.name:
                                       self.onSettingsButtonClicked(n))
-                    setbutton.setToolTip("Configure")
+                    setbutton.setToolTip(self._tr("Configure"))
                     if ico:
                         setbutton.setIcon(QIcon(ico.icon("SETTINGS")))
                     self.pluginsTable.setCellWidget(row, 1, setbutton)
@@ -122,7 +122,7 @@ class ConfigurationDialog(QDialog):
                     rembutton.setIcon(QIcon(ico.icon("DELETE")))
                 rembutton.connect("clicked()", lambda n=p.name:
                                   self.onRemoveButtonClicked(n))
-                rembutton.setToolTip("Remove")
+                rembutton.setToolTip(self._tr("Remove"))
                 self.pluginsTable.setCellWidget(row, 2, rembutton)
 
                 row += 1
@@ -206,8 +206,9 @@ class ConfigurationDialog(QDialog):
         else:
             self.cfg.set("general", "loadAllMenus", "False")
 
-        QMessageBox.information(self, "Restart required",
-                                "Changes only take effect after a restart.")
+        QMessageBox.information(self, self._tr("Restart required"),
+                                self._tr("Changes only take effect after a "
+                                         "restart."))
 
     def onDifferentApiButtonChanged(self, state):
         if state == Qt.Checked:
@@ -250,9 +251,9 @@ class ConfigurationDialog(QDialog):
                                                  1).setEnabled(True)
             else:
                 item.setCheckState(Qt.Unchecked)
-                QMessageBox.critical(self, "Activation failed",
-                                     ("Error starting plugin, check your "
-                                      "client log for more information"))
+                QMessageBox.critical(self, self._tr("Activation failed"),
+                                     self._tr("Error starting plugin, check "
+                                     "your client log for more information"))
         elif not checked and name in self.host.active:
             if self.host.active[name].offersConfigure:
                 self.pluginsTable.cellWidget(item.row(), 1).setEnabled(False)
@@ -267,14 +268,16 @@ class ConfigurationDialog(QDialog):
                     else:
                         self.cfg.set("general", "uninstallQuestion", "True")
 
-                cbox = QCheckBox("Don't ask me again")
+                cbox = QCheckBox(self._tr("Don't ask me again"))
                 cbox.connect("stateChanged(int)", cbox_state_changed)
 
                 msgbox = QMessageBox(self)
-                msgbox.setInformativeText("Do you really want to delete "
-                                          "plugin %s?\nThis will erase all "
-                                          "script data of the plugin from "
-                                          "disk." % pluginname)
+                msgbox.setInformativeText(self._tr("Do you really want to "
+                                                   "delete plugin {name}?\n"
+                                                   "This will erase all "
+                                                   "script data of the "
+                                                   "plugin from disk.").
+                                          format(name=pluginname))
                 msgbox.setIcon(4)  # QMessageBox::Icon::Question = 4
                 msgbox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
                 msgbox.setDefaultButton(QMessageBox.Cancel)
@@ -302,7 +305,8 @@ class ConfigurationDialog(QDialog):
 
     def onBackgroundColorButtonClicked(self):
         curcolor = QColor(self.cfg.get("console", "backgroundColor"))
-        c = QColorDialog.getColor(curcolor, self, "Console Background Color")
+        c = QColorDialog.getColor(curcolor, self,
+                                  self._tr("Console Background Color"))
         if c.isValid():
             self.cfg.set("console", "backgroundColor", c.name())
             self.bgColorButton.setStyleSheet("background-color: %s;" %
@@ -310,7 +314,8 @@ class ConfigurationDialog(QDialog):
 
     def onTextColorButtonClicked(self):
         curcolor = QColor(self.cfg.get("console", "textColor"))
-        c = QColorDialog.getColor(curcolor, self, "Console Text Color")
+        c = QColorDialog.getColor(curcolor, self,
+                                  self._tr("Console Text Color"))
         if c.isValid():
             self.cfg.set("console", "textColor", c.name())
             self.textColorButton.setStyleSheet("background-color: %s;" %
@@ -337,8 +342,8 @@ class ConfigurationDialog(QDialog):
 
     def on_scriptButton_clicked(self):
         curdir = os.path.dirname(self.cfg.get("console", "startup"))
-        fname = QFileDialog.getOpenFileName(self, "Startup script", curdir,
-                                            "Python scripts (*.py)")
+        fname = QFileDialog.getOpenFileName(self, self._tr("Startup script"),
+                                            curdir, "Python scripts (*.py)")
         if fname != "":
             self.scriptEdit.setText(fname)
             self.scriptEdit.setStyleSheet("border: 1px solid black")

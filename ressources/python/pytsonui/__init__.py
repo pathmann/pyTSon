@@ -96,7 +96,8 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
         except Exception as e:
             iconpack = None
             seticons = False
-            ts3print("Error loading iconpack: %s" % e,
+            ts3print(pytson.tr("Error loading iconpack: {exception}",
+                               context="pytsonui").format(exception=e),
                      ts3defines.LogLevel.LogLevel_ERROR,
                      "pytsonui.retrieveWidgets.%s" % obj.objectName, 0)
 
@@ -158,7 +159,8 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
         except Exception as e:
             iconpack = None
             seticons = False
-            ts3print("Error loading iconpack: %s" % e,
+            ts3print(pytson.tr("Error loading iconpack: {exception}",
+                     context="pytsonui").format(exception=e),
                      ts3defines.LogLevel.LogLevel_ERROR,
                      "pytsonui.retrieveAllWidgets.%s" % obj.objectName, 0)
 
@@ -216,7 +218,8 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None):
         except Exception as e:
             iconpack = None
             seticons = False
-            ts3print("Error loading iconpack: %s" % e,
+            ts3print(pytson.tr("Error loading iconpack: {exception}",
+                     context="pytsonui").format(exception=e),
                      ts3defines.LogLevel.LogLevel_ERROR,
                      "pytsonui.retrieveWidgets.%s" % obj.objectName, 0)
 

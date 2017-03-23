@@ -1,5 +1,6 @@
 import os
 
+from PythonQt.QtCore import Qt
 from PythonQt.QtSql import QSqlDatabase
 from PythonQt.QtGui import QPixmap, QPainter, QPen
 
