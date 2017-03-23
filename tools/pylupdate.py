@@ -706,7 +706,6 @@ class FunctionValidator(ParentVisitor):
             (ctx, source, disambiguation, nused) = self._getKeywords(node)
 
             count = [ctx, source].count(None)
-            print("count: %s" % count)
             if count > 0 and not self._checkArguments(node, count):
                 self.log.debug("Argument list not matched (line %s)" %
                                node.lineno)
