@@ -388,7 +388,7 @@ class Context(object):
         elem = etree.Element("context")
         etree.SubElement(elem, "name").text = name
 
-        for msg in self.msgs.values():
+        for msg in sorted(self.msgs.values(), key=lambda x: x.sourcetext):
             elem.append(msg.toXml())
 
         return elem
@@ -454,8 +454,8 @@ class Translation(object):
         root = etree.Element("TS", attrib={"version": "2.1",
                                            "language": language})
 
-        for name, ctx in self.contexts.items():
-            root.append(ctx.toXml(name))
+        for ctxname in sorted(self.contexts.keys()):
+            root.append(self.contexts[ctxname].toXml(ctxname))
 
         tree = etree.ElementTree(root)
 
@@ -465,7 +465,8 @@ class Translation(object):
                 raise Exception("Error validating: %s" %
                                 val.error_log.filter_from_errors()[0])
 
-        tree.write(self.filename, encoding='utf-8', xml_declaration=True)
+        tree.write(self.filename, encoding='utf-8', xml_declaration=True,
+                   pretty_print=True)
 
     def __contains__(self, key):
         """
