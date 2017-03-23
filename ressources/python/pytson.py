@@ -4,6 +4,32 @@ import platform
 
 import ts3lib
 
+from PythonQt.QtGui import QApplication
+
+
+def tr(sourcetext, *, disambiguation="", n=-1, context=None):
+    """
+
+    """
+    return QApplication.translate(context, sourcetext, disambiguation, n)
+
+
+class Translatable(object):
+    """
+
+    """
+    @classmethod
+    def _tr(cls, sourcetext, *, disambiguation="", n=-1, context=None):
+        """
+
+        """
+        if not context:
+            return tr(sourcetext, disambiguation=disambiguation, n=n,
+                      context=cls.__name__)
+        else:
+            return tr(sourcetext, disambiguation=disambiguation, n=n,
+                      context=context)
+
 
 def getConfigPath(*args):
     """
