@@ -15,7 +15,7 @@ class Translatable(object):
             return pytson.tr(sourcetext, disambiguation=disambiguation, n=n,
                              context=context)
 
-def tr(sourcetext, *, disambiguation="", n=-1, context=None):
+def tr(context, sourcetext, *, disambiguation="", n=-1):
         return QApplication.translate(context, sourcetext, disambiguation, n)
 """
 import sys
@@ -596,13 +596,14 @@ class FunctionValidator(ParentVisitor):
         Gets the keyword parameters of a translate function call
         @param node:
         @type node: ast.AST
-        @return: a tuple containing the contextname, the disambiguation string
-        and if the numerous form is requested
+        @return: a tuple containing the contextname, the source string,
+        the disambiguation string and if the numerous form is requested
         @rtype: tuple(str, str or None, bool)
         """
         ctx = None
         disambiguation = None
         nused = False
+        sourcetext = None
 
         for kw in node.keywords:
             if kw.arg == "context":
@@ -621,23 +622,39 @@ class FunctionValidator(ParentVisitor):
                     disambiguation = kw.value.s
             elif kw.arg == "n":
                 nused = True
+            elif kw.arg == "sourcetext":
+                if not isinstance(kw.value, ast.Str):
+                    self.log.debug("Type of argument sourcetext needs to "
+                                   "be raw string (line %s)" % node.lineno)
+                    return None
+                else:
+                    sourcetext = kw.value.s
             else:
                 self.log.debug("Unknown keyword %s (line %s)" %
                                (kw.arg, node.lineno))
                 return None
 
-        return (ctx, disambiguation, nused)
+        return (ctx, sourcetext, disambiguation, nused)
 
     @staticmethod
-    def _checkArguments(node):
+    def _checkArguments(node, count):
         """
         Checks, if the argument list of a translation function is valid
         @param node: the node of the call
         @type node: ast.AST
+        @param count: number of arguments to check for
+        @type count: int
         @return: True or False
         @rtype: bool
         """
-        return len(node.args) == 1 and isinstance(node.args[0], ast.Str)
+        if len(node.args) != count:
+            return False
+
+        for i in range(count):
+            if not isinstance(node.args[i], ast.Str):
+                return False
+
+        return True
 
     def _extractMethodCall(self, node):
         """
@@ -650,12 +667,7 @@ class FunctionValidator(ParentVisitor):
         """
         call = "%s.%s" % (node.func.value.id, node.func.attr)
         if call in ["self._tr", "cls._tr"]:
-            if not self._checkArguments(node):
-                self.log.debug("Argument list not matched (line %s)" %
-                               node.lineno)
-                return None
-
-            (ctx, disambiguation, nused) = self._getKeywords(node)
+            (ctx, source, disambiguation, nused) = self._getKeywords(node)
             if not ctx:
                 cl = self._getClass(node)
                 if not cl:
@@ -663,10 +675,21 @@ class FunctionValidator(ParentVisitor):
                     return None
 
                 if self._classIsTranslatable(cl):
-                    return (cl.name, Message(node.args[0].s, disambiguation,
-                                             nused))
-            else:
-                return (ctx, Message(node.args[0].s, disambiguation, nused))
+                    ctx = cl.name
+                else:
+                    self.log.debug("Class is not translatable (line %s)" %
+                                   node.lineno)
+
+            # if source was not given as keyword arg
+            if not source:
+                if not self._checkArguments(node, 1):
+                    self.log.debug("Argument list not matched (line %s)" %
+                                   node.lineno)
+                    return None
+                else:
+                    source = node.args[0].s
+
+            return (ctx, Message(source, disambiguation, nused))
 
         return None
 
@@ -677,20 +700,31 @@ class FunctionValidator(ParentVisitor):
         @type node: ast.Attribute
         @return: a tuple containing the contextname and the message
         or None, if the call is not valid
-        @rtype: tuple(str, str, str or None, bool) or None
+        @rtype: tuple(str, Message) or None
         """
         if "%s.%s" % (node.func.value.id, node.func.attr) == self.funcname:
-            if not self._checkArguments(node):
+            (ctx, source, disambiguation, nused) = self._getKeywords(node)
+
+            count = [ctx, source].count(None)
+            print("count: %s" % count)
+            if count > 0 and not self._checkArguments(node, count):
                 self.log.debug("Argument list not matched (line %s)" %
                                node.lineno)
                 return None
 
-            (ctx, disambiguation, nused) = self._getKeywords(node)
-            if not ctx:
-                self.log.debug("No context found (line %s)" % node.lineno)
-                return None
+            # if source was no keyword, context can't be either
+            if not source:
+                if ctx:
+                    self.log.debug("Argument list not matched, wrong order "
+                                   "(line %s)" % node.lineno)
+                    return None
 
-            return (ctx, Message(node.args[0].s, disambiguation, nused))
+                ctx = node.args[0].s
+                source = node.args[1].s
+            elif not ctx:
+                ctx = node.args[0].s
+
+            return (ctx, Message(source, disambiguation, nused))
 
         return None
 
@@ -701,20 +735,30 @@ class FunctionValidator(ParentVisitor):
         @type node: ast.Attribute
         @return: a tuple containing the contextname and the message
         or None, if the call is not valid
-        @rtype: tuple(str, str, str or None, bool) or None
+        @rtype: tuple(str, Message) or None
         """
         if node.func.id == self.funcname:
-            if not self._checkArguments(node):
+            (ctx, source, disambiguation, nused) = self._getKeywords(node)
+
+            count = [ctx, source].count(None)
+            if count > 0 and not self._checkArguments(node, count):
                 self.log.debug("Argument list not matched (line %s)" %
                                node.lineno)
                 return None
 
-            (ctx, disambiguation, nused) = self._getKeywords(node)
-            if not ctx:
-                self.log.debug("No context found (line %s)" % node.lineno)
-                return None
+            # if source was no keyword, context can't be either
+            if not source:
+                if ctx:
+                    self.log.debug("Argument list not matched, wrong order "
+                                   "(line %s)" % node.lineno)
+                    return None
 
-            return (ctx, Message(node.args[0].s, disambiguation, nused))
+                ctx = node.args[0].s
+                source = node.args[1].s
+            elif not ctx:
+                ctx = node.args[0].s
+
+            return (ctx, Message(source, disambiguation, nused))
 
         return None
 

@@ -7,10 +7,13 @@ import ts3lib
 from PythonQt.QtGui import QApplication
 
 
-def tr(sourcetext, *, disambiguation="", n=-1, context=None):
+def tr(context, sourcetext, *, disambiguation="", n=-1):
     """
     Returns the current translation for a string. This function calls can be
     extracted by pyTSon's pylupdate.py.
+    @param context: context of the string literal, must be a raw string, not
+    the return value of another function, an attribute or such
+    @type context: str
     @param sourcetext: translatable string, must be a raw string, not the
     return value of another function, an attribute or such
     @type sourcetext: str
@@ -21,9 +24,6 @@ def tr(sourcetext, *, disambiguation="", n=-1, context=None):
     @type disambiguation: str
     @param n: used for strings containing plurals, optional, defaults to -1
     @type n: int
-    @param context: context of the string literal, must be a raw string, not
-    the return value of another function, an attribute or such
-    @type context: str
     """
     return QApplication.translate(context, sourcetext, disambiguation, n)
 
