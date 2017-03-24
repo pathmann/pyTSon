@@ -8,15 +8,10 @@ These are the two valid usecases from module pytson:
 class Translatable(object):
     @classmethod
     def _tr(cls, sourcetext, *, disambiguation="", n=-1, context=None):
-        if not context:
-            return pytson.tr(sourcetext, disambiguation=disambiguation, n=n,
-                             context=self.__class__.__name__)
-        else:
-            return pytson.tr(sourcetext, disambiguation=disambiguation, n=n,
-                             context=context)
+        pass
 
 def tr(context, sourcetext, *, disambiguation="", n=-1):
-        return QApplication.translate(context, sourcetext, disambiguation, n)
+        pass
 """
 import sys
 import os

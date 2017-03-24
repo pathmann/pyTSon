@@ -52,11 +52,10 @@ class Translatable(object):
         @type context: str
         """
         if not context:
-            return tr(sourcetext, disambiguation=disambiguation, n=n,
-                      context=cls.__name__)
+            return tr(cls.__name__, sourcetext, disambiguation=disambiguation,
+                      n=n)
         else:
-            return tr(sourcetext, disambiguation=disambiguation, n=n,
-                      context=context)
+            return tr(context, sourcetext, disambiguation=disambiguation, n=n)
 
 
 def getConfigPath(*args):
