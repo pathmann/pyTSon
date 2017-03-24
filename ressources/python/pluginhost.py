@@ -5,6 +5,7 @@ import glob
 import ts3lib
 import ts3defines
 import pytson
+import ts3client
 
 import importlib
 import traceback
@@ -33,7 +34,8 @@ def logprint(msg, loglevel, channel):
 class PluginHost(pytson.Translatable):
     defaultConfig = [("general", [("differentApi", "False"),
                                   ("uninstallQuestion", "True"),
-                                  ("loadAllMenus", "True")]),
+                                  ("loadAllMenus", "True"),
+                                  ("language", "inherited")]),
                      ("plugins", []),
                      ("console", [("backgroundColor", "#000000"),
                                   ("textColor", "#FFFFFF"),
@@ -70,13 +72,56 @@ class PluginHost(pytson.Translatable):
         cls.menus = {}
         cls.hotkeys = {}
 
+        cls.translator = None
+
         cls.cfg = ConfigParser()
         cls.cfg.read(pytson.getConfigPath("pyTSon.conf"))
 
         cls.setupConfig()
+        cls.setupTranslator()
 
         cls.reload()
         cls.start()
+
+    @classmethod
+    def setupTranslator(cls):
+        lang = cls.cfg.get("general", "language")
+        if lang == "inherited":
+            ccfg = ts3client.Config()
+            q = ccfg.query("SELECT * FROM application WHERE key='Language'")
+
+            if q.next():
+                lang = q.value("value")
+            else:
+                lang = "en_US"
+                logprint(cls._tr("Error querying language from client config"),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.setupTranslator")
+            del ccfg
+
+        if cls.translator:
+            if not QCoreApplication.removeTranslator(cls.translator):
+                logprint(cls._tr("Error removing translator"),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.setupTranslator")
+            cls.translator = None
+
+        p = pytson.getPluginPath("ressources", "i18n", "pyTSon-%s.qm" % lang)
+
+        if os.path.isfile(p):
+            cls.translator = QTranslator()
+            if not cls.translator.load(p):
+                logprint("Error loading translator from %s" % p,
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.setupTranslator")
+                cls.translator = None
+                return
+
+            if not QCoreApplication.installTranslator(cls.translator):
+                logprint("Error installing translator from %s" % p,
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.setupTranslator")
+                cls.translator = None
 
     @classmethod
     def startPlugin(cls, key):
@@ -157,6 +202,12 @@ class PluginHost(pytson.Translatable):
         for keyword, (p, lockey) in cls.hotkeys.items():
             if not type(p) is str:
                 cls.hotkeys[keyword] = (p.name, lockey)
+
+        if cls.translator:
+            if not QCoreApplication.removeTranslator(cls.translator):
+                logprint(cls._tr("Error removing translator"),
+                         ts3defines.LogLevel.LogLevel_ERROR,
+                         "pyTSon.PluginHost.shutdown")
 
     @classmethod
     def activate(cls, pname):
