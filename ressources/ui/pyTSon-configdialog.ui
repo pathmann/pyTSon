@@ -225,6 +225,28 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
+        <widget class="QGroupBox" name="languageGroup">
+         <property name="toolTip">
+          <string>Changes require a restart</string>
+         </property>
+         <property name="title">
+          <string>Language</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QCheckBox" name="languageButton">
+            <property name="text">
+             <string>Use the client's language</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="languageCombo"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="loadMenusButton">
          <property name="text">
           <string>Load menuitems from inactive plugins on startup</string>

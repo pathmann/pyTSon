@@ -1,6 +1,8 @@
 import os
 import shutil
 import platform
+import glob
+import re
 
 import ts3lib
 
@@ -56,6 +58,19 @@ class Translatable(object):
                       n=n)
         else:
             return tr(context, sourcetext, disambiguation=disambiguation, n=n)
+
+
+def locales():
+    """
+    Generator function to return all locale codes available for translation
+    in format language_country (see ISO 639 and ISO 3166)
+    @return: the language code
+    @rtype: str
+    """
+    for f in glob.glob(getPluginPath("ressources", "i18n", "pyTSon-*.qm")):
+        m = re.match(r'^pyTSon-(\w\w_\w\w).qm$', os.path.split(f)[-1])
+        if m:
+            yield m.group(1)
 
 
 def getConfigPath(*args):

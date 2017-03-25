@@ -1,6 +1,6 @@
 import os
 
-from PythonQt.QtCore import Qt
+from PythonQt.QtCore import Qt, QLocale
 from PythonQt.QtGui import (QDialog, QHeaderView, QTableWidgetItem,
                             QToolButton, QIcon, QColor, QFont, QMessageBox,
                             QCheckBox, QColorDialog, QFileDialog)
@@ -32,6 +32,10 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                         ("requiredApiEdit", True, [])
                     ]),
                     ("generalTab", False, [
+                        ("languageGroup", False, [
+                            ("languageButton", True, []),
+                            ("languageCombo", True, []),
+                        ]),
                         ("loadMenusButton", True, []),
                     ]),
                     ("consoleTab", False, [
@@ -169,6 +173,18 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
         self.silentButton.setChecked(self.cfg.getboolean("console",
                                                          "silentStartup"))
 
+        self.languageCombo.addItem("Default", "en_US")
+        for loc in pytson.locales():
+            qloc = QLocale(loc)
+            self.languageCombo.addItem(qloc.nativeLanguageName(), loc)
+
+            if self.cfg.get("general", "language") == loc:
+                self.languageCombo.setCurrentIndex(self.languageCombo.count - 1)
+
+        if self.cfg.get("general", "language") == "inherited":
+            self.languageButton.setChecked(True)
+            self.languageCombo.setEnabled(False)
+
         self.setupList()
 
     def setupSlots(self):
@@ -199,6 +215,10 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                                   self.onSpacesButtonChanged)
         self.tabwidthSpin.connect("valueChanged(int)",
                                   self.onTabwidthSpinChanged)
+        self.languageButton.connect("stateChanged(int)",
+                                    self.onLanguageButtonStateChanged)
+        self.languageCombo.connect("currentIndexChanged(int)",
+                                   self.onLanguageComboCurrentIndexChanged)
 
     def onLoadMenusButtonChanged(self, state):
         if state == Qt.Checked:
@@ -367,3 +387,14 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
 
         self.rpd.show()
         self.rpd.raise_()
+
+    def onLanguageComboCurrentIndexChanged(self, idx):
+        self.cfg.set("general", "language", self.languageCombo.currentData)
+
+    def onLanguageButtonStateChanged(self, state):
+        if state == Qt.Checked:
+            self.cfg.set("general", "language", "inherited")
+        else:
+            self.cfg.set("general", "language", self.languageCombo.currentData)
+
+        self.languageCombo.setEnabled(state == Qt.Unchecked)
