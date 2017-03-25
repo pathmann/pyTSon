@@ -35,7 +35,8 @@ class PluginHost(pytson.Translatable):
     defaultConfig = [("general", [("differentApi", "False"),
                                   ("uninstallQuestion", "True"),
                                   ("loadAllMenus", "True"),
-                                  ("language", "inherited")]),
+                                  ("language", "inherited"),
+                                  ("verbose", "False")]),
                      ("plugins", []),
                      ("console", [("backgroundColor", "#000000"),
                                   ("textColor", "#FFFFFF"),
@@ -55,6 +56,11 @@ class PluginHost(pytson.Translatable):
             for (o, v) in options:
                 if not cls.cfg.has_option(section, o):
                     cls.cfg.set(section, o, v)
+
+    @classmethod
+    def verboseLog(cls, text, channel):
+        if cls.cfg.getboolean("general", "verbose"):
+            logprint(text, ts3defines.LogLevel.LogLevel_INFO, channel)
 
     @classmethod
     def init(cls):
@@ -80,8 +86,12 @@ class PluginHost(pytson.Translatable):
         cls.setupConfig()
         cls.setupTranslator()
 
+        cls.verboseLog(cls._tr("Starting up"), "pyTSon.PluginHost.init")
+
         cls.reload()
         cls.start()
+
+        cls.verboseLog(cls._tr("Init success"), "pyTSon.PluginHost.init")
 
     @classmethod
     def setupTranslator(cls):
@@ -109,6 +119,9 @@ class PluginHost(pytson.Translatable):
         p = pytson.getPluginPath("ressources", "i18n", "pyTSon-%s.qm" % lang)
 
         if os.path.isfile(p):
+            cls.verboseLog(cls._tr("Using translator from {file}").
+                           format(file=p), "pyTSon.PluginHost.setupTranslator")
+
             cls.translator = QTranslator()
             if not cls.translator.load(p):
                 logprint("Error loading translator from %s" % p,
@@ -125,6 +138,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def startPlugin(cls, key):
+        cls.verboseLog(cls._tr("Starting plugin {name}").format(name=key),
+                       "pyTSon.PluginHost.startPlugin")
         try:
             cls.active[key] = cls.plugins[key]()
             cls.cfg.set("plugins", key, "True")
@@ -167,6 +182,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def shutdown(cls):
+        cls.verboseLog(cls._tr("Shutting down"), "pyTSon.PluginHost.shutdown")
+
         if cls.shell:
             cls.shell.delete()
         cls.shell = None
@@ -211,6 +228,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def activate(cls, pname):
+        cls.verboseLog(cls._tr("Activating plugin {name}").format(name=pname),
+                       "pyTSon.PluginHost.activate")
         if pname in cls.plugins:
             try:
                 cls.active[pname] = cls.plugins[pname]()
@@ -239,6 +258,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def deactivate(cls, pname):
+        cls.verboseLog(cls._tr("Deactivating plugin {name}").
+                       format(name=pname), "pyTSon.PluginHost.deactivate")
         if pname in cls.active:
             try:
                 # remove hotkeys
@@ -266,6 +287,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def reload(cls):
+        cls.verboseLog(cls._tr("Reloading plugins"),
+                       "pyTSon.PluginHost.reload")
         # stop all running modules
         for key, p in cls.active.items():
             try:
@@ -314,6 +337,8 @@ class PluginHost(pytson.Translatable):
     @classmethod
     def showScriptingConsole(cls):
         if not cls.shell:
+            cls.verboseLog(cls._tr("Creating scripting console"),
+                           "pyTSon.PluginHost.showScriptingConsole")
             tabcomp = cls.cfg.getboolean("console", "tabcomplete")
             spaces = cls.cfg.getboolean("console", "spaces")
             tabwidth = cls.cfg.getint("console", "tabwidth")
@@ -338,6 +363,8 @@ class PluginHost(pytson.Translatable):
     @classmethod
     def configure(cls, mainwindow=None):
         if not cls.confdlg:
+            cls.verboseLog(cls._tr("Creating config dialog"),
+                           "pyTSon.PluginHost.configure")
             cls.confdlg = ConfigurationDialog(cls.cfg, cls, mainwindow)
 
         cls.confdlg.show()
@@ -391,16 +418,24 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def registerCallbackProxy(cls, obj):
+        cls.verboseLog(cls._tr("Callbackproxy {name} registered").
+                       format(name=obj.__class__.__name__),
+                       "pyTSon.PluginHost.registerCallbackProxy")
         if not id(obj) in cls.proxies:
             cls.proxies[id(obj)] = obj
 
     @classmethod
     def unregisterCallbackProxy(cls, obj):
+        cls.verboseLog(cls._tr("Callbackproxy {name} unregistered").
+                       format(name=obj.__class__.__name__),
+                       "pyTSon.PluginHost.unregisterCallbackProxy")
         if obj in cls.proxies:
             cls.proxies.remove(id(obj))
 
     @classmethod
     def processCommand(cls, schid, command):
+        cls.verboseLog(cls._tr("Processing command {cmd}").format(cmd=command),
+                       "pyTSon.PluginHost.processCommand")
         tokens = command.split(' ')
 
         if len(tokens) == 0 or tokens[0] == "":
@@ -510,6 +545,7 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def initMenus(cls):
+        cls.verboseLog(cls._tr("Initing menus"), "pyTSon.PluginHost.initMenus")
         cls.menus = {}
         ret = [(ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 0,
                 cls._tr("Console"), os.path.join("ressources", "octicons",
@@ -561,6 +597,8 @@ class PluginHost(pytson.Translatable):
 
     @classmethod
     def initHotkeys(cls):
+        cls.verboseLog(cls._tr("Initing hotkeys"),
+                       "pyTSon.PluginHost.initHotkeys")
         nextkey = 2
         cls.hotkeys = {}
         ret = [("0", cls._tr("Show the python scripting console")),

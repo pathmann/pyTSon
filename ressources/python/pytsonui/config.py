@@ -37,6 +37,7 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                             ("languageCombo", True, []),
                         ]),
                         ("loadMenusButton", True, []),
+                        ("verboseButton", True, []),
                     ]),
                     ("consoleTab", False, [
                         ("colorsBox", False, [
@@ -185,6 +186,9 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
             self.languageButton.setChecked(True)
             self.languageCombo.setEnabled(False)
 
+        if self.cfg.getboolean("general", "verbose"):
+            self.verboseButton.setChecked(True)
+
         self.setupList()
 
     def setupSlots(self):
@@ -219,6 +223,8 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                                     self.onLanguageButtonStateChanged)
         self.languageCombo.connect("currentIndexChanged(int)",
                                    self.onLanguageComboCurrentIndexChanged)
+        self.verboseButton.connect("stateChanged(int)",
+                                   self.onVerboseButtonStateChanged)
 
     def onLoadMenusButtonChanged(self, state):
         if state == Qt.Checked:
@@ -398,3 +404,6 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
             self.cfg.set("general", "language", self.languageCombo.currentData)
 
         self.languageCombo.setEnabled(state == Qt.Unchecked)
+
+    def onVerboseButtonStateChanged(self, state):
+        self.cfg.set("general", "verbose", str(state == Qt.Checked))

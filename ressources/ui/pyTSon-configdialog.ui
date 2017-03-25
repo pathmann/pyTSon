@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pluginsTab">
       <attribute name="title">
@@ -250,6 +250,13 @@
         <widget class="QCheckBox" name="loadMenusButton">
          <property name="text">
           <string>Load menuitems from inactive plugins on startup</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="verboseButton">
+         <property name="text">
+          <string>Verbose log output</string>
          </property>
         </widget>
        </item>
