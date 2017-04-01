@@ -1,3 +1,5 @@
+from . import _errprint
+
 from ts3plugin import PluginHost
 
 import ts3lib
@@ -10,23 +12,6 @@ import re
 from PythonQt.QtCore import Qt, QAbstractItemModel, QModelIndex
 from PythonQt.QtGui import (QStyledItemDelegate, QStyle, QFontMetrics,
                             QApplication, QIcon, QColor, QTreeView)
-
-
-def _errprint(msg, errcode, aid, secid=None):
-    if secid:
-        err = ts3lib.logMessage("%s (%s): %s" % (msg, secid, errcode),
-                                ts3defines.LogLevel.LogLevel_ERROR,
-                                "pyTSon.ts3widgets", aid)
-    else:
-        err = ts3lib.logMessage("%s: %s" % (msg, errcode),
-                                ts3defines.LogLevel.LogLevel_ERROR,
-                                "pyTSon.ts3widgets", aid)
-
-    if err != ts3defines.ERROR_ok:
-        if secid:
-            print("%s (%s, %s): %s" % (msg, aid, secid, errcode))
-        else:
-            print("%s (%s): %s" % (msg, aid, errcode))
 
 
 class ServerViewRoles:
