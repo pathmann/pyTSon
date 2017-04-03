@@ -1,4 +1,4 @@
-#include "ts3module.h"
+#include "ts3lib.h"
 
 #include <QObject>
 #include <QString>
@@ -29,15 +29,18 @@
 #define CPPDELARR(arr) delete[] arr
 #endif
 
-/*
-# coding: utf-8
+void freeBookmarkList(struct PluginBookmarkList* list) {
+  for (int i = 0; i < list->itemcount; ++i) {
+    ts3_funcs.freeMemory(list->items[i].name);
 
-class ts3:
-    """
+    if (list->items[i].isFolder)
+      freeBookmarkList(list->items[i].folder);
+    else ts3_funcs.freeMemory(list->items[i].uuid);
+  }
 
-    """
+  ts3_funcs.freeMemory(list);
+}
 
-*/
 
 #ifndef PYTSON_PARSER
 static PyMethodDef ts3modfuncs[] = {
@@ -67,13 +70,12 @@ PyMODINIT_FUNC PyInit_ts3lib(void) {
 
 PyObject* getPluginID(PyObject* /*self*/, PyObject* args) {
   /*
-    @staticmethod
-    def getPluginID():
-        """
-        Returns pyTSon's plugin id
-        @return: the plugin id
-        @rtype: string
-        """
+def getPluginID():
+    """
+    Returns pyTSon's plugin id
+    @return: the plugin id
+    @rtype: string
+    """
   */
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
@@ -86,15 +88,14 @@ PyObject* {{f.name}}(PyObject* /*self*/, PyObject* args) {
 {% if f.body == "" %}
   //{{f.signature}}
   /*
-    @staticmethod
-    def {{f.name}}({{f.parameterNames | join(", ")}}):
-        """
-        
-        {% for p in f.parameterNames %}
-        @param {{p}}:
-        @type {{p}}:
-        {% endfor %}
-        """
+def {{f.name}}({{f.parameterNames | join(", ")}}):
+    """
+
+    {% for p in f.parameterNames %}
+    @param {{p}}:
+    @type {{p}}:
+    {% endfor %}
+    """
 
   */
 

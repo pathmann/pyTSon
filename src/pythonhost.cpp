@@ -11,8 +11,10 @@
 #include "pyconversion.h"
 #include "global_shared.h"
 #include "ts3logdispatcher.h"
-#include "ts3module.h"
+#include "ts3lib.h"
 
+#include "pythonqt/pythonqtpytson.h"
+#include "pythonqt/eventfilterobject.h"
 
 #if defined(Q_OS_WIN)
   #define INTERPRETER "python.exe"
@@ -21,7 +23,7 @@
   #define INTERPRETER "python"
 #endif
 
-PythonHost::PythonHost(): m_interpreter(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
+PythonHost::PythonHost(): QObject(), singleton<PythonHost>(), m_interpreter(NULL), m_pluginmod(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
 
 }
 
@@ -51,6 +53,11 @@ bool PythonHost::setupDirectories(QString &error) {
     error = QObject::tr("Interpreter not found in").arg(interpreterpath);
     return false;
   }
+
+#ifdef Q_OS_UNIX
+  if (chmod(interpreterpath.toUtf8().data(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1)
+    ts3logdispatcher::instance()->add(QObject::tr("Setting file permissions of the python interpreter failed, you may need to manually set chmod u+x to %1 (%2)").arg(interpreterpath).arg(errno), LogLevel_ERROR);
+#endif
 
   m_interpreter = Py_DecodeLocale(interpreterpath.toUtf8().data(), NULL);
   if (!m_interpreter) {
@@ -131,7 +138,7 @@ bool PythonHost::setupDirectories(QString &error) {
 }
 
 bool PythonHost::isReady() {
-  return (m_inited && m_pmod && m_pyhost && m_callmeth && m_trace);
+  return (m_inited && m_pluginmod && m_pmod && m_pyhost && m_callmeth && m_trace);
 }
 
 QString PythonHost::formatError(const QString &fallback) {
@@ -230,7 +237,20 @@ bool PythonHost::setModuleSearchpath(QString& error) {
   return true;
 }
 
+void PythonHost::initPythonQt() {
+  PythonQt::init(PythonQt::PythonAlreadyInitialized);
+  PythonQt_QtAll::init();
+
+  PythonQt::self()->registerClass(&EventFilterObject::staticMetaObject, "pytson");
+  PythonQt::self()->addDecorators(new pytsondecorator());
+}
+
 bool PythonHost::init(QString& error) {
+  qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
+
+  m_mainthread = std::this_thread::get_id();
+  connect(this, &PythonHost::callInMainThread, this, &PythonHost::onCallInMainThread, Qt::QueuedConnection);
+
   if (!setupDirectories(error))
     return false;
 
@@ -256,8 +276,7 @@ bool PythonHost::init(QString& error) {
   if (!setSysPath(error))
     return false;
 
-  PythonQt::init(PythonQt::PythonAlreadyInitialized);
-  PythonQt_QtAll::init();
+  initPythonQt();
 
   m_trace = PyImport_ImportModule("traceback");
   if (!m_trace) {
@@ -265,14 +284,20 @@ bool PythonHost::init(QString& error) {
     return false;
   }
 
-  //import ts3plugin module
-  m_pmod = PyImport_ImportModule("ts3plugin");
-  if (!m_pmod) {
+  m_pluginmod = PyImport_ImportModule("ts3plugin");
+  if (!m_pluginmod) {
     error = formatError(QObject::tr("Error importing ts3plugin module"));
     return false;
   }
 
-  //get PluginHost of ts3plugin module
+  //import pluginhost module
+  m_pmod = PyImport_ImportModule("pluginhost");
+  if (!m_pmod) {
+    error = formatError(QObject::tr("Error importing pluginhost module"));
+    return false;
+  }
+
+  //get PluginHost class of module
   m_pyhost = PyObject_GetAttrString(m_pmod, "PluginHost");
   if (!m_pyhost) {
     error = formatError(QObject::tr("Error getting PluginHost class"));
@@ -317,6 +342,9 @@ void PythonHost::shutdown() {
   Py_XDECREF(m_pmod);
   m_pmod = NULL;
 
+  Py_XDECREF(m_pluginmod);
+  m_pluginmod = NULL;
+
   Py_XDECREF(m_trace);
   m_trace = NULL;
 
@@ -352,6 +380,12 @@ int PythonHost::processCommand(uint64 schid, const char* command) {
     return 1;
   }
 
+  /* Currently, this should not happen, processCommand is called from the mainthread, so shouldn't be queued */
+  if (!pyret) {
+    ts3logdispatcher::instance()->add(QObject::tr("Calling processCommand failed with error \"%1\"").arg(error), LogLevel_ERROR);
+    return 1;
+  }
+
   if (PyObject_IsTrue(pyret)) {
     Py_DECREF(pyret);
     return 0;
@@ -370,6 +404,12 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
     return;
   }
 
+  /* Currently, this should not happen, infoData is called from the mainthread, so shouldn't be queued */
+  if (!pyret) {
+    ts3logdispatcher::instance()->add(QObject::tr("Calling infoData failed with error \"%1\"").arg(error), LogLevel_ERROR);
+    return;
+  }
+
   //pyret should be a list of strings
   if (!PyList_Check(pyret)) {
     Py_DECREF(pyret);
@@ -378,7 +418,7 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
   }
 
   PyObject* pystr;
-  QString str;
+  QByteArray str;
   for (int i = 0; i < PyList_Size(pyret); ++i) {
     pystr = PyList_GetItem(pyret, i);
 
@@ -394,13 +434,19 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
   Py_DECREF(pyret);
 
   *data = (char*)malloc((str.length() +1) * sizeof(char));
-  strncpy(*data, str.toUtf8().data(), str.size() +1);
+  strncpy(*data, str.data(), str.size() +1);
 }
 
 void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
   PyObject* pyret;
   QString error;
   if (!callMethod(&pyret, error, "(s)", "initMenus")) {
+    ts3logdispatcher::instance()->add(QObject::tr("Calling initMenus failed with error \"%1\"").arg(error), LogLevel_ERROR);
+    return;
+  }
+
+  /* Currently, this should not happen, initMenus is called from the mainthread, so shouldn't be queued */
+  if (!pyret) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling initMenus failed with error \"%1\"").arg(error), LogLevel_ERROR);
     return;
   }
@@ -459,6 +505,12 @@ void PythonHost::initHotkeys(struct PluginHotkey*** hotkeys) {
   PyObject* pyret = NULL;
   QString error;
   if (!callMethod(&pyret, error, "(s)", "initHotkeys")) {
+    ts3logdispatcher::instance()->add(QObject::tr("Calling initHotkeys failed with error \"%1\"").arg(error), LogLevel_ERROR);
+    return;
+  }
+
+  /* Currently, this should not happen, initHotkeys is called from the mainthread, so shouldn't be queued */
+  if (!pyret) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling initHotkeys failed with error \"%1\"").arg(error), LogLevel_ERROR);
     return;
   }
@@ -567,9 +619,14 @@ int PythonHost::onClientPokeEvent(uint64 schid, anyID fromClientID, const char* 
 }
 
 int PythonHost::onServerPermissionErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, unsigned int failedPermissionID) {
-  PyObject* pyret;
+  PyObject* pyret = NULL;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKsIsI)", "onServerPermissionErrorEvent", (unsigned long long)schid, errorMessage, error, returnCode, failedPermissionID)) {
+    ts3logdispatcher::instance()->add(QObject::tr("Calling onServerPermissionErrorEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
+    return 1;
+  }
+
+  if (!pyret) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling onServerPermissionErrorEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
     return 1;
   }
@@ -585,7 +642,6 @@ int PythonHost::onServerPermissionErrorEvent(uint64 schid, const char* errorMess
 }
 
 void PythonHost::onUserLoggingMessageEvent(const char* logMessage, int logLevel, const char* logChannel, uint64 logID, const char* logTime, const char* completeLogString) {
-  return;
   QString callerror;
   if (!PythonHost::instance()->callMethod(NULL, callerror, "(ssisKss)", "onUserLoggingMessageEvent",  logMessage,  logLevel,  logChannel, (unsigned long long) logID,  logTime,  completeLogString)) {
     printf("%s\n", QObject::tr("Calling onUserLoggingMessageEvent failed with error \"%1\"\n").arg(callerror).toUtf8().data());
@@ -965,6 +1021,12 @@ void PythonHost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 wave
   Py_DECREF(pyret);
 }
 
+void PythonHost::onFileTransferStatusEvent(anyID transferID, unsigned int status, const char *statusMessage, uint64 remotefileSize, uint64 schid) {
+  QString errstr;
+  if (!callMethod(NULL, errstr, "(sIIsKK)", "onFileTransferStatusEvent", (unsigned int)transferID, status, statusMessage, (unsigned long long)remotefileSize, (unsigned long long)schid))
+    ts3logdispatcher::instance()->add(QObject::tr("Calling onFileTransferStatusEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
+}
+
 bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, ...) {
   if (!isReady()) {
     error = QObject::tr("PythonHost is not ready");
@@ -977,14 +1039,26 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
     va_list vl;
     va_start(vl, format);
 
-    args = Py_VaBuildValue(format, vl);
-    if (!args) {
-      va_end(vl);
-      error = QObject::tr("Error creating argumentlist");
-      return false;
+    if (std::this_thread::get_id() != m_mainthread) {
+      ts3callbackarguments cbargs;
+      if (cbargs.init(error, format, vl)) {
+        emit callInMainThread(cbargs);
+        error = QObject::tr("Event is queued");
+        return true;
+      }
+      else return false;
     }
-    else va_end(vl);
+    else {
+      args = Py_VaBuildValue(format, vl);
+      if (!args) {
+        va_end(vl);
+        error = QObject::tr("Error creating argumentlist");
+        return false;
+      }
+      else va_end(vl);
+    }
   }
+  else return false;
 
   PyObject* pyret = PyObject_CallObject(m_callmeth, args);
   Py_XDECREF(args);
@@ -999,4 +1073,28 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
   else Py_DECREF(pyret);
 
   return true;
+}
+
+void PythonHost::onCallInMainThread(const ts3callbackarguments args) {
+  if (std::this_thread::get_id() == m_mainthread) {
+    if (!isReady()) {
+      ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, PythonHost not ready anymore"), LogLevel_ERROR);
+    }
+    else {
+      QString err;
+      PyObject* pyargs = args.toPythonTuple(err);
+
+      if (!pyargs)
+        ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, error creating argument tuple: \"%1\"").arg(err), LogLevel_ERROR);
+      else {
+        PyObject* pyret = PyObject_CallObject(m_callmeth, pyargs);
+        Py_XDECREF(pyargs);
+
+        if (!pyret)
+          ts3logdispatcher::instance()->add(QObject::tr("Error calling queued method"), LogLevel_ERROR);
+        else Py_DECREF(pyret);
+      }
+    }
+  }
+  else ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, not in mainthread"), LogLevel_ERROR);
 }

@@ -2,7 +2,7 @@
 
 bool deviceArrayToPyList(char*** devices, QString& error, PyObject** ret) {
   if (!devices) {
-    error = QObject::tr("No array given in function arrayToPyList<anyID>");
+    error = QObject::tr("No array given in function deviceArrayToPyList");
     return false;
   }
 
@@ -71,7 +71,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
       return false;
     }
 
-    if (PyTuple_SetItem(it, 0, PyBytes_FromString(bm->items[i].name)) != 0) {
+    if (PyTuple_SetItem(it, 0, PyUnicode_FromString(bm->items[i].name)) != 0) {
       Py_DECREF(it);
       Py_DECREF(*ret);
       error = QObject::tr("Error appending item in tuple in function bookMarksToPyList");
@@ -92,6 +92,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
         error = QObject::tr("Error appending item in tuple (3) in function bookMarksToPyList");
         return false;
       }
+      Py_INCREF(Py_None);
 
       PyObject* childs;
       if (!bookmarksToPyList(bm->items[i].folder, error, &childs)) {
@@ -107,10 +108,9 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
         error = QObject::tr("Error appending item in tuple (4) in function bookMarksToPyList");
         return false;
       }
-      Py_DECREF(childs);
     }
     else {
-      if (PyTuple_SetItem(it, 2, PyBytes_FromString(bm->items[i].uuid)) != 0) {
+      if (PyTuple_SetItem(it, 2, PyUnicode_FromString(bm->items[i].uuid)) != 0) {
         Py_DECREF(it);
         Py_DECREF(*ret);
         error = QObject::tr("Error appending item in tuple (5) in function bookMarksToPyList");
@@ -123,6 +123,14 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
         error = QObject::tr("Error appending item in tuple (6) in function bookMarksToPyList");
         return false;
       }
+      Py_INCREF(Py_None);
+    }
+
+    if (PyList_SetItem(*ret, i, it) != 0) {
+      Py_DECREF(it);
+      Py_DECREF(*ret);
+      error = QObject::tr("Error appending item in list in function bookMarksToPyList");
+      return false;
     }
   }
 

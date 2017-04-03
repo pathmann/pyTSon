@@ -1,4 +1,4 @@
-#include "plugin.h"
+#include "ts3plugin.h"
 
 #include "pythonhost.h"
 #include "ts3logdispatcher.h"
@@ -19,6 +19,35 @@
 # coding: utf-8
 
 import ts3defines
+from pluginhost import PluginHost
+
+class PluginMount(type):
+    """
+    Mountpoint for ts3plugins.
+    This class is used as metaclass for ts3plugin-subclasses to autodetect classes and add them to the PluginHost.
+    """
+
+    def __init__(cls, name, bases, attrs):
+        super(PluginMount, cls).__init__(name, bases, attrs)
+        if not hasattr(PluginHost, 'plugins'):
+            PluginHost.plugins = {}
+            PluginHost.active = {}
+        else:
+            for a in ['requestAutoload', 'name', 'version', 'apiVersion', 'author', 'description', 'offersConfigure', 'commandKeyword', 'infoTitle', 'menuItems', 'hotkeys']:
+                if not hasattr(cls, a):
+                    err = ts3lib.logMessage("Plugin %s not loaded, missing required attribute %s" % (name, a), ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
+                    if err != ts3defines.ERROR_ok:
+                        print("Plugin %s not loaded, missing required attribute %s" % (name, a))
+
+                    return
+
+            if not cls.name in PluginHost.plugins:
+                PluginHost.plugins[cls.name] = cls
+            else:
+                err = ts3lib.logMessage("Error loading python plugin %s, already registered or a plugin with that name already exist" % cls.name, ts3defines.LogLevel.LogLevel_ERROR, "pyTSon.PluginMount.init", 0)
+                if err != ts3defines.ERROR_ok:
+                    print("Error loading python plugin %s, already registered or a plugin with that name already exist" % cls.name)
+
 
 class ts3plugin(object):
     __metaclass__ = PluginMount
@@ -169,6 +198,38 @@ class ts3plugin(object):
         @type failedPermissionID: int
         @return: True, if the plugin handled the error, so the client will ignore it. If no returnCode was passed, this return value will be ignored
         @rtype: bool
+        """
+
+    def onUserLoggingMessageEvent(self, logMessage, logLevel, logChannel, logID, logTime, completeLogString):
+        """
+        This is called whenever a message is added to the clientlog. You should not call ts3lib.logMessage in this event to prevent infinite loops. This event can be called asynchronous if called from another thread than the mainthread.
+        @param logMessage: the message that has been logged
+        @type logMessage: str
+        @param logLevel: the level of the message (see ts3defines.LogLevel)
+        @type logLevel: int
+        @param logChannel: the logchannel of the message
+        @type logChannel: str
+        @param logID: the id of the server connection handler it the message is connected to one, otherwise set to 0
+        @type logID: int
+        @param logTime: the time of the message as unix timestamp
+        @type logTime: int
+        @param completeLogString: all infos concatenated as string
+        @type completeLogString: str
+        """
+
+    def onFileTransferStatusEvent(self, transferID, status, statusMessage, remotefileSize, schid):
+        """
+        This is called whenever a filetransfer's status changed. This event is called asynchronous.
+        @param transferID: the id of the filetransfer
+        @type transferID: int
+        @param status: the new status
+        @type status: int
+        @param statusMessage: a statusmessage
+        @type statusMessage: str
+        @param remotefileSize: size of the file on the remote site (if uploading, this is the incompletefilesize)
+        @type remotefileSize: int
+        @param schid: the ID of the serverconnection
+        @type schid: int
         """
 */
 
@@ -834,17 +895,17 @@ void ts3plugin_onClientMoveSubscriptionEvent(uint64 serverConnectionHandlerID, a
   /*
     def onClientMoveSubscriptionEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility):
         """
-        
+        This is called whenever a new client enters the view when subscribing a channel.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
+        @param clientID: the id of the client
+        @type clientID: int
+        @param oldChannelID: always set to 0
+        @type oldChannelID: int
+        @param newChannelID: the id of the subscribed channel
+        @type newChannelID: int
+        @param visibility: always set to ts3defines.Visibility.ENTER_VISIBILITY
+        @type visibility: int
         """
   */
   QString callerror;
@@ -857,19 +918,19 @@ void ts3plugin_onClientMoveTimeoutEvent(uint64 serverConnectionHandlerID, anyID 
   /*
     def onClientMoveTimeoutEvent(self, serverConnectionHandlerID, clientID, oldChannelID, newChannelID, visibility, timeoutMessage):
         """
-        
+        This is called when a client timed out.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param oldChannelID:
-        @type oldChannelID:
-        @param newChannelID:
-        @type newChannelID:
-        @param visibility:
-        @type visibility:
-        @param timeoutMessage:
-        @type timeoutMessage:
+        @param clientID: the id of the client
+        @type clientID: int
+        @param oldChannelID: the id of the channel the client was in
+        @type oldChannelID: int
+        @param newChannelID: always set to 0
+        @type newChannelID: int
+        @param visibility: always set to ts3defines.Visibility.LEAVE_VISIBILITY
+        @type visibility: int
+        @param timeoutMessage: the timeout message
+        @type timeoutMessage: str
         """
   */
   QString callerror;
@@ -882,15 +943,15 @@ void ts3plugin_onClientNamefromDBIDEvent(uint64 serverConnectionHandlerID, const
   /*
     def onClientNamefromDBIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
         """
-        
+        This is called to return the last nickname of a client referenced by the database id after it was requested with ts3lib.requestClientNamefromDBID.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param uniqueClientIdentifier:
-        @type uniqueClientIdentifier:
-        @param clientDatabaseID:
-        @type clientDatabaseID:
-        @param clientNickName:
-        @type clientNickName:
+        @param uniqueClientIdentifier: the uid of the client
+        @type uniqueClientIdentifier: str
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
+        @param clientNickName: the last nickname of the client
+        @type clientNickName: str
         """
   */
   QString callerror;
@@ -903,15 +964,15 @@ void ts3plugin_onClientNamefromUIDEvent(uint64 serverConnectionHandlerID, const 
   /*
     def onClientNamefromUIDEvent(self, serverConnectionHandlerID, uniqueClientIdentifier, clientDatabaseID, clientNickName):
         """
-        
+        This is called to return the last nickname of a client referenced by the uid after it was requested with ts3lib.requestClientNamefromUID.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param uniqueClientIdentifier:
-        @type uniqueClientIdentifier:
-        @param clientDatabaseID:
-        @type clientDatabaseID:
-        @param clientNickName:
-        @type clientNickName:
+        @param uniqueClientIdentifier: the uid of the client
+        @type uniqueClientIdentifier: str
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
+        @param clientNickName: the last nickname of the client
+        @type clientNickName: str
         """
   */
   QString callerror;
@@ -924,13 +985,13 @@ void ts3plugin_onClientNeededPermissionsEvent(uint64 serverConnectionHandlerID, 
   /*
     def onClientNeededPermissionsEvent(self, serverConnectionHandlerID, permissionID, permissionValue):
         """
-        
+        This is called whenever a permission the TS3 client needed changes.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param permissionID:
-        @type permissionID:
-        @param permissionValue:
-        @type permissionValue:
+        @param permissionID: the id of the permission
+        @type permissionID: int
+        @param permissionValue: the value of the permission
+        @type permissionValue: int
         """
   */
   QString callerror;
@@ -943,7 +1004,7 @@ void ts3plugin_onClientNeededPermissionsFinishedEvent(uint64 serverConnectionHan
   /*
     def onClientNeededPermissionsFinishedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called after each permission yielded by onClientNeededPermissionsEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -958,19 +1019,19 @@ void ts3plugin_onClientPermListEvent(uint64 serverConnectionHandlerID, uint64 cl
   /*
     def onClientPermListEvent(self, serverConnectionHandlerID, clientDatabaseID, permissionID, permissionValue, permissionNegated, permissionSkip):
         """
-        
+        This is called for each granted permission to a specific client requested with ts3lib.requestClientPermList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientDatabaseID:
-        @type clientDatabaseID:
-        @param permissionID:
-        @type permissionID:
-        @param permissionValue:
-        @type permissionValue:
-        @param permissionNegated:
-        @type permissionNegated:
-        @param permissionSkip:
-        @type permissionSkip:
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
+        @param permissionID: the id of the permission
+        @type permissionID: int
+        @param permissionValue: the value of the permission
+        @type permissionValue: int
+        @param permissionNegated: negated flag of the permission
+        @type permissionNegated: int
+        @param permissionSkip: skip flag of the permission
+        @type permissionSkip: int
         """
   */
   QString callerror;
@@ -983,11 +1044,11 @@ void ts3plugin_onClientPermListFinishedEvent(uint64 serverConnectionHandlerID, u
   /*
     def onClientPermListFinishedEvent(self, serverConnectionHandlerID, clientDatabaseID):
         """
-        
+        This is called after each permission yielded by onClientPermListEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientDatabaseID:
-        @type clientDatabaseID:
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
         """
   */
   QString callerror;
@@ -1000,15 +1061,15 @@ void ts3plugin_onClientSelfVariableUpdateEvent(uint64 serverConnectionHandlerID,
   /*
     def onClientSelfVariableUpdateEvent(self, serverConnectionHandlerID, flag, oldValue, newValue):
         """
-        
+        This is called whenever a variable of the own client is changed.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param flag:
-        @type flag:
-        @param oldValue:
-        @type oldValue:
-        @param newValue:
-        @type newValue:
+        @param flag: the changed variable (see ts3defines.ClientProperties and ts3defines.ClientPropertiesRare)
+        @type flag: int
+        @param oldValue: the former value
+        @type oldValue: str
+        @param newValue: the new value
+        @type newValue: str
         """
   */
   QString callerror;
@@ -1021,11 +1082,11 @@ void ts3plugin_onClientServerQueryLoginPasswordEvent(uint64 serverConnectionHand
   /*
     def onClientServerQueryLoginPasswordEvent(self, serverConnectionHandlerID, loginPassword):
         """
-        
+        This is called when a new query login was requested.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param loginPassword:
-        @type loginPassword:
+        @param loginPassword: the new password
+        @type loginPassword: str
         """
   */
   QString callerror;
@@ -1038,21 +1099,21 @@ void ts3plugin_onComplainListEvent(uint64 serverConnectionHandlerID, uint64 targ
   /*
     def onComplainListEvent(self, serverConnectionHandlerID, targetClientDatabaseID, targetClientNickName, fromClientDatabaseID, fromClientNickName, complainReason, timestamp):
         """
-        
+        This is called for each entry in the complaintslist.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param targetClientDatabaseID:
-        @type targetClientDatabaseID:
-        @param targetClientNickName:
-        @type targetClientNickName:
-        @param fromClientDatabaseID:
-        @type fromClientDatabaseID:
-        @param fromClientNickName:
-        @type fromClientNickName:
-        @param complainReason:
-        @type complainReason:
-        @param timestamp:
-        @type timestamp:
+        @param targetClientDatabaseID: the database id of the complained client
+        @type targetClientDatabaseID: int
+        @param targetClientNickName: the last nickname of the complained client
+        @type targetClientNickName: str
+        @param fromClientDatabaseID: the database id of the complaining client
+        @type fromClientDatabaseID: int
+        @param fromClientNickName: the last nickname of the complaining client
+        @type fromClientNickName: str
+        @param complainReason: the reason
+        @type complainReason: str
+        @param timestamp: the time of the complain as unix timestamp
+        @type timestamp: int
         """
   */
   QString callerror;
@@ -1065,11 +1126,11 @@ void ts3plugin_onConnectionInfoEvent(uint64 serverConnectionHandlerID, anyID cli
   /*
     def onConnectionInfoEvent(self, serverConnectionHandlerID, clientID):
         """
-        
+        This is called when the connection info of a client has been updated requested with ts3lib.requestConnectionInfo.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
+        @param clientID: the id of the client
+        @type clientID: int
         """
   */
   QString callerror;
@@ -1082,13 +1143,13 @@ void ts3plugin_onConnectStatusChangeEvent(uint64 serverConnectionHandlerID, int 
   /*
     def onConnectStatusChangeEvent(self, serverConnectionHandlerID, newStatus, errorNumber):
         """
-        
+        This is called whenever the status of a serverconnection changed.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param newStatus:
-        @type newStatus:
-        @param errorNumber:
-        @type errorNumber:
+        @param newStatus: the new status (see ts3defines.ConnectStatus)
+        @type newStatus: int
+        @param errorNumber: the error (see ts3defines.ERROR_*)
+        @type errorNumber: int
         """
   */
   QString callerror;
@@ -1101,17 +1162,17 @@ void ts3plugin_onDelChannelEvent(uint64 serverConnectionHandlerID, uint64 channe
   /*
     def onDelChannelEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
         """
-        
+        This is called whenever a channel was deleted.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel
         @type channelID: int
-        @param invokerID:
-        @type invokerID:
-        @param invokerName:
+        @param invokerID: the id of the client who deleted the channel
+        @type invokerID: int
+        @param invokerName: the nick of the deleting client
         @type invokerName: str
-        @param invokerUniqueIdentifier:
-        @type invokerUniqueIdentifier:
+        @param invokerUniqueIdentifier: the uid of the deleting client
+        @type invokerUniqueIdentifier: str
         """
   */
   QString callerror;
@@ -1124,17 +1185,17 @@ void ts3plugin_onFileInfoEvent(uint64 serverConnectionHandlerID, uint64 channelI
   /*
     def onFileInfoEvent(self, serverConnectionHandlerID, channelID, name, size, datetime):
         """
-        
+        This is called with the fileinfo of a remote file requested with ts3lib.requestFileInfo.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel the file is in
         @type channelID: int
-        @param name:
-        @type name:
-        @param size:
-        @type size:
-        @param datetime:
-        @type datetime:
+        @param name: the full path of the file
+        @type name: str
+        @param size: the filesize in bytes
+        @type size: int
+        @param datetime: time the file was last changed as unix timestamp
+        @type datetime: int
         """
   */
   QString callerror;
@@ -1147,25 +1208,25 @@ void ts3plugin_onFileListEvent(uint64 serverConnectionHandlerID, uint64 channelI
   /*
     def onFileListEvent(self, serverConnectionHandlerID, channelID, path, name, size, datetime, atype, incompletesize, returnCode):
         """
-        
+        This is called for each file and directory in path requested with ts3lib.requestFileList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel
         @type channelID: int
-        @param path:
-        @type path:
-        @param name:
-        @type name:
-        @param size:
-        @type size:
-        @param datetime:
+        @param path: the path
+        @type path: str
+        @param name: the filename
+        @type name: str
+        @param size: the filesize in bytes
+        @type size: int
+        @param datetime: time the file or directory was last changed as unix timestamp
         @type datetime:
-        @param atype:
-        @type atype:
-        @param incompletesize:
-        @type incompletesize:
-        @param returnCode:
-        @type returnCode:
+        @param atype: set to 1 if it's a directory, otherwise set to 0
+        @type atype: int
+        @param incompletesize: the complete filesize in bytes or 0 if the file is already complete
+        @type incompletesize: int
+        @param returnCode: the returncode passed to the request or an empty string
+        @type returnCode: str
         """
   */
   QString callerror;
@@ -1178,7 +1239,7 @@ void ts3plugin_onFileListFinishedEvent(uint64 serverConnectionHandlerID, uint64 
   /*
     def onFileListFinishedEvent(self, serverConnectionHandlerID, channelID, path):
         """
-        
+        This is called after each file and directory yielded by onFileListEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         @param channelID:
@@ -1197,9 +1258,9 @@ void ts3plugin_onHotkeyEvent(const char *keyword) {
   /*
     def onHotkeyEvent(self, keyword):
         """
-        
-        @param keyword:
-        @type keyword:
+        This is called when a plugin's hotkey is triggered.
+        @param keyword: the local keyword set in cls.hotkeys
+        @type keyword: str
         """
   */
   QString callerror;
@@ -1212,11 +1273,11 @@ void ts3plugin_onHotkeyRecordedEvent(const char *keyword, const char *key) {
   /*
     def onHotkeyRecordedEvent(self, keyword, key):
         """
-        
-        @param keyword:
-        @type keyword:
-        @param key:
-        @type key:
+        This is called when a hotkey was recorded requested by ts3lib.requestHotkeyInputDialog.
+        @param keyword: the keyword
+        @type keyword: str
+        @param key: the hotkey to trigger the keyword
+        @type key: str
         """
   */
   QString callerror;
@@ -1229,11 +1290,11 @@ void ts3plugin_onIncomingClientQueryEvent(uint64 serverConnectionHandlerID, cons
   /*
     def onIncomingClientQueryEvent(self, serverConnectionHandlerID, commandText):
         """
-        
+        This callback was designed for the clientquery plugin. It combines many callbacks and is called with a representing string.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param commandText:
-        @type commandText:
+        @param commandText: the text of the client query
+        @type commandText: str
         """
   */
   QString callerror;
@@ -1246,15 +1307,15 @@ void ts3plugin_onMenuItemEvent(uint64 serverConnectionHandlerID, enum PluginMenu
   /*
     def onMenuItemEvent(self, serverConnectionHandlerID, atype, menuItemID, selectedItemID):
         """
-        
+        This is called when a plugin's menuitem defined in cls.menuItems is clicked.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param atype:
-        @type atype:
-        @param menuItemID:
-        @type menuItemID:
-        @param selectedItemID:
-        @type selectedItemID:
+        @param atype: type of the menuitem (see ts3defines.PluginMenuType)
+        @type atype: int
+        @param menuItemID: the local id of the menuitem defines in cls.menuItems
+        @type menuItemID: int
+        @param selectedItemID: set to the id of the selected channel if atype is ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CHANNEL, set to the id of the selected client if atype is ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_CLIENT, otherwise always set to 0
+        @type selectedItemID: int
         """
   */
   QString callerror;
@@ -1267,19 +1328,19 @@ void ts3plugin_onMessageGetEvent(uint64 serverConnectionHandlerID, uint64 messag
   /*
     def onMessageGetEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, message, timestamp):
         """
-        
+        This is called with the information about an offline message requested with ts3lib.requestMessageGet.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param messageID:
-        @type messageID:
-        @param fromClientUniqueIdentity:
-        @type fromClientUniqueIdentity:
-        @param subject:
-        @type subject:
-        @param message:
-        @type message:
-        @param timestamp:
-        @type timestamp:
+        @param messageID: the id of the message
+        @type messageID: int
+        @param fromClientUniqueIdentity: the uid of the message's sender
+        @type fromClientUniqueIdentity: str
+        @param subject: the subject of the message
+        @type subject: str
+        @param message: the content of the message
+        @type message: str
+        @param timestamp: time the message was sent as unix timestamp
+        @type timestamp: int
         """
   */
   QString callerror;
@@ -1292,19 +1353,19 @@ void ts3plugin_onMessageListEvent(uint64 serverConnectionHandlerID, uint64 messa
   /*
     def onMessageListEvent(self, serverConnectionHandlerID, messageID, fromClientUniqueIdentity, subject, timestamp, flagRead):
         """
-        
+        This is called for each offline message available on the server requested with ts3lib.requestMessageList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param messageID:
-        @type messageID:
-        @param fromClientUniqueIdentity:
-        @type fromClientUniqueIdentity:
-        @param subject:
-        @type subject:
-        @param timestamp:
-        @type timestamp:
-        @param flagRead:
-        @type flagRead:
+        @param messageID: the id of the message
+        @type messageID: int
+        @param fromClientUniqueIdentity: the uid of the message's sender
+        @type fromClientUniqueIdentity: str
+        @param subject: the subject of the message
+        @type subject: str
+        @param timestamp: time the message was sent as unix timestamp
+        @type timestamp: int
+        @param flagRead: defines the read status of the message
+        @type flagRead: int
         """
   */
   QString callerror;
@@ -1317,19 +1378,19 @@ void ts3plugin_onNewChannelCreatedEvent(uint64 serverConnectionHandlerID, uint64
   /*
     def onNewChannelCreatedEvent(self, serverConnectionHandlerID, channelID, channelParentID, invokerID, invokerName, invokerUniqueIdentifier):
         """
-        
+        This is called whenever a new channel was created.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the new channel
         @type channelID: int
-        @param channelParentID:
-        @type channelParentID:
-        @param invokerID:
-        @type invokerID:
-        @param invokerName:
+        @param channelParentID: the id of the parent channel
+        @type channelParentID: int
+        @param invokerID: the id of the creating client
+        @type invokerID: int
+        @param invokerName: nick of the creating client
         @type invokerName: str
-        @param invokerUniqueIdentifier:
-        @type invokerUniqueIdentifier:
+        @param invokerUniqueIdentifier: the uid of the creating client
+        @type invokerUniqueIdentifier: str
         """
   */
   QString callerror;
@@ -1342,13 +1403,13 @@ void ts3plugin_onNewChannelEvent(uint64 serverConnectionHandlerID, uint64 channe
   /*
     def onNewChannelEvent(self, serverConnectionHandlerID, channelID, channelParentID):
         """
-        
+        This is called whenever a new channel enters the view (at connect).
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel
         @type channelID: int
-        @param channelParentID:
-        @type channelParentID:
+        @param channelParentID: the id of the parent channel
+        @type channelParentID: int
         """
   */
   QString callerror;
@@ -1361,15 +1422,15 @@ void ts3plugin_onPermissionListEvent(uint64 serverConnectionHandlerID, unsigned 
   /*
     def onPermissionListEvent(self, serverConnectionHandlerID, permissionID, permissionName, permissionDescription):
         """
-        
+        This is called for each permission on the server requested with ts3lib.requestPermissionList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param permissionID:
-        @type permissionID:
-        @param permissionName:
-        @type permissionName:
-        @param permissionDescription:
-        @type permissionDescription:
+        @param permissionID: id of the permission
+        @type permissionID: int
+        @param permissionName: name of the permission
+        @type permissionName: str
+        @param permissionDescription: description of the permission
+        @type permissionDescription: str
         """
   */
   QString callerror;
@@ -1382,7 +1443,7 @@ void ts3plugin_onPermissionListFinishedEvent(uint64 serverConnectionHandlerID) {
   /*
     def onPermissionListFinishedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called after each permission yielded by onPermissionListEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1397,11 +1458,11 @@ void ts3plugin_onPermissionListGroupEndIDEvent(uint64 serverConnectionHandlerID,
   /*
     def onPermissionListGroupEndIDEvent(self, serverConnectionHandlerID, groupEndID):
         """
-        
+        This is called for each last permission in the groups of permissions after requesting the permissionlist with ts3lib.requestPermissionList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param groupEndID:
-        @type groupEndID:
+        @param groupEndID: id of the last permission in group
+        @type groupEndID: int
         """
   */
   QString callerror;
@@ -1414,27 +1475,27 @@ void ts3plugin_onPermissionOverviewEvent(uint64 serverConnectionHandlerID, uint6
   /*
     def onPermissionOverviewEvent(self, serverConnectionHandlerID, clientDatabaseID, channelID, overviewType, overviewID1, overviewID2, permissionID, permissionValue, permissionNegated, permissionSkip):
         """
-        
+        This is called for each permission of a pair of client and channel requested with ts3lib.requestPermissionOverview.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientDatabaseID:
-        @type clientDatabaseID:
-        @param channelID:
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
+        @param channelID: the id of the channel
         @type channelID: int
-        @param overviewType:
-        @type overviewType:
-        @param overviewID1:
-        @type overviewID1:
-        @param overviewID2:
-        @type overviewID2:
-        @param permissionID:
-        @type permissionID:
-        @param permissionValue:
-        @type permissionValue:
-        @param permissionNegated:
-        @type permissionNegated:
-        @param permissionSkip:
-        @type permissionSkip:
+        @param overviewType: defines the type of entry in the overview (0 for servergroup, 1 for client permissions, 2 for needed channel permissions, 3 for channelgroup)
+        @type overviewType: int
+        @param overviewID1: depending on the overviewType, set to the id of the servergroup, to the client's database id or the id of the channel
+        @type overviewID1: int
+        @param overviewID2: only used with overviewType=3, then set to the id of the channelgroup; otherwise set to 0
+        @type overviewID2: int
+        @param permissionID: the id of the permission
+        @type permissionID: int
+        @param permissionValue: the value of the permission
+        @type permissionValue: int
+        @param permissionNegated: negated flag of the permission
+        @type permissionNegated: int
+        @param permissionSkip: skip flag of the permission
+        @type permissionSkip: int
         """
   */
   QString callerror;
@@ -1447,7 +1508,7 @@ void ts3plugin_onPermissionOverviewFinishedEvent(uint64 serverConnectionHandlerI
   /*
     def onPermissionOverviewFinishedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called after each permission yielded by onPermissionOverviewEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1463,7 +1524,7 @@ void ts3plugin_onPlaybackShutdownCompleteEvent(uint64 serverConnectionHandlerID)
   /*
     def onPlaybackShutdownCompleteEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called when a playback device can be shutdown with ts3lib.closePlaybackDevice after the process was initiated with ts3lib.initiateGracefulPlaybackShutdown.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1478,13 +1539,13 @@ void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char
   /*
     def onPluginCommandEvent(self, serverConnectionHandlerID, pluginName, pluginCommand):
         """
-        
+        This is called whenever pyTSon receives a plugincommand from another client. All pyTSon plugins will receive this callback. pyTSon recommends to prefix plugincommands with the pluginname.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param pluginName:
-        @type pluginName:
-        @param pluginCommand:
-        @type pluginCommand:
+        @param pluginName: the name of the sending plugin
+        @type pluginName: str
+        @param pluginCommand: the command
+        @type pluginCommand: str
         """
   */
   QString callerror;
@@ -1497,7 +1558,7 @@ void ts3plugin_onServerConnectionInfoEvent(uint64 serverConnectionHandlerID) {
   /*
     def onServerConnectionInfoEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called whenever the server's connectioninfo was updated.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1512,15 +1573,15 @@ void ts3plugin_onServerEditedEvent(uint64 serverConnectionHandlerID, anyID edite
   /*
     def onServerEditedEvent(self, serverConnectionHandlerID, editerID, editerName, editerUniqueIdentifier):
         """
-        
+        This is called whenever the server was edited by a client.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param editerID:
-        @type editerID:
-        @param editerName:
-        @type editerName:
-        @param editerUniqueIdentifier:
-        @type editerUniqueIdentifier:
+        @param editerID: the id of the client
+        @type editerID: int
+        @param editerName: nick of the client
+        @type editerName: int
+        @param editerUniqueIdentifier: uid of the client
+        @type editerUniqueIdentifier: str
         """
   */
   QString callerror;
@@ -1533,15 +1594,15 @@ void ts3plugin_onServerGroupByClientIDEvent(uint64 serverConnectionHandlerID, co
   /*
     def onServerGroupByClientIDEvent(self, serverConnectionHandlerID, name, serverGroupList, clientDatabaseID):
         """
-        
+        This is called for each servergroup of a client requested with ts3lib.requestServerGroupsByClientID.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param name:
-        @type name:
-        @param serverGroupList:
-        @type serverGroupList:
-        @param clientDatabaseID:
-        @type clientDatabaseID:
+        @param name: name of the servergroup
+        @type name:  str
+        @param serverGroupList: id of the servergroup
+        @type serverGroupList: int
+        @param clientDatabaseID: the database id of the client
+        @type clientDatabaseID: int
         """
   */
   QString callerror;
@@ -1554,23 +1615,23 @@ void ts3plugin_onServerGroupClientAddedEvent(uint64 serverConnectionHandlerID, a
   /*
     def onServerGroupClientAddedEvent(self, serverConnectionHandlerID, clientID, clientName, clientUniqueIdentity, serverGroupID, invokerClientID, invokerName, invokerUniqueIdentity):
         """
-        
+        This is called whenever a client is added to a servergroup.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param clientName:
-        @type clientName:
-        @param clientUniqueIdentity:
-        @type clientUniqueIdentity:
-        @param serverGroupID:
-        @type serverGroupID:
-        @param invokerClientID:
-        @type invokerClientID:
-        @param invokerName:
+        @param clientID: the id of the added client
+        @type clientID: int
+        @param clientName: nick of the added client
+        @type clientName: str
+        @param clientUniqueIdentity: uid of the added client
+        @type clientUniqueIdentity: str
+        @param serverGroupID: the id of the servergroup
+        @type serverGroupID: int
+        @param invokerClientID: the id of the adding client
+        @type invokerClientID: int
+        @param invokerName: nick of the adding client
         @type invokerName: str
-        @param invokerUniqueIdentity:
-        @type invokerUniqueIdentity:
+        @param invokerUniqueIdentity: uid of the adding client
+        @type invokerUniqueIdentity: str
         """
   */
   QString callerror;
@@ -1583,23 +1644,23 @@ void ts3plugin_onServerGroupClientDeletedEvent(uint64 serverConnectionHandlerID,
   /*
     def onServerGroupClientDeletedEvent(self, serverConnectionHandlerID, clientID, clientName, clientUniqueIdentity, serverGroupID, invokerClientID, invokerName, invokerUniqueIdentity):
         """
-        
+        This is called whenever a client was removed from a servergroup.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param clientName:
-        @type clientName:
-        @param clientUniqueIdentity:
-        @type clientUniqueIdentity:
-        @param serverGroupID:
-        @type serverGroupID:
-        @param invokerClientID:
-        @type invokerClientID:
-        @param invokerName:
+        @param clientID: the id of the removed client
+        @type clientID: int
+        @param clientName: nick of the removed client
+        @type clientName: str
+        @param clientUniqueIdentity: uid of the removed client
+        @type clientUniqueIdentity: str
+        @param serverGroupID: id the servergroup
+        @type serverGroupID: int
+        @param invokerClientID: the id of the removing client
+        @type invokerClientID: int
+        @param invokerName: nick of the removing client
         @type invokerName: str
-        @param invokerUniqueIdentity:
-        @type invokerUniqueIdentity:
+        @param invokerUniqueIdentity: uid of the removing client
+        @type invokerUniqueIdentity: str
         """
   */
   QString callerror;
@@ -1612,17 +1673,17 @@ void ts3plugin_onServerGroupClientListEvent(uint64 serverConnectionHandlerID, ui
   /*
     def onServerGroupClientListEvent(self, serverConnectionHandlerID, serverGroupID, clientDatabaseID, clientNameIdentifier, clientUniqueID):
         """
-        
+        This is called for each member of a servergroup requested with ts3lib.requestServerGroupClientList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param serverGroupID:
-        @type serverGroupID:
-        @param clientDatabaseID:
-        @type clientDatabaseID:
-        @param clientNameIdentifier:
-        @type clientNameIdentifier:
-        @param clientUniqueID:
-        @type clientUniqueID:
+        @param serverGroupID: the id of the servergroup
+        @type serverGroupID: int
+        @param clientDatabaseID: the database id of the member
+        @type clientDatabaseID: int
+        @param clientNameIdentifier: the last nick of the member or an empty string if withNames was set to False in the request
+        @type clientNameIdentifier: str
+        @param clientUniqueID: the uid of the member or an empty string if withNames was set to False in the request
+        @type clientUniqueID: str
         """
   */
   QString callerror;
@@ -1635,19 +1696,19 @@ void ts3plugin_onServerGroupListEvent(uint64 serverConnectionHandlerID, uint64 s
   /*
     def onServerGroupListEvent(self, serverConnectionHandlerID, serverGroupID, name, atype, iconID, saveDB):
         """
-        
+        This is called for each servergroup on the server requested with ts3lib.requestServerGroupList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param serverGroupID:
-        @type serverGroupID:
-        @param name:
-        @type name:
-        @param atype:
-        @type atype:
-        @param iconID:
-        @type iconID:
-        @param saveDB:
-        @type saveDB:
+        @param serverGroupID: the id of the servergroup
+        @type serverGroupID: int
+        @param name: name of the servergroup
+        @type name: str
+        @param atype: type of the servergroup (0=template, 1=regular, 2=serverquery)
+        @type atype: int
+        @param iconID: icon id of the servergroup or 0 if no icon in this group
+        @type iconID: int
+        @param saveDB: set to 1 if memberships are saved to the database, set to 0 otherwise
+        @type saveDB: int
         """
   */
   QString callerror;
@@ -1660,7 +1721,7 @@ void ts3plugin_onServerGroupListFinishedEvent(uint64 serverConnectionHandlerID) 
   /*
     def onServerGroupListFinishedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called after each servergroup yielded by onServerGroupListEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1675,19 +1736,19 @@ void ts3plugin_onServerGroupPermListEvent(uint64 serverConnectionHandlerID, uint
   /*
     def onServerGroupPermListEvent(self, serverConnectionHandlerID, serverGroupID, permissionID, permissionValue, permissionNegated, permissionSkip):
         """
-        
+        This is called for each granted permission of a servergroup requested with ts3lib.requestServerGroupPermList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param serverGroupID:
-        @type serverGroupID:
-        @param permissionID:
-        @type permissionID:
-        @param permissionValue:
-        @type permissionValue:
-        @param permissionNegated:
-        @type permissionNegated:
-        @param permissionSkip:
-        @type permissionSkip:
+        @param serverGroupID: the id of the servergroup
+        @type serverGroupID: int
+        @param permissionID: the id of the permission
+        @type permissionID: int
+        @param permissionValue: value of the permission
+        @type permissionValue: int
+        @param permissionNegated: negated flag
+        @type permissionNegated: int
+        @param permissionSkip: skip flag
+        @type permissionSkip: int
         """
   */
   QString callerror;
@@ -1700,11 +1761,11 @@ void ts3plugin_onServerGroupPermListFinishedEvent(uint64 serverConnectionHandler
   /*
     def onServerGroupPermListFinishedEvent(self, serverConnectionHandlerID, serverGroupID):
         """
-        
+        This is called after each permission yielded by onServerGroupPermListEvent was triggered.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param serverGroupID:
-        @type serverGroupID:
+        @param serverGroupID: id of the servergroup
+        @type serverGroupID: int
         """
   */
   QString callerror;
@@ -1717,11 +1778,11 @@ void ts3plugin_onServerLogEvent(uint64 serverConnectionHandlerID, const char *lo
   /*
     def onServerLogEvent(self, serverConnectionHandlerID, logMsg):
         """
-        
+        This is called for each line of the serverlog requested by the TS3 Client.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param logMsg:
-        @type logMsg:
+        @param logMsg: the message
+        @type logMsg: str
         """
   */
   QString callerror;
@@ -1734,7 +1795,7 @@ void ts3plugin_onServerLogFinishedEvent(uint64 serverConnectionHandlerID, uint64
   /*
     def onServerLogFinishedEvent(self, serverConnectionHandlerID, lastPos, fileSize):
         """
-        
+        This is called after the requested number of loglines were yielded by onServerLogEvent.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         @param lastPos:
@@ -1753,11 +1814,11 @@ void ts3plugin_onServerStopEvent(uint64 serverConnectionHandlerID, const char *s
   /*
     def onServerStopEvent(self, serverConnectionHandlerID, shutdownMessage):
         """
-        
+        This is called when the server was stopped.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param shutdownMessage:
-        @type shutdownMessage:
+        @param shutdownMessage: if given, the shutdownmessage
+        @type shutdownMessage: str
         """
   */
   QString callerror;
@@ -1770,25 +1831,25 @@ void ts3plugin_onServerTemporaryPasswordListEvent(uint64 serverConnectionHandler
   /*
     def onServerTemporaryPasswordListEvent(self, serverConnectionHandlerID, clientNickname, uniqueClientIdentifier, description, password, timestampStart, timestampEnd, targetChannelID, targetChannelPW):
         """
-        
+        This is called for each temporary password on the server requested with ts3lib.requestServerTemporaryPasswordList.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientNickname:
-        @type clientNickname:
-        @param uniqueClientIdentifier:
-        @type uniqueClientIdentifier:
-        @param description:
-        @type description:
-        @param password:
-        @type password:
-        @param timestampStart:
-        @type timestampStart:
-        @param timestampEnd:
-        @type timestampEnd:
-        @param targetChannelID:
-        @type targetChannelID:
-        @param targetChannelPW:
-        @type targetChannelPW:
+        @param clientNickname: nick of the creator
+        @type clientNickname: str
+        @param uniqueClientIdentifier: uid of the creator
+        @type uniqueClientIdentifier: str
+        @param description: description of the password
+        @type description: str
+        @param password: the password
+        @type password: str
+        @param timestampStart: time the password was created as unix timestamp
+        @type timestampStart: int
+        @param timestampEnd: time the password expires as unix timestamp
+        @type timestampEnd: int
+        @param targetChannelID: the id of the channel clients join in
+        @type targetChannelID: int
+        @param targetChannelPW: password to the targetChannel
+        @type targetChannelPW: str
         """
   */
   QString callerror;
@@ -1801,7 +1862,7 @@ void ts3plugin_onServerUpdatedEvent(uint64 serverConnectionHandlerID) {
   /*
     def onServerUpdatedEvent(self, serverConnectionHandlerID):
         """
-        
+        This is called whenever the server variables were updated.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
         """
@@ -1816,11 +1877,11 @@ void ts3plugin_onSoundDeviceListChangedEvent(const char *modeID, int playOrCap) 
   /*
     def onSoundDeviceListChangedEvent(self, modeID, playOrCap):
         """
-        
-        @param modeID:
-        @type modeID:
-        @param playOrCap:
-        @type playOrCap:
+        This is called when the list of sounddevices changed.
+        @param modeID: defines the playback/capture mode
+        @type modeID: int
+        @param playOrCap: defines whether the playback- or capturelist changed
+        @type playOrCap: int
         """
   */
   QString callerror;
@@ -1833,15 +1894,15 @@ void ts3plugin_onTalkStatusChangeEvent(uint64 serverConnectionHandlerID, int sta
   /*
     def onTalkStatusChangeEvent(self, serverConnectionHandlerID, status, isReceivedWhisper, clientID):
         """
-        
+        This is called whenever a client starts or stops talking.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param status:
-        @type status:
-        @param isReceivedWhisper:
-        @type isReceivedWhisper:
-        @param clientID:
-        @type clientID:
+        @param status: defines whether the client starts or stops talking (see ts3defines.TalkStatus)
+        @type status: int
+        @param isReceivedWhisper: set to 1 if the client whispered, set to 0 otherwise
+        @type isReceivedWhisper: int
+        @param clientID: the id of the client
+        @type clientID: int
         """
   */
   QString callerror;
@@ -1854,17 +1915,17 @@ void ts3plugin_onUpdateChannelEditedEvent(uint64 serverConnectionHandlerID, uint
   /*
     def onUpdateChannelEditedEvent(self, serverConnectionHandlerID, channelID, invokerID, invokerName, invokerUniqueIdentifier):
         """
-        
+        This is called whenever a channel was edited by a client.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel
         @type channelID: int
-        @param invokerID:
-        @type invokerID:
-        @param invokerName:
+        @param invokerID: the id of the client
+        @type invokerID: int
+        @param invokerName: nick of the client
         @type invokerName: str
-        @param invokerUniqueIdentifier:
-        @type invokerUniqueIdentifier:
+        @param invokerUniqueIdentifier: uid of the client
+        @type invokerUniqueIdentifier: str
         """
   */
   QString callerror;
@@ -1877,10 +1938,10 @@ void ts3plugin_onUpdateChannelEvent(uint64 serverConnectionHandlerID, uint64 cha
   /*
     def onUpdateChannelEvent(self, serverConnectionHandlerID, channelID):
         """
-        
+        This is called whenever the channel variables of a specific channel are updated.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param channelID:
+        @param channelID: the id of the channel
         @type channelID: int
         """
   */
@@ -1894,17 +1955,17 @@ void ts3plugin_onUpdateClientEvent(uint64 serverConnectionHandlerID, anyID clien
   /*
     def onUpdateClientEvent(self, serverConnectionHandlerID, clientID, invokerID, invokerName, invokerUniqueIdentifier):
         """
-        
+        This is called whenever the client variables of a specific client are updated.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param clientID:
-        @type clientID:
-        @param invokerID:
-        @type invokerID:
-        @param invokerName:
+        @param clientID: the id of the client
+        @type clientID: int
+        @param invokerID: id of the client invoking the change or 0 if it was a selfupdate
+        @type invokerID: int
+        @param invokerName: nick of the invoking client
         @type invokerName: str
-        @param invokerUniqueIdentifier:
-        @type invokerUniqueIdentifier:
+        @param invokerUniqueIdentifier: uid of the invoking client
+        @type invokerUniqueIdentifier: str
         """
   */
   QString callerror;

@@ -48,6 +48,7 @@ EXPORT_SYMBOL void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64 schid, sho
 EXPORT_SYMBOL void ts3plugin_onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, int* edited);
 EXPORT_SYMBOL void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume);
 EXPORT_SYMBOL void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume);
+EXPORT_SYMBOL void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char* statusMessage, uint64 remotefileSize, uint64 schid);
 
 #ifdef __cplusplus
 }

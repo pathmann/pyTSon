@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QWidget" name="Dialog">
+ <class>pytsonconfigdialog</class>
+ <widget class="QWidget" name="pytsonconfigdialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string notr="true">Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -63,10 +63,10 @@
            <item>
             <widget class="QPushButton" name="reloadButton">
              <property name="text">
-              <string>Reload all</string>
+              <string notr="true" extracomment="asd2">Reload all</string>
              </property>
              <property name="pytsonicon" stdset="0">
-              <string>RELOAD</string>
+              <string notr="true">RELOAD</string>
              </property>
             </widget>
            </item>
@@ -225,9 +225,38 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
+        <widget class="QGroupBox" name="languageGroup">
+         <property name="toolTip">
+          <string>Changes require a restart</string>
+         </property>
+         <property name="title">
+          <string>Language</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QCheckBox" name="languageButton">
+            <property name="text">
+             <string>Use the client's language</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="languageCombo"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="loadMenusButton">
          <property name="text">
           <string>Load menuitems from inactive plugins on startup</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="verboseButton">
+         <property name="text">
+          <string>Verbose log output</string>
          </property>
         </widget>
        </item>
@@ -250,14 +279,17 @@
              <string>Bac&amp;kground:</string>
             </property>
             <property name="buddy">
-             <cstring>backgroundColorButton</cstring>
+             <cstring>bgColorButton</cstring>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QToolButton" name="backgroundColorButton">
+           <widget class="QToolButton" name="bgColorButton">
             <property name="text">
-             <string/>
+             <string notr="true"/>
+            </property>
+            <property name="shortcut">
+             <string notr="true"/>
             </property>
            </widget>
           </item>
@@ -274,7 +306,10 @@
           <item row="1" column="1">
            <widget class="QToolButton" name="textColorButton">
             <property name="text">
-             <string/>
+             <string notr="true"/>
+            </property>
+            <property name="shortcut">
+             <string notr="true"/>
             </property>
            </widget>
           </item>
@@ -413,7 +448,7 @@
             <item>
              <widget class="QToolButton" name="scriptButton">
               <property name="text">
-               <string>...</string>
+               <string notr="true">...</string>
               </property>
              </widget>
             </item>

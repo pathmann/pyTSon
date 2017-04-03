@@ -4,15 +4,20 @@
 #include <Python.h>
 
 #include "singleton.h"
+#include "ts3callbackarguments.h"
 
 #include "teamspeak/public_definitions.h"
 #include "plugin_definitions.h"
 
+#include <QObject>
 #include <QString>
 #include <QDir>
 
-class PythonHost: public singleton<PythonHost> {
+#include <thread>
+
+class PythonHost: public QObject, public singleton<PythonHost> {
     friend class singleton<PythonHost>;
+    Q_OBJECT
   public:
     bool init(QString& error);
     void shutdown();
@@ -34,8 +39,14 @@ class PythonHost: public singleton<PythonHost> {
     void onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, int* edited);
     void onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume);
     void onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume);
+    void onFileTransferStatusEvent(anyID transferID, unsigned int status, const char* statusMessage, uint64 remotefileSize, uint64 schid);
 
     bool callMethod(PyObject** ret, QString& error, const char* format, ...);
+
+  signals:
+    void callInMainThread(const ts3callbackarguments args);
+  protected slots:
+    void onCallInMainThread(const ts3callbackarguments args);
   protected:
     bool setupDirectories(QString& error);
     bool isReady();
@@ -44,6 +55,8 @@ class PythonHost: public singleton<PythonHost> {
     bool setSysPath(QString& error);
 
     QString formatError(const QString& fallback);
+
+    void initPythonQt();
   private:
     PythonHost();
     ~PythonHost();
@@ -55,11 +68,14 @@ class PythonHost: public singleton<PythonHost> {
     QDir m_sitepackdir;
     QDir m_base;
     wchar_t* m_interpreter;
+    PyObject* m_pluginmod;
     PyObject* m_pmod;
     PyObject* m_pyhost;
     PyObject* m_callmeth;
     PyObject* m_trace;
     bool m_inited;
+
+    std::thread::id m_mainthread;
 };
 
 #endif // PYTHONHOST_H

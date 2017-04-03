@@ -17,30 +17,44 @@ SOURCES += pytson.cpp \
     pythonhost.cpp \
     global_shared.cpp \
     ts3logdispatcher.cpp \
-    pyconversion.cpp
+    pyconversion.cpp \
+    pythonqt/pythonqtpytson.cpp \
+    pythonqt/eventfilterobject.cpp \
+    ts3callbackarguments.cpp
 
 HEADERS += pytson.h \
     pythonhost.h \
     singleton.h \
     global_shared.h \
     ts3logdispatcher.h \
-    pyconversion.h
+    pyconversion.h \
+    pythonqt/pythonqtpytson.h \
+    pythonqt/eventfilterobject.h \
+    ts3callbackarguments.h
 
-OTHER_FILES += ../templates/ts3module.h.tpl \
-    ../templates/ts3module.cpp.tpl \
-    ../templates/plugin.h.tpl \
-    ../templates/plugin.cpp.tpl \
+OTHER_FILES += ../templates/ts3lib.h.tpl \
+    ../templates/ts3lib.cpp.tpl \
+    ../templates/ts3plugin.h.tpl \
+    ../templates/ts3plugin.cpp.tpl \
     ../templates/ts3defines.py.tpl \
-    ../templates/ts3plugin.py.tpl \
-    ../ressources/pyTSon-configdialog.ui \
-    ../ressources/repository.ui \
-    ../ressources/repository-manager.ui \
-    ../ressources/installer.ui \
-    ../ressources/pytsonui.py \
-    ../ressources/devtools.py \
+    ../ressources/ui/pyTSon-configdialog.ui \
+    ../ressources/ui/repository.ui \
+    ../ressources/ui/repository-manager.ui \
+    ../ressources/ui/installer.ui \
+    ../ressources/python/pytsonui/__init__.py \
+    ../ressources/python/pytsonui/console.py \
+    ../ressources/python/pytsonui/config.py \
+    ../ressources/python/pytsonui/dialogs.py \
+    ../ressources/python/pytsonui/repository.py \
+    ../ressources/python/devtools.py \
     ../ressources/repositorymaster.json \
-    ../ressources/pytson.py \
-    ../ressources/ts3client.py
+    ../ressources/python/pytson.py \
+    ../ressources/python/ts3client.py \
+    ../ressources/python/ts3plugin.py \
+    ../ressources/python/pluginhost.py \
+    ../ressources/python/pythonqtpytson.py \
+    ../ressources/python/ts3widgets/__init__.py \
+    ../ressources/python/ts3widgets/serverview.py
 
 
 unix:!mac {
@@ -62,11 +76,11 @@ macx {
 
 
 #########GENERATED SOURCES#########
-SOURCES += ../generated/pregen/ts3module.cpp \
-    ../generated/pregen/plugin.cpp
+SOURCES += ../generated/pregen/ts3lib.cpp \
+    ../generated/pregen/ts3plugin.cpp
 
-HEADERS += ../generated/pregen/ts3module.h \
-    ../generated/pregen/plugin.h
+HEADERS += ../generated/pregen/ts3lib.h \
+    ../generated/pregen/ts3plugin.h
 
 INCLUDEPATH += ../generated/pregen
 

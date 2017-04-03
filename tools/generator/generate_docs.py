@@ -4,8 +4,8 @@ import sys, os
 
 from argparse import ArgumentParser
 
-DOC_FILES = ["ts3module.cpp", "plugin.cpp"]
-EXTRA_FILES = [("..", "..", "ressources", "pytsonui.py"), ("..", "..", "ressources", "pytson.py"), ("..", "..", "ressources", "devtools.py"), ("..", "..", "ressources", "ts3client.py")]
+DOC_FILES = ["ts3lib.cpp", "ts3plugin.cpp"]
+EXTRA_FILES = [("..", "..", "ressources", "python", "pytsonui"), ("..", "..", "ressources", "python", "pytson.py"), ("..", "..", "ressources", "python", "devtools.py"), ("..", "..", "ressources", "python", "ts3client.py"), ("..", "..", "ressources", "python", "pluginhost.py"), ("..", "..", "ressources", "python", "ts3widgets"), ("..", "..", "ressources", "python", "pythonqtpytson.py")]
 
 def main(inpdir, outdir):
     outfiles = [os.path.join(inpdir, os.path.join(*t)) for t in EXTRA_FILES]
@@ -28,8 +28,9 @@ def main(inpdir, outdir):
                     elif incomment:
                         outf.write(l)
 
-    os.system("epydoc %s --parse-only -o %s -n pyTSon --html" % (" ".join(outfiles), outdir))
-    os.system("epydoc %s --parse-only -o %s -n pyTSon --pdf" % (" ".join(outfiles), outdir))
+    confpath = os.path.join(os.path.dirname(__file__), "epydoc.conf")
+    os.system("epydoc %s --parse-only -o %s --html --config %s" % (" ".join(outfiles), outdir, confpath))
+    os.system("epydoc %s --parse-only -o %s --pdf --config %s" % (" ".join(outfiles), outdir, confpath))
 
 
 if __name__ == "__main__":

@@ -197,7 +197,7 @@ bool bookmarksToPyList(struct PluginBookmarkList* bm, QString& error, PyObject**
  */
 template<typename T>
 inline bool pyListToArray(PyObject* , QString& error, T** , bool ) {
-  error = QObject::tr("pyListToArray not implemented for this datatime");
+  error = QObject::tr("pyListToArray not implemented for this datatype");
   return false;
 }
 
@@ -215,7 +215,6 @@ inline bool pyListToArray<char*>(PyObject* list, QString& error, char*** ret, bo
   }
   else *ret = (char**)malloc(sizeof(char*) * len);
 
-  *ret = (char**)malloc(sizeof(char*) * len);
   PyObject* item;
   const char* str;
   for (unsigned int i = 0; i < len; ++i) {
@@ -230,7 +229,7 @@ inline bool pyListToArray<char*>(PyObject* list, QString& error, char*** ret, bo
     }
 
     str = PyUnicode_AsUTF8(item);
-    (*ret[i]) = (char*)malloc(sizeof(char) * (strlen(str) +1));
+    ((*ret)[i]) = (char*)malloc(sizeof(char) * (strlen(str) +1));
     strcpy((*ret)[i], str);
   }
 

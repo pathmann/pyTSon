@@ -145,3 +145,7 @@ void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clien
 void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
   PythonHost::instance()->onCustom3dRolloffCalculationWaveEvent(schid, waveHandle, distance, volume);
 }
+
+void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char* statusMessage, uint64 remotefileSize, uint64 schid) {
+  PythonHost::instance()->onFileTransferStatusEvent(transferID, status, statusMessage, remotefileSize, schid);
+}
