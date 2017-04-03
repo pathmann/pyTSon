@@ -461,11 +461,11 @@ class PluginHost(pytson.Translatable):
         for key, p in cls.active.items():
             if p.infoTitle is not None and hasattr(p, "infoData"):
                 try:
-                    infoData = p.infoData(schid, aid, atype)
-                    if infoData is not None:
+                    data = p.infoData(schid, aid, atype)
+                    if data is not None:
                         if p.infoTitle != "":
                         ret.append(p.infoTitle)
-                        ret += p.infoData(schid, aid, atype)
+                        ret += data
                 except:
                     logprint(cls._tr("Error calling infoData of python plugin "
                                      "{name}: {trace}").format(
