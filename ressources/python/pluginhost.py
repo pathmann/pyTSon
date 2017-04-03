@@ -464,8 +464,8 @@ class PluginHost(pytson.Translatable):
                     data = p.infoData(schid, aid, atype)
                     if data is not None:
                         if p.infoTitle != "":
-                        ret.append(p.infoTitle)
-                        ret += data
+                            ret.append(p.infoTitle)
+                            ret += data
                 except:
                     logprint(cls._tr("Error calling infoData of python plugin "
                                      "{name}: {trace}").format(
