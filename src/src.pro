@@ -54,7 +54,9 @@ OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../ressources/python/pluginhost.py \
     ../ressources/python/pythonqtpytson.py \
     ../ressources/python/ts3widgets/__init__.py \
-    ../ressources/python/ts3widgets/serverview.py
+    ../ressources/python/ts3widgets/serverview.py \
+    ../ressources/python/ts3widgets/filetransfer.py \
+    ../ressources/ui/filebrowser.ui
 
 
 unix:!mac {
