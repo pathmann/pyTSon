@@ -13,7 +13,7 @@ from signalslot import Signal
 
 from PythonQt.QtCore import (Qt, QAbstractItemModel, QModelIndex)
 from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
-                            QSortFilterProxyModel)
+                            QSortFilterProxyModel, QFileDialog)
 
 from datetime import datetime
 
@@ -134,6 +134,10 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
     def path(self, val):
         self._reload(val)
 
+    @property
+    def currentFiles(self):
+        return self.files
+
     def _reload(self, path=None):
         if path:
             self.newpath = path
@@ -251,6 +255,7 @@ class FileBrowser(QDialog, pytson.Translatable):
             self.delete()
             raise e
 
+        self.schid = schid
         self.cid = cid
         self.password = password
         self.path = None
@@ -271,6 +276,8 @@ class FileBrowser(QDialog, pytson.Translatable):
                 raise Exception("Error getting DownloadDir from config")
         else:
             self.downloaddir = downloaddir
+
+        self.transdlg = None
 
         self.listmodel = FileListModel(schid, cid, password, self)
         self.listmodel.pathChanged.connect(self.onPathChanged)
@@ -312,6 +319,15 @@ class FileBrowser(QDialog, pytson.Translatable):
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         for i in range(1, header.count()):
             header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+
+        self.uploadButton.connect("clicked()", self.uploadFiles)
+        self.downloadButton.connect("clicked()", self.downloadFiles)
+
+    def _showTransfers(self):
+        if not self.transdlg:
+            self.transdlg = FileTransferDialog(self.schid, self.cid,
+                                               self.password, self)
+            self.transdlg.show()
 
     def onPathChanged(self, newpath):
         self.path = newpath
@@ -363,13 +379,40 @@ class FileBrowser(QDialog, pytson.Translatable):
     def on_refreshButton_clicked(self):
         self.listmodel.path = self.listmodel.path
 
-    def on_uploadButton_clicked(self):
+    def uploadFiles(self):
         if self.readonly:
             return
 
-        #TODO
+        files = QFileDialog.getOpenFileNames(self, self._tr("Upload files"),
+                                             self.downloaddir)
 
-    def on_downloadButton_clicked(self):
+        fca = FileCollisionAction.overwrite
+        curfiles = {f.name: f for f in self.listmodel.currentFiles}
+        for f in files:
+            fname = os.path.split(f)[-1]
+            if fname in curfiles:
+                if not fca & FileCollisionAction.toall:
+                    fca = FileCollisionDialog.getAction(f, curfiles[fname],
+                                                        False, len(files) > 1,
+                                                        self)
+
+                if fca == 0:
+                    return
+
+                if fca & FileCollisionAction.skip:
+                    if not fca & FileCollisionAction.toall:
+                        fca = FileCollisionAction.overwrite
+                    break
+
+            self._showTransfers()
+            self.transdlg.addUpload(self.path, f,
+                                    fca & FileCollisionAction.overwrite,
+                                    fca & FileCollisionAction.resume)
+
+            if not fca & FileCollisionAction.toall:
+                fca = FileCollisionAction.overwrite
+
+    def downloadFiles(self):
         if self.readonly:
             return
 
@@ -395,18 +438,103 @@ class FileBrowser(QDialog, pytson.Translatable):
         #TODO
         pass
 
+    def on_table_doubleClicked(self, idx):
+        pass
+
+    def on_list_doubleClicked(self, idx):
+        pass
+
 
 class FileCollisionAction(object):
     overwrite = 1
     resume = 2
-    toall = 4
+    skip = 4
+    toall = 8
 
 
-class FileCollisionDialog(QDialog):
+class FileCollisionDialog(QDialog, pytson.Translatable):
     """
 
     """
-    pass
+    @classmethod
+    def getAction(cls, localfile, remotefile, isdownload, multi, parent=None):
+        """
+
+        """
+        dlg = cls(localfile, remotefile, isdownload, multi, parent)
+        return dlg.exec_()
+
+    def __init__(self, localfile, remotefile, isdownload, multi, parent=None):
+        """
+
+        """
+        super(QDialog, self).__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
+        try:
+            setupUi(self, pytson.getPluginPath("ressources",
+                                               "filecollision.ui"))
+        except Exception as e:
+            self.delete()
+            raise e
+
+        if not multi:
+            self.multiButton.setVisible(False)
+            self.skipallButton.setVisible(False)
+
+        locsize = os.path.getsize(localfile)
+        if locsize == remotefile.size:
+            self.resumeButton.hide()
+
+            self.actionLabel.text = self._tr("Do you want to overwrite the "
+                                             "existing file")
+        else:
+            self.actionLabel.text = self._tr("Do you want to overwrite or "
+                                             "resume the existing file")
+
+        self.filenameLabel.text = "<b>%s</b>" % remotefile.name
+
+        datefmt = pytson.tr("filetransfer", "%Y-%m-%d %H:%M:%S")
+        locdate = datetime.fromtimestamp(os.path.getmtime(localfile))
+        filefmt = "Size: <b>%s</b><br />Date: <b>%s</b>"
+
+        locstr = filefmt % (bytesToStr(locsize), locdate.strftime(datefmt))
+        remstr = filefmt % (bytesToStr(remotefile.size),
+                            remotefile.datetime.strftime(datefmt))
+
+        if isdownload:
+            self.existingLabel.text = locstr
+            self.newLabel.text = remstr
+        else:
+            self.existingLabel.text = remstr
+            self.newLabel.text = locstr
+
+    def on_overwriteButton_clicked(self):
+        ret = FileCollisionAction.overwrite
+        if self.multiButton.isChecked():
+            ret = ret | FileCollisionAction.toall
+
+        self.done(ret)
+
+    def on_resumeButton_clicked(self):
+        ret = FileCollisionAction.resume
+        if self.multiButton.isChecked():
+            ret = ret | FileCollisionAction.toall
+
+        self.done(ret)
+
+    def on_skipButton_clicked(self):
+        ret = FileCollisionAction.skip
+        if self.multiButton.isChecked():
+            ret = ret | FileCollisionAction.toall
+
+        self.done(ret)
+
+    def on_skipallButton_clicked(self):
+        self.done(FileCollisionAction.skip | FileCollisionAction.toall)
+
+    def on_cancelButton_clicked(self):
+        self.done(0)
 
 
 class FileTransfer(object):
@@ -434,4 +562,30 @@ class FileTransferDialog(QDialog):
     """
 
     """
-    pass
+    def __init__(self, schid, cid, password, parent=None):
+        super(QDialog, self).__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
+        try:
+            setupUi(self, pytson.getPluginPath("ressources",
+                                               "filetransfer.ui"))
+        except Exception as e:
+            self.delete()
+            raise e
+
+        self.resize(770, 250)
+
+    def on_closeButton_clicked(self):
+        self.close()
+
+    def on_cleanupButton_clicked(self):
+        pass
+
+    def addUpload(self, path, localfile, overwrite, resume):
+        """
+
+        """
+        pass
+
+    def addDownloads(self, files):
+        pass
