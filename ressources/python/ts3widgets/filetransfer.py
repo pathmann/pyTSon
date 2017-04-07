@@ -22,14 +22,14 @@ def splitpath(path):
     """
 
     """
-    return list(filter(None, path.split('/')))
+    return ["/"] + list(filter(None, path.split('/')))
 
 
 def joinpath(*args):
     """
 
     """
-    return "/" + "/".join(filter(None, *args))
+    return "/" + "/".join(filter(lambda x: x not in ["/", ""], args))
 
 
 def bytesToStr(size):
@@ -164,7 +164,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         if (schid != self.schid or channelID != self.cid or
            path != self.newpath):
             return
-        print("fini %s" % path)
+        #might be unneeded (event is catched in onServerErrorEvent)
 
     def onServerErrorEvent(self, schid, errorMessage, error, returnCode,
                            extraMessage):
@@ -233,6 +233,9 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
                                                      "%Y-%m-%d %H:%M:%S"))
         return None
 
+    def fileByIndex(self, idx):
+        return self.files[idx.row()]
+
 
 class FileBrowser(QDialog, pytson.Translatable):
     """
@@ -276,6 +279,9 @@ class FileBrowser(QDialog, pytson.Translatable):
                 raise Exception("Error getting DownloadDir from config")
         else:
             self.downloaddir = downloaddir
+
+        self.fileDoubleClicked = Signal()
+        self.contextMenuRequested = Signal()
 
         self.transdlg = None
 
@@ -322,6 +328,10 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.uploadButton.connect("clicked()", self.uploadFiles)
         self.downloadButton.connect("clicked()", self.downloadFiles)
+        self.deleteButton.connect("clicked()", self.deleteFiles)
+        self.list.connect("doubleClicked(QModelIndex)", self.viewDoubleClicked)
+        self.table.connect("doubleClicked(QModelIndex)",
+                           self.viewDoubleClicked)
 
     def _showTransfers(self):
         if not self.transdlg:
@@ -368,7 +378,7 @@ class FileBrowser(QDialog, pytson.Translatable):
         if self.path == "/":
             return
 
-        self.listmodel.path = joinpath(splitpath(self.path)[:-1])
+        self.listmodel.path = joinpath(*splitpath(self.path)[:-1])
 
     def on_homeButton_clicked(self):
         if self.staticpath:
@@ -412,7 +422,7 @@ class FileBrowser(QDialog, pytson.Translatable):
             if not fca & FileCollisionAction.toall:
                 fca = FileCollisionAction.overwrite
 
-    def downloadFiles(self):
+    def downloadFiles(self, files=None):
         if self.readonly:
             return
 
@@ -424,25 +434,49 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         #TODO
 
-    def on_deleteButton_clicked(self):
+    def deleteFiles(self, files=None):
         if self.readonly:
             return
 
         #TODO
 
     def on_table_customContextMenuRequested(self, pos):
-        #TODO
-        pass
+        selfiles = [self.proxy.mapToSource(x) for x in
+                    self.table.selectionModel().selectedIndexes()]
+
+        if self.readonly:
+            self.contextMenuRequested.emit(selfiles,
+                                           self.table.mapToGlobal(pos))
+        else:
+            #TODO
+            pass
 
     def on_list_customContextMenuRequested(self, pos):
-        #TODO
-        pass
+        selfiles = [self.proxy.mapToSource(x) for x in
+                    self.list.selectionModel().selectedIndexes()]
 
-    def on_table_doubleClicked(self, idx):
-        pass
+        if self.readonly:
+            self.contextMenuRequested.emit(selfiles,
+                                           self.list.mapToGlobal(pos))
+        else:
+            #TODO
+            pass
 
-    def on_list_doubleClicked(self, idx):
-        pass
+    def viewDoubleClicked(self, idx):
+        if not idx.isValid():
+            return
+
+        f = self.listmodel.fileByIndex(self.proxy.mapToSource(idx))
+        if f.isDirectory:
+            if self.staticpath:
+                self.fileDoubleClicked.emit(f)
+            else:
+                self.listmodel.path = joinpath(self.path, f.name)
+        else:
+            if self.readonly:
+                self.fileDoubleClicked.emit(f)
+            else:
+                self.downloadFiles([f])
 
 
 class FileCollisionAction(object):
