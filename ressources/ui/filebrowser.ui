@@ -403,6 +403,9 @@
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
          </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <property name="resizeMode">
           <enum>QListView::Adjust</enum>
          </property>
@@ -437,6 +440,9 @@
         <widget class="QTableView" name="table">
          <property name="contextMenuPolicy">
           <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
          </property>
          <property name="showGrid">
           <bool>false</bool>

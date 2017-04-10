@@ -13,7 +13,9 @@ from signalslot import Signal
 
 from PythonQt.QtCore import (Qt, QAbstractItemModel, QModelIndex)
 from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
-                            QSortFilterProxyModel, QFileDialog)
+                            QSortFilterProxyModel, QFileDialog, QLineEdit,
+                            QInputDialog, QStatusBar, QMessageBox)
+from PythonQt import BoolResult
 
 from datetime import datetime
 
@@ -237,6 +239,34 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         return self.files[idx.row()]
 
 
+class SmartStatusBar(QStatusBar):
+    """
+
+    """
+
+    # default Timeout of messages
+    defaultTimeout = 5000
+
+    def __init__(self, parent=None):
+        super(SmartStatusBar, self).__init__(parent)
+
+        self.connect("messageChanged(QString)", self.onMessageChanged)
+
+    def onMessageChanged(self, message):
+        if message == "":
+            self.hide()
+
+    def display(self, message, timeout=0):
+        """
+
+        """
+        self.show()
+        if timeout == 0:
+            timeout = self.defaultTimeout
+
+        self.showMessage(message, timeout)
+
+
 class FileBrowser(QDialog, pytson.Translatable):
     """
 
@@ -254,6 +284,10 @@ class FileBrowser(QDialog, pytson.Translatable):
         try:
             setupUi(self, pytson.getPluginPath("ressources", "filebrowser.ui"),
                     iconpack=iconpack)
+
+            self.statusbar = SmartStatusBar(self)
+            self.filebrowser.layout().addWidget(self.statusbar)
+            self.statusbar.hide()
         except Exception as e:
             self.delete()
             raise e
@@ -265,6 +299,9 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.staticpath = staticpath
         self.readonly = readonly
+
+        self.createretcode = None
+        self.delretcode = None
 
         if not self.readonly and not downloaddir:
             cfg = ts3client.Config()
@@ -297,6 +334,11 @@ class FileBrowser(QDialog, pytson.Translatable):
         self.listmodel.path = path
 
         self.adjustUi()
+
+        PluginHost.registerCallbackProxy(self)
+
+    def __del__(self):
+        PluginHost.unregisterCallbackProxy(self)
 
     def adjustUi(self):
         """
@@ -389,6 +431,17 @@ class FileBrowser(QDialog, pytson.Translatable):
     def on_refreshButton_clicked(self):
         self.listmodel.path = self.listmodel.path
 
+    def showError(self, prefix, errcode, msg=None):
+        if not msg:
+            err, msg = ts3lib.getErrorMessage(errcode)
+        else:
+            err = ERROR_ok
+
+        if err != ERROR_ok:
+            self.statusbar.display("%s: %s" % (prefix, errcode))
+        else:
+            self.statusbar.display("%s: %s" % (prefix, msg))
+
     def uploadFiles(self):
         if self.readonly:
             return
@@ -422,6 +475,24 @@ class FileBrowser(QDialog, pytson.Translatable):
             if not fca & FileCollisionAction.toall:
                 fca = FileCollisionAction.overwrite
 
+    def onServerErrorEvent(self, schid, errorMessage, error, returnCode,
+                           extraMessage):
+        if schid != self.schid:
+            return
+
+        if returnCode == self.createretcode:
+            if error == ERROR_ok:
+                self.listmodel.path = self.path
+            else:
+                self.showError(self._tr("Error creating directory"), error,
+                               errorMessage)
+        elif returnCode == self.delretcode:
+            if error == ERROR_ok:
+                self.listmodel.path = self.path
+            else:
+                self.showError(self._tr("Error deleting files"), error,
+                               errorMessage)
+
     def downloadFiles(self, files=None):
         if self.readonly:
             return
@@ -432,17 +503,54 @@ class FileBrowser(QDialog, pytson.Translatable):
         if self.readonly:
             return
 
-        #TODO
+        ok = BoolResult()
+        dirname = QInputDialog.getText(self, self._tr("Create Folder"),
+                                       self._tr("Folder name:"),
+                                       QLineEdit.Normal, "", ok)
+
+        if not ok or dirname == "":
+            return
+
+        self.createretcode = ts3lib.createReturnCode()
+        err = ts3lib.requestCreateDirectory(self.schid, self.cid,
+                                            self.password,
+                                            joinpath(self.path, dirname),
+                                            self.createretcode)
+
+        if err != ERROR_ok:
+            self.showError(self._tr("Error creating directory"), err)
 
     def deleteFiles(self, files=None):
         if self.readonly:
             return
 
-        #TODO
+        if self.stack.currentWidget() == self.listPage:
+            view = self.list
+        else:
+            view = self.table
+
+        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
+                    for x in view.selectionModel().selectedIndexes]
+
+        if not selfiles:
+            return
+
+        if QMessageBox.question(self, self._tr("Delete files"),
+                                self._tr("Do you really want to delete all "
+                                         "selected files?")) == QMessageBox.No:
+            return
+
+        pathes = [joinpath(f.path, f.name) for f in selfiles]
+        self.delretcode = ts3lib.createReturnCode()
+        err = ts3lib.requestDeleteFile(self.schid, self.cid, self.password,
+                                       pathes, self.delretcode)
+
+        if err != ERROR_ok:
+            self.showError(self._tr("Error deleting files"), err)
 
     def on_table_customContextMenuRequested(self, pos):
-        selfiles = [self.proxy.mapToSource(x) for x in
-                    self.table.selectionModel().selectedIndexes()]
+        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
+                    for x in self.table.selectionModel().selectedIndexes]
 
         if self.readonly:
             self.contextMenuRequested.emit(selfiles,
@@ -452,8 +560,8 @@ class FileBrowser(QDialog, pytson.Translatable):
             pass
 
     def on_list_customContextMenuRequested(self, pos):
-        selfiles = [self.proxy.mapToSource(x) for x in
-                    self.list.selectionModel().selectedIndexes()]
+        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
+                    for x in self.list.selectionModel().selectedIndexes]
 
         if self.readonly:
             self.contextMenuRequested.emit(selfiles,
@@ -490,6 +598,7 @@ class FileCollisionDialog(QDialog, pytson.Translatable):
     """
 
     """
+
     @classmethod
     def getAction(cls, localfile, remotefile, isdownload, multi, parent=None):
         """
