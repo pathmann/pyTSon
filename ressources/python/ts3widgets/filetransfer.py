@@ -22,19 +22,34 @@ from datetime import datetime
 
 def splitpath(path):
     """
-
+    Splits a TS3 filepath into its sections.
+    @param path: the path to split
+    @type path: str
+    @return: the list of sections
+    @rtype: list[str]
     """
     return ["/"] + list(filter(None, path.split('/')))
 
 
 def joinpath(*args):
     """
-
+    Joins multiple sections into a TS3 filepath.
+    @param args: sections to join
+    @type args: tuple(str)
+    @return: the resulting path
+    @rtype: str
     """
     return "/" + "/".join(filter(lambda x: x not in ["/", ""], args))
 
 
 def bytesToStr(size):
+    """
+    Creates a human readable string of a number of bytes.
+    @param size: number of bytes
+    @type size: int
+    @return: the converted size and most fitting unit
+    @rtype: str
+    """
     bias = 1024.0
     units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
 
@@ -48,7 +63,7 @@ def bytesToStr(size):
 
 class File(object):
     """
-
+    Container class to hold all information on a remote TS3 file.
     """
 
     def __init__(self, path, name, size, date, atype, incompletesize):
@@ -61,15 +76,14 @@ class File(object):
 
     @property
     def isDirectory(self):
-        """
-
-        """
         return self.type == FileListType.FileListType_Directory
 
     @property
     def icon(self):
         """
-
+        Returns the most fitting icon for the file
+        @return: the icon
+        @rtype: QIcon
         """
         if self.isDirectory:
             return QIcon.fromTheme("folder")
@@ -97,13 +111,10 @@ class File(object):
 
 class FileListModel(QAbstractItemModel, pytson.Translatable):
     """
-
+    Itemmodel to abstract the files contained on a TS3 filepath.
     """
 
     def __init__(self, schid, cid, password, parent=None):
-        """
-
-        """
         super(QAbstractItemModel, self).__init__(parent)
 
         self.schid = schid
@@ -123,9 +134,6 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         PluginHost.registerCallbackProxy(self)
 
     def __del__(self):
-        """
-
-        """
         PluginHost.unregisterCallbackProxy(self)
 
     @property
@@ -241,7 +249,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
 
 class SmartStatusBar(QStatusBar):
     """
-
+    StatusBar which automatically hides itsself, when the message is cleared.
     """
 
     # default Timeout of messages
@@ -250,15 +258,20 @@ class SmartStatusBar(QStatusBar):
     def __init__(self, parent=None):
         super(SmartStatusBar, self).__init__(parent)
 
-        self.connect("messageChanged(QString)", self.onMessageChanged)
+        self.connect("messageChanged(QString)", self._onMessageChanged)
 
-    def onMessageChanged(self, message):
+    def _onMessageChanged(self, message):
         if message == "":
             self.hide()
 
     def display(self, message, timeout=0):
         """
-
+        Displays a message for a specified duration.
+        @param message: the message to display
+        @type message: str
+        @param timeout: duration in ms; optional; if set to 0,
+        SmartStatusBar.defaultTimeout is used
+        @type timeout: int
         """
         self.show()
         if timeout == 0:
@@ -269,14 +282,39 @@ class SmartStatusBar(QStatusBar):
 
 class FileBrowser(QDialog, pytson.Translatable):
     """
-
+    Dialog to display files contained on a TS3 filepath.
     """
 
     def __init__(self, schid, cid, password='', path='/', parent=None, *,
                  staticpath=False, readonly=False, downloaddir=None,
                  iconpack=None):
         """
-
+        Instantiates a new object.
+        @param schid: the id of the serverconnection handler
+        @type schid: int
+        @param cid: the id of the channel
+        @type cid: int
+        @param password: password to the channel, defaults to an empty string
+        @type password: str
+        @param path: path to display, defaults to the root path
+        @type path: str
+        @param parent: parent of the dialog; optional keyword arg;
+        defaults to None
+        @type parent: QWidget
+        @param staticpath: if set to True, the initial path can't be
+        changed by the user; optional keyword arg; defaults to False
+        @type staticpath: bool
+        @param readonly: if set to True, the user can't download, upload
+        or delete files, or create new directories; optional keyword arg;
+        defaults to False
+        @type readonly: bool
+        @param downloaddir: directory to download files to; optional keyword
+        arg; defaults to None; if set to None, the TS3 client's download
+        directory is used
+        @type downloaddir: str
+        @param iconpack: iconpack to load icons from; optional keyword arg;
+        defaults to None; if set to None, the current iconpack is used
+        @type iconpack: ts3client.IconPack
         """
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -333,17 +371,14 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.listmodel.path = path
 
-        self.adjustUi()
+        self._adjustUi()
 
         PluginHost.registerCallbackProxy(self)
 
     def __del__(self):
         PluginHost.unregisterCallbackProxy(self)
 
-    def adjustUi(self):
-        """
-
-        """
+    def _adjustUi(self):
         self.filterFrame.hide()
 
         self.iconButton.setChecked(True)
