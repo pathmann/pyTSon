@@ -14,7 +14,8 @@ from signalslot import Signal
 from PythonQt.QtCore import (Qt, QAbstractItemModel, QModelIndex)
 from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
                             QSortFilterProxyModel, QFileDialog, QLineEdit,
-                            QInputDialog, QStatusBar, QMessageBox)
+                            QInputDialog, QStatusBar, QMessageBox,
+                            QStyleOptionProgressBar, QApplication, QStyle)
 from PythonQt import BoolResult
 
 from datetime import datetime
@@ -107,6 +108,10 @@ class File(object):
                 theme = "text-x-generic"
 
             return QIcon.fromTheme(theme)
+
+    @property
+    def fullpath(self):
+        return joinpath(self.path, self.name)
 
 
 class FileListModel(QAbstractItemModel, pytson.Translatable):
@@ -264,7 +269,7 @@ class SmartStatusBar(QStatusBar):
         if message == "":
             self.hide()
 
-    def display(self, message, timeout=0):
+    def showMessage(self, message, timeout=0):
         """
         Displays a message for a specified duration.
         @param message: the message to display
@@ -277,7 +282,86 @@ class SmartStatusBar(QStatusBar):
         if timeout == 0:
             timeout = self.defaultTimeout
 
-        self.showMessage(message, timeout)
+        QStatusBar.showMessage(self, message, timeout)
+
+
+class FileCollector(pytson.Translatable):
+    """
+
+    """
+
+    def __init__(self, schid, cid, password, rootdir):
+        super().__init__()
+
+        self.schid = schid
+        self.cid = cid
+        self.password = password
+        self.rootdir = rootdir
+
+        self.collectionFinished = Signal()
+        self.collectionError = Signal()
+
+        self.queue = {}
+        self.files = {}
+
+        PluginHost.registerCallbackProxy(self)
+
+    def __del__(self):
+        PluginHost.unregisterCallbackProxy(self)
+
+    def addFiles(self, files):
+        """
+
+        """
+        self.files[self.rootdir] = files
+
+    def collect(self, dirs):
+        """
+
+        """
+        for d in dirs:
+            retcode = ts3lib.createReturnCode()
+            self.queue[retcode] = d.fullpath
+
+            err = ts3lib.requestFileList(self.schid, self.cid, self.password,
+                                         d.fullpath, retcode)
+
+            if err != ERROR_ok:
+                del self.queue[retcode]
+                self.collectionError.emit(self._tr("Error requesting "
+                                                   "filelist of {dirname}").
+                                          format(dirname=d.fullpath), err)
+
+    def onServerErrorEvent(self, schid, errorMessage, error, returnCode,
+                           extraMessage):
+        if schid != self.schid or returnCode not in self.queue:
+            return
+
+        if error not in [ERROR_ok, ERROR_database_empty_result]:
+            self.collectionError.emit(self._tr("Error requesting filelist "
+                                               "of {dirname}").
+                                      format(dirname=self.queue[returnCode]),
+                                      error)
+
+        del self.queue[returnCode]
+
+        if not self.queue:
+            self.collectionFinished.emit([(k, v)
+                                          for k, v in self.files.items()])
+            self.files = {}
+
+    def onFileListEvent(self, schid, channelID, path, name, size, datetime,
+                        atype, incompletesize, returnCode):
+        if (schid != self.schid or self.cid != channelID or
+           returnCode not in self.queue):
+            return
+
+        downpath = os.path.join(self.rootdir, *splitpath(path)[1:])
+        f = File(path, name, size, datetime, atype, incompletesize)
+        if downpath in self.files:
+            self.files[downpath].append(f)
+        else:
+            self.files[downpath] = [f]
 
 
 class FileBrowser(QDialog, pytson.Translatable):
@@ -354,6 +438,10 @@ class FileBrowser(QDialog, pytson.Translatable):
                 raise Exception("Error getting DownloadDir from config")
         else:
             self.downloaddir = downloaddir
+
+        self.collector = FileCollector(schid, cid, password, self.downloaddir)
+        self.collector.collectionFinished.connect(self._startDownload)
+        self.collector.collectionError.connect(self.showError)
 
         self.fileDoubleClicked = Signal()
         self.contextMenuRequested = Signal()
@@ -473,9 +561,9 @@ class FileBrowser(QDialog, pytson.Translatable):
             err = ERROR_ok
 
         if err != ERROR_ok:
-            self.statusbar.display("%s: %s" % (prefix, errcode))
+            self.statusbar.showMessage("%s: %s" % (prefix, errcode))
         else:
-            self.statusbar.display("%s: %s" % (prefix, msg))
+            self.statusbar.showMessage("%s: %s" % (prefix, msg))
 
     def uploadFiles(self):
         if self.readonly:
@@ -528,11 +616,79 @@ class FileBrowser(QDialog, pytson.Translatable):
                 self.showError(self._tr("Error deleting files"), error,
                                errorMessage)
 
+    def selectedFiles(self):
+        if self.stack.currentWidget() == self.listPage:
+            view = self.list
+        else:
+            view = self.table
+
+        return [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
+                for x in view.selectionModel().selectedIndexes]
+
+    def _startDownload(self, collection):
+        """
+        @param files: list of tuples containing the download directory and the
+        list of files to download to that directory
+        @type files: list[tuple(str, list[File])]
+        """
+        if not collection:
+            return
+
+        fca = FileCollisionAction.overwrite
+
+        for (downdir, files) in collection:
+            for f in files:
+                multi = len(files) + len(collection) > 2
+                fname = os.path.join(downdir, f.name)
+                if os.path.isfile(fname):
+                    if not fca & FileCollisionAction.toall:
+                        fca = FileCollisionDialog.getAction(fname, f, True,
+                                                            multi, self)
+
+                    if fca == 0:
+                        return
+
+                    if fca & FileCollisionAction.skip:
+                        if not fca & FileCollisionAction.toall:
+                            fca = FileCollisionAction.overwrite
+                        break
+
+                self._showTransfers()
+                self.transdlg.addDownload(f, downdir,
+                                          fca & FileCollisionAction.overwrite,
+                                          fca & FileCollisionAction.resume)
+
+                if not fca & FileCollisionAction.toall:
+                    fca = FileCollisionAction.overwrite
+
     def downloadFiles(self, files=None):
         if self.readonly:
             return
 
-        #TODO
+        if not files:
+            selfiles = self.selectedFiles()
+        else:
+            selfiles = files
+
+        if not selfiles:
+            return
+
+        downfiles = []
+        downdirs = []
+
+        for f in selfiles:
+            if f.isDirectory:
+                downdirs.append(f)
+            else:
+                downfiles.append(f)
+
+        if not downdirs:
+            self._startDownload([(self.downloaddir, downfiles)])
+        else:
+            if downfiles:
+                self.collector.addFiles(downfiles)
+
+            self.collector.collect(downdirs)
 
     def on_directoryButton_clicked(self):
         if self.readonly:
@@ -559,13 +715,10 @@ class FileBrowser(QDialog, pytson.Translatable):
         if self.readonly:
             return
 
-        if self.stack.currentWidget() == self.listPage:
-            view = self.list
+        if not files:
+            selfiles = self.selectedFiles()
         else:
-            view = self.table
-
-        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
-                    for x in view.selectionModel().selectedIndexes]
+            selfiles = files
 
         if not selfiles:
             return
@@ -575,7 +728,7 @@ class FileBrowser(QDialog, pytson.Translatable):
                                          "selected files?")) == QMessageBox.No:
             return
 
-        pathes = [joinpath(f.path, f.name) for f in selfiles]
+        pathes = [f.fullpath for f in selfiles]
         self.delretcode = ts3lib.createReturnCode()
         err = ts3lib.requestDeleteFile(self.schid, self.cid, self.password,
                                        pathes, self.delretcode)
@@ -584,8 +737,7 @@ class FileBrowser(QDialog, pytson.Translatable):
             self.showError(self._tr("Error deleting files"), err)
 
     def on_table_customContextMenuRequested(self, pos):
-        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
-                    for x in self.table.selectionModel().selectedIndexes]
+        selfiles = self.selectedFiles()
 
         if self.readonly:
             self.contextMenuRequested.emit(selfiles,
@@ -595,8 +747,7 @@ class FileBrowser(QDialog, pytson.Translatable):
             pass
 
     def on_list_customContextMenuRequested(self, pos):
-        selfiles = [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
-                    for x in self.list.selectionModel().selectedIndexes]
+        selfiles = self.selectedFiles()
 
         if self.readonly:
             self.contextMenuRequested.emit(selfiles,
@@ -614,7 +765,7 @@ class FileBrowser(QDialog, pytson.Translatable):
             if self.staticpath:
                 self.fileDoubleClicked.emit(f)
             else:
-                self.listmodel.path = joinpath(self.path, f.name)
+                self.listmodel.path = f.fullpath
         else:
             if self.readonly:
                 self.fileDoubleClicked.emit(f)
@@ -722,18 +873,65 @@ class FileTransfer(object):
     pass
 
 
-class FileTransferModel(QAbstractItemModel):
+class FileTransferModel(QAbstractItemModel, pytson.Translatable):
     """
 
     """
-    pass
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.titles = [self._tr("Description"), self._tr("Progress")]
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            return self.titles[section]
+
+        return None
+
+    def index(self, row, column, parent=QModelIndex()):
+        if parent.isValid():
+            return QModelIndex()
+
+        return self.createIndex(row, column)
+
+    def parent(self, idx):
+        return QModelIndex()
+
+    def rowCount(self, parent=QModelIndex()):
+        if parent.isValid():
+            return 0
+
+        return 0
+
+    def columnCount(self, parent=QModelIndex()):
+        return 2
+
+    def data(self, idx, role=Qt.DisplayRole):
+        return None
 
 
 class FileTransferDelegate(QStyledItemDelegate):
     """
 
     """
-    pass
+    def paint(self, painter, option, idx):
+        if idx.column() != 1:
+            QStyledItemDelegate.paint(self, painter, option, idx)
+            return
+
+        progress = idx.data()
+
+        pgoptions = QStyleOptionProgressBar()
+        pgoptions.rect = option.rect
+        pgoptions.minimum = 0
+        pgoptions.maximum = 100
+        pgoptions.progress = progress
+        pgoptions.text = "%s%%" % progress
+        pgoptions.textVisible = True
+
+        QApplication.style().drawControl(QStyle.CE_ProgressBar, pgoptions,
+                                         painter)
 
 
 class FileTransferDialog(QDialog):
@@ -747,6 +945,12 @@ class FileTransferDialog(QDialog):
         try:
             setupUi(self, pytson.getPluginPath("ressources",
                                                "filetransfer.ui"))
+
+            self.delegate = FileTransferDelegate(self)
+            self.table.setItemDelegate(self.delegate)
+
+            self.model = FileTransferModel(self)
+            self.table.setModel(self.model)
         except Exception as e:
             self.delete()
             raise e
@@ -765,5 +969,8 @@ class FileTransferDialog(QDialog):
         """
         pass
 
-    def addDownloads(self, files):
+    def addDownload(self, thefile, downloaddir, overwrite, resume):
+        """
+
+        """
         pass
