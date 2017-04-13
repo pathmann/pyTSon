@@ -3,7 +3,8 @@ import os
 from . import _errprint
 
 import ts3lib
-from ts3defines import ERROR_ok, ERROR_database_empty_result, FileListType
+from ts3defines import (FileListType, ERROR_ok, ERROR_database_empty_result,
+                        ERROR_file_transfer_complete)
 import pytson
 from pytsonui import setupUi
 import ts3client
@@ -19,6 +20,8 @@ from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
 from PythonQt import BoolResult
 
 from datetime import datetime
+
+from collections import OrderedDict
 
 
 def splitpath(path):
@@ -867,10 +870,76 @@ class FileCollisionDialog(QDialog, pytson.Translatable):
 
 
 class FileTransfer(object):
+    def __init__(self, err, retcode):
+        self.err = err
+        self.retcode = retcode
+
+        if err != ERROR_ok:
+            self.errmsg = ""
+
+        self.size = 0
+
+    def updateSize(self, val):
+        self.size = val
+
+    def updateError(self, err, msg=None):
+        pass
+
+    @property
+    def progress(self):
+        return 0
+
+    @property
+    def hasError(self):
+        return self.err != ERROR_ok
+
+
+class Download(FileTransfer):
     """
 
     """
-    pass
+
+    def __init__(self, err, retcode, thefile, todir):
+        super().__init__(err, retcode)
+
+        self.file = thefile
+        self.todir = todir
+
+    @property
+    def progress(self):
+        if self.size == -1:
+            return 100
+        return round((self.size / self.file.size) * 100)
+
+    @property
+    def description(self):
+        pass
+
+    @property
+    def localpath(self):
+        return os.path.join(self.todir, self.file.name)
+
+
+class Upload(FileTransfer):
+    """
+
+    """
+
+    def __init__(self, err, retcode, localfile):
+        super().__init__(err, retcode)
+
+        self.file = localfile
+        self.completesize = os.path.getsize(localfile)
+
+    @property
+    def progress(self):
+        if self.size == -1:
+            return 100
+        return round((self.size / self.completesize) * 100)
+
+    @property
+    def description(self):
+        pass
 
 
 class FileTransferModel(QAbstractItemModel, pytson.Translatable):
@@ -878,10 +947,94 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
 
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, schid, cid, password, parent=None):
         super().__init__(parent)
 
+        self.schid = schid
+        self.cid = cid
+        self.password = password
+
         self.titles = [self._tr("Description"), self._tr("Progress")]
+
+        self.transfers = OrderedDict()
+
+        self.downcounter = 0
+        self.timer = None
+
+        PluginHost.registerCallbackProxy(self)
+
+    def __del__(self):
+        PluginHost.unregisterCallbackProxy(self)
+
+    def timerEvent(self, event):
+        for i, trans in enumerate(self.transfers.values()):
+            if isinstance(trans, Download):
+                if not trans.hasError and trans.progress != 100:
+                    trans.updateSize(os.path.getsize(trans.localpath))
+                    idx = self.createIndex(i, 1)
+                    self.dataChanged(idx, idx)
+
+    def addDownload(self, thefile, downloaddir, overwrite, resume):
+        retcode = ts3lib.createReturnCode()
+        err, ftid = ts3lib.requestFile(self.schid, self.cid, self.password,
+                                       thefile.fullpath, overwrite, resume,
+                                       downloaddir, retcode)
+
+        self.beginInsertRows(QModelIndex(), len(self.transfers),
+                             len(self.transfers))
+        self.transfers[ftid] = Download(err, retcode, thefile, downloaddir)
+        self.endInsertRows()
+
+        self.downcounter += 1
+        if self.downcounter == 1:
+            self.timer = self.startTimer(500)
+
+    def addUpload(self, path, localfile, overwrite, resume):
+        """
+
+        """
+        retcode = ts3lib.createReturnCode()
+        err, ftid = ts3lib.sendFile(self.schid, self.cid, self.password,
+                                    joinpath(path,
+                                             os.path.split(localfile)[-1]),
+                                    overwrite, resume,
+                                    os.path.dirname(localfile), retcode)
+
+        self.beginInsertRows(QModelIndex(), len(self.transfers),
+                             len(self.transfers))
+        self.transfers[ftid] = Upload(err, retcode, localfile)
+        self.endInsertRows()
+
+    def cleanup(self):
+        for i, ftid in enumerate(list(self.transfers)):
+            trans = self.transfers[ftid]
+            if trans.progress == 100 or trans.hasError:
+                self.beginRemoveRows(QModelIndex(), i, i)
+                del self.transfers[ftid]
+                self.endRemoveRows()
+
+    def onFileTransferStatusEvent(self, transferID, status, statusMessage,
+                                  remotefileSize, schid):
+        if schid != self.schid or transferID not in self.transfers:
+            return
+
+        i = list(self.transfers).index(transferID)
+        idx = self.createIndex(i, 1)
+        trans = self.transfers[transferID]
+        if status == ERROR_file_transfer_complete:
+            trans.updateSize(-1)
+
+            if isinstance(trans, Download):
+                self.downcounter -= 1
+        else:
+            # sadly, there are no events during transmission, then the next
+            # line would make sense
+            self.transfers[transferID].updateSize(remotefileSize)
+
+        self.dataChanged(idx, idx)
+
+        if self.downcounter == 0 and self.timer:
+            self.killTimer(self.timer)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
@@ -902,12 +1055,27 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
         if parent.isValid():
             return 0
 
-        return 0
+        return len(self.transfers)
 
     def columnCount(self, parent=QModelIndex()):
         return 2
 
     def data(self, idx, role=Qt.DisplayRole):
+        if not idx.isValid():
+            return None
+
+        trans = list(self.transfers.values())[idx.row()]
+
+        if idx.column() == 0:
+            if role == Qt.DisplayRole:
+                return trans.description
+            elif role == Qt.ForegroundRole:
+                if trans.hasError:
+                    return Qt.red
+        elif idx.column() == 1:
+            if role == Qt.DisplayRole:
+                return trans.progress
+
         return None
 
 
@@ -949,7 +1117,7 @@ class FileTransferDialog(QDialog):
             self.delegate = FileTransferDelegate(self)
             self.table.setItemDelegate(self.delegate)
 
-            self.model = FileTransferModel(self)
+            self.model = FileTransferModel(schid, cid, password, self)
             self.table.setModel(self.model)
         except Exception as e:
             self.delete()
@@ -961,16 +1129,16 @@ class FileTransferDialog(QDialog):
         self.close()
 
     def on_cleanupButton_clicked(self):
-        pass
+        self.model.cleanup()
 
     def addUpload(self, path, localfile, overwrite, resume):
         """
 
         """
-        pass
+        self.model.addUpload(path, localfile, overwrite, resume)
 
     def addDownload(self, thefile, downloaddir, overwrite, resume):
         """
 
         """
-        pass
+        self.model.addDownload(thefile, downloaddir, overwrite, resume)
