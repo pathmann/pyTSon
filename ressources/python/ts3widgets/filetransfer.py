@@ -554,14 +554,14 @@ class FileBrowser(QDialog, pytson.Translatable):
         self.table.sortByColumn(0, Qt.AscendingOrder)
 
         if self.staticpath:
-            self.upButton.setEnabled(False)
-            self.homeButton.setEnabled(False)
+            self.upButton.hide()
+            self.homeButton.hide()
 
         if self.readonly:
-            self.uploadButton.setEnabled(False)
-            self.downloadButton.setEnabled(False)
-            self.directoryButton.setEnabled(False)
-            self.deleteButton.setEnabled(False)
+            self.uploadButton.hide()
+            self.downloadButton.hide()
+            self.directoryButton.hide()
+            self.deleteButton.hide()
 
             self.downloaddirLabel.hide()
             self.downloaddirButton.hide()
