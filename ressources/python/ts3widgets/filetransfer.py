@@ -17,7 +17,7 @@ from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
                             QSortFilterProxyModel, QFileDialog, QLineEdit,
                             QInputDialog, QStatusBar, QMessageBox,
                             QStyleOptionProgressBar, QApplication, QStyle,
-                            QDesktopServices)
+                            QDesktopServices, QMenu)
 from PythonQt import BoolResult
 
 from datetime import datetime
@@ -123,12 +123,14 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
     Itemmodel to abstract the files contained on a TS3 filepath.
     """
 
-    def __init__(self, schid, cid, password, parent=None):
+    def __init__(self, schid, cid, password, parent=None, *, readonly=False):
         super(QAbstractItemModel, self).__init__(parent)
 
         self.schid = schid
         self.cid = cid
         self.password = password
+
+        self.readonly = readonly
 
         self.pathChanged = Signal()
         self.error = Signal()
@@ -137,6 +139,10 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         self.newpath = None
         self.files = []
         self.newfiles = []
+
+        self.retcode = None
+        self.renretcode = None
+        self.renfile = ()
 
         self.titles = [self._tr("Name"), self._tr("Size"), self._tr("Type"),
                        self._tr("Last Changed")]
@@ -184,40 +190,66 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         if (schid != self.schid or channelID != self.cid or
            path != self.newpath):
             return
-        #might be unneeded (event is catched in onServerErrorEvent)
+        # might be unneeded (event is catched in onServerErrorEvent)
 
     def onServerErrorEvent(self, schid, errorMessage, error, returnCode,
                            extraMessage):
-        if schid != self.schid or returnCode != self.retcode:
+        if schid != self.schid:
             return
 
-        if error in [ERROR_ok, ERROR_database_empty_result]:
-            self.beginResetModel()
-            self.files = self.newfiles
-            self.newfiles = []
-            self.endResetModel()
+        if returnCode == self.retcode:
+            if error in [ERROR_ok, ERROR_database_empty_result]:
+                self.beginResetModel()
+                self.files = self.newfiles
+                self.newfiles = []
+                self.endResetModel()
 
-            if self._path != self.newpath:
-                self._path = self.newpath
-                self.pathChanged.emit(self._path)
-        else:
-            self.error.emit(self._tr("Error requesting filelist"), error,
-                            errorMessage)
+                if self._path != self.newpath:
+                    self._path = self.newpath
+                    self.pathChanged.emit(self._path)
+            else:
+                self.error.emit(self._tr("Error requesting filelist"), error,
+                                errorMessage)
+        elif returnCode == self.renretcode:
+            if error != ERROR_ok:
+                self.renfile[0].name = self.renfile[1]
+
+                self.error.emit(self._tr("Error renaming file"), error,
+                                errorMessage)
+
+            self.renfile = ()
 
     def onServerPermissionErrorEvent(self, schid, errorMessage, error,
                                      returnCode, failedPermissionID):
         if schid != self.schid or returnCode != self.retcode:
             return
 
-        if error != ERROR_ok:
-            self.error.emit(self._tr("Error requesting filelist"), error,
-                            errorMessage)
+        if returnCode == self.retcode:
+            if error != ERROR_ok:
+                self.error.emit(self._tr("Error requesting filelist"), error,
+                                errorMessage)
+        elif returnCode == self.renretcode:
+            if error != ERROR_ok:
+                self.renfile[0].name = self.renfile[1]
+
+                self.error.emit(self._tr("Error renaming file"), error,
+                                errorMessage)
+
+            self.renfile = ()
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return self.titles[section]
 
         return None
+
+    def flags(self, idx):
+        f = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+
+        if not self.readonly:
+            return f | Qt.ItemIsEditable
+        else:
+            return f
 
     def index(self, row, column, parent=QModelIndex()):
         if parent.isValid():
@@ -247,6 +279,8 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
                 return f.name
             elif role == Qt.DecorationRole:
                 return f.icon
+            elif role == Qt.EditRole and not self.readonly:
+                return f.name
             elif role == Qt.UserRole:
                 if f.isDirectory:
                     return "a%s" % f.name
@@ -264,6 +298,23 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
                 return f.datetime.strftime(pytson.tr("filetransfer",
                                                      "%Y-%m-%d %H:%M:%S"))
         return None
+
+    def setData(self, idx, value, role=Qt.EditRole):
+        if not idx.isValid():
+            return False
+
+        f = self.fileByIndex(idx)
+        self.renretcode = ts3lib.createReturnCode()
+        self.renfile = (f, f.name)
+
+        err = ts3lib.requestRenameFile(self.schid, self.cid, self.password,
+                                       0, "", f.fullpath, joinpath(f.path,
+                                                                   value),
+                                       self.renretcode)
+
+        if err == ERROR_ok:
+            f.name = value
+            return True
 
     def fileByIndex(self, idx):
         return self.files[idx.row()]
@@ -456,6 +507,9 @@ class FileBrowser(QDialog, pytson.Translatable):
         else:
             self.downloaddir = downloaddir
 
+        if not self.readonly:
+            self.menu = QMenu(self)
+
         self.collector = FileCollector(schid, cid, password, self.downloaddir)
         self.collector.collectionFinished.connect(self._startDownload)
         self.collector.collectionError.connect(self.showError)
@@ -465,7 +519,8 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.transdlg = None
 
-        self.listmodel = FileListModel(schid, cid, password, self)
+        self.listmodel = FileListModel(schid, cid, password, self,
+                                       readonly=readonly)
         self.listmodel.pathChanged.connect(self.onPathChanged)
         self.listmodel.error.connect(self.showError)
 
