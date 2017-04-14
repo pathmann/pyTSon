@@ -12,11 +12,12 @@ import ts3client
 from pluginhost import PluginHost
 from signalslot import Signal
 
-from PythonQt.QtCore import (Qt, QAbstractItemModel, QModelIndex)
+from PythonQt.QtCore import (Qt, QAbstractItemModel, QModelIndex, QUrl)
 from PythonQt.QtGui import (QDialog, QStyledItemDelegate, QIcon, QHeaderView,
                             QSortFilterProxyModel, QFileDialog, QLineEdit,
                             QInputDialog, QStatusBar, QMessageBox,
-                            QStyleOptionProgressBar, QApplication, QStyle)
+                            QStyleOptionProgressBar, QApplication, QStyle,
+                            QDesktopServices)
 from PythonQt import BoolResult
 
 from datetime import datetime
@@ -130,6 +131,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         self.password = password
 
         self.pathChanged = Signal()
+        self.error = Signal()
 
         self._path = None
         self.newpath = None
@@ -198,9 +200,21 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
             if self._path != self.newpath:
                 self._path = self.newpath
                 self.pathChanged.emit(self._path)
+        else:
+            self.error.emit(self._tr("Error requesting filelist"), error,
+                            errorMessage)
+
+    def onServerPermissionErrorEvent(self, schid, errorMessage, error,
+                                     returnCode, failedPermissionID):
+        if schid != self.schid or returnCode != self.retcode:
+            return
+
+        if error != ERROR_ok:
+            self.error.emit(self._tr("Error requesting filelist"), error,
+                            errorMessage)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return self.titles[section]
 
         return None
@@ -453,6 +467,7 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.listmodel = FileListModel(schid, cid, password, self)
         self.listmodel.pathChanged.connect(self.onPathChanged)
+        self.listmodel.error.connect(self.showError)
 
         self.proxy = QSortFilterProxyModel(self)
         self.proxy.setSortRole(Qt.UserRole)
@@ -472,6 +487,10 @@ class FileBrowser(QDialog, pytson.Translatable):
     def _adjustUi(self):
         self.filterFrame.hide()
 
+        self.filecountLabel.hide()
+
+        self.downloaddirButton.setText(self.downloaddir)
+
         self.iconButton.setChecked(True)
         self.stack.setCurrentWidget(self.listPage)
 
@@ -488,6 +507,9 @@ class FileBrowser(QDialog, pytson.Translatable):
             self.downloadButton.setEnabled(False)
             self.directoryButton.setEnabled(False)
             self.deleteButton.setEnabled(False)
+
+            self.downloaddirLabel.hide()
+            self.downloaddirButton.hide()
 
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Stretch)
@@ -515,12 +537,42 @@ class FileBrowser(QDialog, pytson.Translatable):
         self.upButton.setEnabled(not inroot)
         self.homeButton.setEnabled(not inroot)
 
+        files = self.listmodel.currentFiles
+
+        if not files:
+            self.filecountLabel.hide()
+        else:
+            self.filecountLabel.show()
+
+            fcount = 0
+            dcount = 0
+
+            for f in files:
+                if f.isDirectory:
+                    dcount += 1
+                else:
+                    fcount += 1
+
+            fstr = self._tr("{filecount} file(s)", n=fcount).format(
+                            filecount=fcount)
+            dstr = self._tr("{dircount} directory(s)", n=dcount).format(
+                            dircount=dcount)
+
+            if dcount == 0:
+                self.filecountLabel.setText(fstr)
+            elif fcount == 0:
+                self.filecountLabel.setText(dstr)
+            else:
+                cstr = self._tr("{dircountstr} and {fcountstr}").format(
+                                dircountstr=dstr, fcountstr=fstr)
+                self.filecountLabel.setText(cstr)
+
     def on_pathEdit_returnPressed(self):
         oldpath = self.listmodel.path
         if not self.readonly:
             self.listmodel.path = self.pathEdit.text
 
-        self.pathEdit.text = oldpath
+        self.pathEdit.text = oldpath or ""
 
     def on_iconButton_toggled(self, act):
         if act:
@@ -556,6 +608,9 @@ class FileBrowser(QDialog, pytson.Translatable):
 
     def on_refreshButton_clicked(self):
         self.listmodel.path = self.listmodel.path
+
+    def on_downloaddirButton_clicked(self):
+        QDesktopServices.openUrl(QUrl(self.downloaddir))
 
     def showError(self, prefix, errcode, msg=None):
         if not msg:
@@ -869,13 +924,18 @@ class FileCollisionDialog(QDialog, pytson.Translatable):
         self.done(0)
 
 
-class FileTransfer(object):
+class FileTransfer(pytson.Translatable):
     def __init__(self, err, retcode):
         self.err = err
         self.retcode = retcode
 
         if err != ERROR_ok:
-            self.errmsg = ""
+            errerr, msg = ts3lib.getErrorMessage(err)
+            if errerr == ERROR_ok:
+                self.errmsg = msg
+            else:
+                self.errmsg = self._tr("Unknown error {errcode}").format(
+                                       errcode=err)
 
         self.size = 0
 
@@ -883,7 +943,16 @@ class FileTransfer(object):
         self.size = val
 
     def updateError(self, err, msg=None):
-        pass
+        self.err = err
+        if msg:
+            self.errmsg = msg
+        else:
+            errerr, msg = ts3lib.getErrorMessage(err)
+            if errerr == ERROR_ok:
+                self.errmsg = msg
+            else:
+                self.errmsg = self._tr("Unknown error {errcode}").format(
+                                       errcode=err)
 
     @property
     def progress(self):
@@ -913,7 +982,12 @@ class Download(FileTransfer):
 
     @property
     def description(self):
-        pass
+        if self.hasError:
+            return self._tr("Error downloading {filename}: {errmsg}").format(
+                            filename=self.file.name, errmsg=self.errmsg)
+        else:
+            return self._tr("Downloading {filename}").format(
+                            filename=self.file.name)
 
     @property
     def localpath(self):
@@ -939,7 +1013,11 @@ class Upload(FileTransfer):
 
     @property
     def description(self):
-        pass
+        if self.hasError:
+            return self._tr("Error uploading {filename}: {errmsg}").format(
+                            filename=self.file, errmsg=self.errmsg)
+        else:
+            return self._tr("Uploading {filename}").format(filename=self.file)
 
 
 class FileTransferModel(QAbstractItemModel, pytson.Translatable):
@@ -989,6 +1067,8 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
         if self.downcounter == 1:
             self.timer = self.startTimer(500)
 
+        return ftid
+
     def addUpload(self, path, localfile, overwrite, resume):
         """
 
@@ -1004,6 +1084,8 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
                              len(self.transfers))
         self.transfers[ftid] = Upload(err, retcode, localfile)
         self.endInsertRows()
+
+        return ftid
 
     def cleanup(self):
         for i, ftid in enumerate(list(self.transfers)):
@@ -1036,8 +1118,25 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
         if self.downcounter == 0 and self.timer:
             self.killTimer(self.timer)
 
+    def onServerErrorEvent(self, schid, errorMessage, error, returnCode,
+                           extraMessage):
+        if schid != self.schid or error != ERROR_ok:
+            return
+
+        for i, trans in enumerate(self.transfers.values()):
+            if trans.retcode == returnCode:
+                trans.updateError(error, errorMessage)
+
+                idx = self.createIndex(i, 0)
+                self.dataChanged(idx, idx)
+
+                return
+
+    def onServerPermissionErrorEvent(self, *args):
+        self.onServerErrorEvent(*args)
+
     def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return self.titles[section]
 
         return None
@@ -1135,10 +1234,10 @@ class FileTransferDialog(QDialog):
         """
 
         """
-        self.model.addUpload(path, localfile, overwrite, resume)
+        return self.model.addUpload(path, localfile, overwrite, resume)
 
     def addDownload(self, thefile, downloaddir, overwrite, resume):
         """
 
         """
-        self.model.addDownload(thefile, downloaddir, overwrite, resume)
+        return self.model.addDownload(thefile, downloaddir, overwrite, resume)
