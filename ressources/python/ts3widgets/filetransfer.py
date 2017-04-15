@@ -4,7 +4,7 @@ from . import _errprint
 
 import ts3lib
 from ts3defines import (FileListType, ERROR_ok, ERROR_database_empty_result,
-                        ERROR_file_transfer_complete)
+                        ERROR_file_transfer_complete, ChannelProperties)
 import pytson
 from pytsonui import setupUi
 import ts3client
@@ -304,6 +304,9 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
             return False
 
         f = self.fileByIndex(idx)
+        if value == f.name:
+            return
+
         self.renretcode = ts3lib.createReturnCode()
         self.renfile = (f, f.name)
 
@@ -317,7 +320,9 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
             return True
 
     def fileByIndex(self, idx):
-        return self.files[idx.row()]
+        if idx.isValid():
+            return self.files[idx.row()]
+        return None
 
 
 class SmartStatusBar(QStatusBar):
@@ -471,6 +476,26 @@ class FileBrowser(QDialog, pytson.Translatable):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
 
+        err, cname = ts3lib.getChannelVariableAsString(schid, cid,
+                                                       ChannelProperties.
+                                                       CHANNEL_NAME)
+
+        if err == ERROR_ok:
+            self.setWindowTitle(self._tr("File Browser - {cname}").format(
+                                cname=cname))
+        else:
+            self.setWindowTitle(self._tr("File Browser"))
+
+        iconpackopened = False
+        if not iconpack:
+            try:
+                iconpack = ts3client.IconPack.current()
+                iconpack.open()
+                iconpackopened = True
+            except Exception as e:
+                self.delete()
+                raise e
+
         try:
             setupUi(self, pytson.getPluginPath("ressources", "filebrowser.ui"),
                     iconpack=iconpack)
@@ -508,7 +533,43 @@ class FileBrowser(QDialog, pytson.Translatable):
             self.downloaddir = downloaddir
 
         if not self.readonly:
-            self.menu = QMenu(self)
+            menu = self.menu = QMenu(self)
+
+            self.openAction = menu.addAction(QIcon(iconpack.icon("FILE_UP")),
+                                             self._tr("Open"))
+            self.openAction.connect("triggered()",
+                                    self.on_openAction_triggered)
+
+            self.downAction = menu.addAction(QIcon(iconpack.icon("DOWN")),
+                                             self._tr("Download"))
+            self.downAction.connect("triggered()", self.downloadFiles)
+            self.renameAction = menu.addAction(QIcon(iconpack.icon("EDIT")),
+                                               self._tr("Rename"))
+            self.renameAction.connect("triggered()",
+                                      self.on_renameAction_triggered)
+            self.copyAction = menu.addAction(QIcon(iconpack.icon("COPY")),
+                                             self._tr("Copy URL"))
+            self.copyAction.connect("triggered()",
+                                    self.on_copyAction_triggered)
+            self.delAction = menu.addAction(QIcon(iconpack.icon("DELETE")),
+                                            self._tr("Delete"))
+            self.delAction.connect("triggered()", self.deleteFiles)
+
+            self.upAction = menu.addAction(QIcon(iconpack.icon("UP")),
+                                           self._tr("Upload files"))
+            self.upAction.connect("triggered()", self.uploadFiles)
+            self.createAction = menu.addAction(QIcon.fromTheme("folder"),
+                                               self._tr("Create Folder"))
+            self.createAction.connect("triggered()", self.createFolder)
+            self.refreshAction = menu.addAction(QIcon(iconpack.icon(
+                                                "FILE_REFRESH")),
+                                                self._tr("Refresh"))
+            self.refreshAction.connect("triggered()", self.refresh)
+
+            self.allactions = [self.openAction, self.downAction,
+                               self.renameAction, self.copyAction,
+                               self.delAction, self.upAction,
+                               self.createAction, self.refreshAction]
 
         self.collector = FileCollector(schid, cid, password, self.downloaddir)
         self.collector.collectionFinished.connect(self._startDownload)
@@ -534,10 +595,32 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self._adjustUi()
 
+        if iconpackopened:
+            iconpack.close()
+
         PluginHost.registerCallbackProxy(self)
 
     def __del__(self):
         PluginHost.unregisterCallbackProxy(self)
+
+    def _enableMenus(self, actlist):
+        for act in self.allactions:
+            act.setVisible(act in actlist)
+
+    def _adjustMenu(self):
+        selfiles = self.selectedFiles()
+        cur = self.listmodel.fileByIndex(self.currentItem())
+
+        if len(selfiles) == 0:
+            self._enableMenus([self.upAction, self.createAction,
+                               self.refreshAction])
+        elif cur.isDirectory:
+            self._enableMenus([self.openAction, self.downAction,
+                               self.renameAction, self.copyAction,
+                               self.delAction])
+        else:
+            self._enableMenus([self.downAction, self.renameAction,
+                               self.copyAction, self.delAction])
 
     def _adjustUi(self):
         self.filterFrame.hide()
@@ -571,9 +654,11 @@ class FileBrowser(QDialog, pytson.Translatable):
         for i in range(1, header.count()):
             header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
+        self.refreshButton.connect("clicked()", self.refresh)
         self.uploadButton.connect("clicked()", self.uploadFiles)
         self.downloadButton.connect("clicked()", self.downloadFiles)
         self.deleteButton.connect("clicked()", self.deleteFiles)
+        self.directoryButton.connect("clicked()", self.createFolder)
         self.list.connect("doubleClicked(QModelIndex)", self.viewDoubleClicked)
         self.table.connect("doubleClicked(QModelIndex)",
                            self.viewDoubleClicked)
@@ -661,7 +746,7 @@ class FileBrowser(QDialog, pytson.Translatable):
 
         self.listmodel.path = "/"
 
-    def on_refreshButton_clicked(self):
+    def refresh(self):
         self.listmodel.path = self.listmodel.path
 
     def on_downloaddirButton_clicked(self):
@@ -738,6 +823,17 @@ class FileBrowser(QDialog, pytson.Translatable):
         return [self.listmodel.fileByIndex(self.proxy.mapToSource(x))
                 for x in view.selectionModel().selectedIndexes]
 
+    def currentItem(self, source=True):
+        if self.stack.currentWidget() == self.listPage:
+            view = self.list
+        else:
+            view = self.table
+
+        if source:
+            return self.proxy.mapToSource(view.currentIndex())
+        else:
+            return view.currentIndex()
+
     def _startDownload(self, collection):
         """
         @param files: list of tuples containing the download directory and the
@@ -803,7 +899,7 @@ class FileBrowser(QDialog, pytson.Translatable):
 
             self.collector.collect(downdirs)
 
-    def on_directoryButton_clicked(self):
+    def createFolder(self):
         if self.readonly:
             return
 
@@ -851,23 +947,23 @@ class FileBrowser(QDialog, pytson.Translatable):
 
     def on_table_customContextMenuRequested(self, pos):
         selfiles = self.selectedFiles()
+        globpos = self.table.mapToGlobal(pos)
 
         if self.readonly:
-            self.contextMenuRequested.emit(selfiles,
-                                           self.table.mapToGlobal(pos))
+            self.contextMenuRequested.emit(selfiles, globpos)
         else:
-            #TODO
-            pass
+            self._adjustMenu()
+            self.menu.popup(globpos)
 
     def on_list_customContextMenuRequested(self, pos):
         selfiles = self.selectedFiles()
+        globpos = self.list.mapToGlobal(pos)
 
         if self.readonly:
-            self.contextMenuRequested.emit(selfiles,
-                                           self.list.mapToGlobal(pos))
+            self.contextMenuRequested.emit(selfiles, globpos)
         else:
-            #TODO
-            pass
+            self._adjustMenu()
+            self.menu.popup(globpos)
 
     def viewDoubleClicked(self, idx):
         if not idx.isValid():
@@ -884,6 +980,44 @@ class FileBrowser(QDialog, pytson.Translatable):
                 self.fileDoubleClicked.emit(f)
             else:
                 self.downloadFiles([f])
+
+    def on_openAction_triggered(self):
+        cur = self.listmodel.fileByIndex(self.currentItem())
+
+        if not cur or not cur.isDirectory:
+            return
+
+        self.listmodel.path = cur.fullpath
+
+    def on_renameAction_triggered(self):
+        if self.stack.currentWidget() == self.listPage:
+            view = self.list
+        else:
+            view = self.table
+
+        view.edit(self.currentItem(False))
+
+    def on_copyAction_triggered(self):
+        cur = self.listmodel.fileByIndex(self.currentItem())
+
+        if not cur:
+            return
+
+        err, host, port, _ = ts3lib.getServerConnectInfo(self.schid)
+
+        if err == ERROR_ok:
+            url = ("[URL=ts3file://{address}?port={port}&channel={cid}&"
+                   "path={path}&filename={fname}&isDir={isdir}&"
+                   "size={size}&fileDateTime={date}]{fname}[/URL]").format(
+                   address=host, port=port, cid=self.cid,
+                   path=QUrl.toPercentEncoding(cur.path), fname=cur.name,
+                   isdir=1 if cur.isDirectory else 0, size=cur.size,
+                   date=int(cur.datetime.timestamp()))
+
+            QApplication.clipboard().setText(url)
+        else:
+            self.showError(self._tr("Error getting server connection info"),
+                           err)
 
 
 class FileCollisionAction(object):
@@ -1256,13 +1390,15 @@ class FileTransferDelegate(QStyledItemDelegate):
                                          painter)
 
 
-class FileTransferDialog(QDialog):
+class FileTransferDialog(QDialog, pytson.Translatable):
     """
 
     """
     def __init__(self, schid, cid, password, parent=None):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
+
+        self.setWindowTitle(self._tr("File Transfers"))
 
         try:
             setupUi(self, pytson.getPluginPath("ressources",
