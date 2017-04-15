@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 
-import sys, os
+import sys
+import os
 
 from argparse import ArgumentParser
 
 DOC_FILES = ["ts3lib.cpp", "ts3plugin.cpp"]
-EXTRA_FILES = [("..", "..", "ressources", "python", "pytsonui"), ("..", "..", "ressources", "python", "pytson.py"), ("..", "..", "ressources", "python", "devtools.py"), ("..", "..", "ressources", "python", "ts3client.py"), ("..", "..", "ressources", "python", "pluginhost.py"), ("..", "..", "ressources", "python", "ts3widgets"), ("..", "..", "ressources", "python", "pythonqtpytson.py")]
+EXTRA_FILES = [("..", "..", "ressources", "python", "pytsonui"),
+               ("..", "..", "ressources", "python", "pytson.py"),
+               ("..", "..", "ressources", "python", "devtools.py"),
+               ("..", "..", "ressources", "python", "ts3client.py"),
+               ("..", "..", "ressources", "python", "pluginhost.py"),
+               ("..", "..", "ressources", "python", "ts3widgets"),
+               ("..", "..", "ressources", "python", "pythonqtpytson.py")]
+
 
 def main(inpdir, outdir):
     outfiles = [os.path.join(inpdir, os.path.join(*t)) for t in EXTRA_FILES]
@@ -17,7 +25,8 @@ def main(inpdir, outdir):
         incomment = False
 
         with open(fname, "r") as inf:
-            outfiles.append(os.path.join(outdir, os.path.splitext(os.path.basename(fname))[0] + ".py"))
+            outfiles.append(os.path.join(outdir, os.path.splitext(
+                            os.path.basename(fname))[0] + ".py"))
             with open(outfiles[-1], "w") as outf:
                 for l in inf:
                     if not incomment and l.strip() == "/*":
@@ -29,14 +38,18 @@ def main(inpdir, outdir):
                         outf.write(l)
 
     confpath = os.path.join(os.path.dirname(__file__), "epydoc.conf")
-    os.system("epydoc %s --parse-only -o %s --html --config %s" % (" ".join(outfiles), outdir, confpath))
-    os.system("epydoc %s --parse-only -o %s --pdf --config %s" % (" ".join(outfiles), outdir, confpath))
+    os.system("epydoc %s --parse-only -o %s --html --config %s" %
+              (" ".join(outfiles), outdir, confpath))
+    os.system("epydoc %s --parse-only -o %s --pdf --config %s" %
+              (" ".join(outfiles), outdir, confpath))
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('inputdir', help='The directory, where input files live in')
-    parser.add_argument('outputdir', help='The directory, processed files should be placed in')
+    parser.add_argument('inputdir', help='The directory, where input files \
+                        live in')
+    parser.add_argument('outputdir', help='The directory, processed files \
+                        should be placed in')
 
     args = parser.parse_args()
 
@@ -49,4 +62,3 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(args.inputdir, args.outputdir)
-
