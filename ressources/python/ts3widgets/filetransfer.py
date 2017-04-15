@@ -360,10 +360,26 @@ class SmartStatusBar(QStatusBar):
 
 class FileCollector(pytson.Translatable):
     """
-
+    Collects all files recursively from TS3 filetransfer directories with their
+    corresponding download path.
+    Emits a signal collectionFinished with a list of tuples(str, list[File])
+    containing the download dir and a list of files.
+    The signal collectionError(str, int) is emitted on error with the
+    errorstring and the errorcode.
     """
 
     def __init__(self, schid, cid, password, rootdir):
+        """
+        Instantiates a new object.
+        @param schid: the id of the serverconnection handler
+        @type schid: int
+        @param cid: the id of the channel
+        @type cid: int
+        @param password: the password of the channel
+        @type password: str
+        @param rootdir: the root download directory
+        @type rootdir: str
+        """
         super().__init__()
 
         self.schid = schid
@@ -384,13 +400,18 @@ class FileCollector(pytson.Translatable):
 
     def addFiles(self, files):
         """
-
+        Manually adds a list of files to the collection (emitted with the
+        rootdir)
+        @param files: list of files to emit
+        @type files: list(File)
         """
         self.files[self.rootdir] = files
 
     def collect(self, dirs):
         """
-
+        Starts collecting files from a list of directories
+        @param dirs: list of directories
+        @type dirs: list(File)
         """
         for d in dirs:
             retcode = ts3lib.createReturnCode()
@@ -431,10 +452,14 @@ class FileCollector(pytson.Translatable):
 
         downpath = os.path.join(self.rootdir, *splitpath(path)[1:])
         f = File(path, name, size, datetime, atype, incompletesize)
-        if downpath in self.files:
-            self.files[downpath].append(f)
+
+        if f.isDirectory:
+            self.collect([f])
         else:
-            self.files[downpath] = [f]
+            if downpath in self.files:
+                self.files[downpath].append(f)
+            else:
+                self.files[downpath] = [f]
 
 
 class FileBrowser(QDialog, pytson.Translatable):
@@ -1029,20 +1054,42 @@ class FileCollisionAction(object):
 
 class FileCollisionDialog(QDialog, pytson.Translatable):
     """
-
+    Dialog to inform about a filecollision and requests input how to handle it.
     """
 
     @classmethod
     def getAction(cls, localfile, remotefile, isdownload, multi, parent=None):
         """
-
+        Convenience function to execute (blocks) the dialog.
+        @param localfile: the path to the local file
+        @type localfile: str
+        @param remotefile: the remote file
+        @type remotefile: File
+        @param isdownload: set to True if remotefile should be downloaded
+        @type isdownload: bool
+        @param multi: set to True, if there are multiple files which could
+        collide
+        @type multi: bool
+        @param parent: parent widget of the dialog; optional; defaults to None
+        @type parent: QWidget
         """
         dlg = cls(localfile, remotefile, isdownload, multi, parent)
         return dlg.exec_()
 
     def __init__(self, localfile, remotefile, isdownload, multi, parent=None):
         """
-
+        Instantiates a new dialog.
+        @param localfile: the path to the local file
+        @type localfile: str
+        @param remotefile: the remote file
+        @type remotefile: File
+        @param isdownload: set to True if remotefile should be downloaded
+        @type isdownload: bool
+        @param multi: set to True, if there are multiple files which could
+        collide
+        @type multi: bool
+        @param parent: parent widget of the dialog; optional; defaults to None
+        @type parent: QWidget
         """
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -1114,6 +1161,10 @@ class FileCollisionDialog(QDialog, pytson.Translatable):
 
 
 class FileTransfer(pytson.Translatable):
+    """
+    Abstract container class to hold information on a filetransfer
+    """
+
     def __init__(self, err, retcode):
         self.err = err
         self.retcode = retcode
@@ -1154,7 +1205,7 @@ class FileTransfer(pytson.Translatable):
 
 class Download(FileTransfer):
     """
-
+    Container class to hold information on a download
     """
 
     def __init__(self, err, retcode, thefile, todir):
@@ -1185,7 +1236,7 @@ class Download(FileTransfer):
 
 class Upload(FileTransfer):
     """
-
+    Container class to hold information on an upload
     """
 
     def __init__(self, err, retcode, localfile):
@@ -1211,7 +1262,7 @@ class Upload(FileTransfer):
 
 class FileTransferModel(QAbstractItemModel, pytson.Translatable):
     """
-
+    Itemmodel to abstract multiple filetransfers.
     """
 
     def __init__(self, schid, cid, password, parent=None):
@@ -1242,6 +1293,19 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
                     self.dataChanged(idx, idx)
 
     def addDownload(self, thefile, downloaddir, overwrite, resume):
+        """
+        Requests a download from the server and monitors its progress
+        @param thefile: remote file to download
+        @type thefile: File
+        @param downloaddir: path to the download directory
+        @type downloaddir: str
+        @param overwrite: set to True to overwrite an existing file
+        @type overwrite: bool
+        @param resume: set to True to resume a previous download
+        @type resume: bool
+        @return: the filetransfer id
+        @rtype: int
+        """
         retcode = ts3lib.createReturnCode()
         err, ftid = ts3lib.requestFile(self.schid, self.cid, self.password,
                                        thefile.fullpath, overwrite, resume,
@@ -1260,7 +1324,17 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
 
     def addUpload(self, path, localfile, overwrite, resume):
         """
-
+        Requests an upload to the server.
+        @param path: path to upload the file to
+        @type path: str
+        @param localfile: path to the file to upload
+        @type localfile: str
+        @param overwrite: set to True to overwrite an existing file
+        @type overwrite: bool
+        @param resume: set to True to resume a previous upload
+        @type resume: bool
+        @return: the filetransfer id
+        @rtype: int
         """
         retcode = ts3lib.createReturnCode()
         err, ftid = ts3lib.sendFile(self.schid, self.cid, self.password,
@@ -1277,6 +1351,9 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
         return ftid
 
     def cleanup(self):
+        """
+        Cleanup finished and broken downloads
+        """
         for i, ftid in enumerate(list(self.transfers)):
             trans = self.transfers[ftid]
             if trans.progress == 100 or trans.hasError:
@@ -1369,7 +1446,7 @@ class FileTransferModel(QAbstractItemModel, pytson.Translatable):
 
 class FileTransferDelegate(QStyledItemDelegate):
     """
-
+    Delegate which displays a progress bar in the second column of an itemview
     """
     def paint(self, painter, option, idx):
         if idx.column() != 1:
@@ -1392,8 +1469,9 @@ class FileTransferDelegate(QStyledItemDelegate):
 
 class FileTransferDialog(QDialog, pytson.Translatable):
     """
-
+    Dialog to display filetransfers from/to a ts3 channel.
     """
+
     def __init__(self, schid, cid, password, parent=None):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -1423,12 +1501,32 @@ class FileTransferDialog(QDialog, pytson.Translatable):
 
     def addUpload(self, path, localfile, overwrite, resume):
         """
-
+        Adds an upload.
+        @param path: path to upload the file to
+        @type path: str
+        @param localfile: path to the file to upload
+        @type localfile: str
+        @param overwrite: set to True to overwrite an existing file
+        @type overwrite: bool
+        @param resume: set to True to resume a previous upload
+        @type resume: bool
+        @return: the filetransfer id
+        @rtype: int
         """
         return self.model.addUpload(path, localfile, overwrite, resume)
 
     def addDownload(self, thefile, downloaddir, overwrite, resume):
         """
-
+        Adds a download.
+        @param thefile: remote file to download
+        @type thefile: File
+        @param downloaddir: path to the download directory
+        @type downloaddir: str
+        @param overwrite: set to True to overwrite an existing file
+        @type overwrite: bool
+        @param resume: set to True to resume a previous download
+        @type resume: bool
+        @return: the filetransfer id
+        @rtype: int
         """
         return self.model.addDownload(thefile, downloaddir, overwrite, resume)
