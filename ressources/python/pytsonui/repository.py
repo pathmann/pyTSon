@@ -443,12 +443,18 @@ class InstallDialog(QDialog, pytson.Translatable):
         if reply.error() == QNetworkReply.NoError:
             self.consoleEdit.append("Download finished.")
 
-            if (reply.header(QNetworkRequest.ContentTypeHeader) !=
-               "application/zip"):
-                self.pip.installPlugin(self.addon,
-                                       reply.readAll().data().decode('utf-8'))
-            else:
-                self.pip.installPlugin(self.addon, io.BytesIO(reply.readAll()))
+            try:
+                if (reply.header(QNetworkRequest.ContentTypeHeader) !=
+                   "application/zip"):
+                    self.pip.installPlugin(self.addon,
+                                           reply.readAll().data().
+                                           decode('utf-8'))
+                else:
+                    self.pip.installPlugin(self.addon,
+                                           io.BytesIO(reply.readAll()))
+            except Exception as e:
+                self.consoleEdit.append("Exception during installation: %s" %
+                                        e)
         else:
             self.consoleEdit.append("Network error: %s" % reply.error())
 
