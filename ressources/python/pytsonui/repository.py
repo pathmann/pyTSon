@@ -427,6 +427,8 @@ class InstallDialog(QDialog, pytson.Translatable):
             self.pip = devtools.PluginInstaller(self.consoleEdit.append)
             self.nwm = QNetworkAccessManager(self)
             self.nwm.connect("finished(QNetworkReply*)", self.onNetworkReply)
+
+            self.closeFrame.hide()
         except Exception as e:
             self.delete()
             raise e
@@ -451,3 +453,8 @@ class InstallDialog(QDialog, pytson.Translatable):
             self.consoleEdit.append("Network error: %s" % reply.error())
 
         reply.deleteLater()
+
+        self.closeFrame.show()
+
+    def on_closeButton_clicked(self):
+        self.accept()

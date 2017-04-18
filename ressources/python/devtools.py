@@ -125,7 +125,8 @@ class %s(ts3plugin):
         self._print("Directory created.")
 
         plat = pytson.platformstr()
-        if ("dependencies" in addon and plat in addon["dependencies"] and
+        if ("dependencies" in addon and addon["dependencies"] and
+           plat in addon["dependencies"] and
            len(addon["dependencies"][plat]) > 0):
             self._print("Installing dependencies ...")
             if not self.installPackages(addon["dependencies"][plat]):
