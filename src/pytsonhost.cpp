@@ -6,6 +6,8 @@
 #include "pyconversion.h"
 #include "ts3lib.h"
 
+#include "PythonQt.h"
+
 pytsonhost::pytsonhost(): QObject(), PythonHost() {
   qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
 

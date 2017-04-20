@@ -7,19 +7,6 @@
 #include <QString>
 #include <QDir>
 
-#include "PythonQt.h"
-#include "PythonQt_QtAll.h"
-
-#include "pythonqt/pythonqtpytson.h"
-#include "pythonqt/eventfilterobject.h"
-
-#if defined(Q_OS_WIN)
-  #define INTERPRETER "python.exe"
-#else
-  //mac + linux
-  #define INTERPRETER "python"
-#endif
-
 class PythonHost {
   public:
     typedef struct {
@@ -52,10 +39,6 @@ class PythonHost {
     QDir m_sitepackdir;
     QDir m_base;
     wchar_t* m_interpreter;
-    /*PyObject* m_pluginmod;
-    PyObject* m_pmod;
-    PyObject* m_pyhost;
-    PyObject* m_callmeth;*/
     PyObject* m_trace;
     bool m_inited;
 };
