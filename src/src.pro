@@ -14,23 +14,27 @@ UI_DIR = build
 INCLUDEPATH += ../includes/pluginsdk/21/include
 
 SOURCES += pytson.cpp \
-    pythonhost.cpp \
+    pytsonhost.cpp \
     global_shared.cpp \
     ts3logdispatcher.cpp \
     pyconversion.cpp \
-    pythonqt/pythonqtpytson.cpp \
-    pythonqt/eventfilterobject.cpp \
-    ts3callbackarguments.cpp
+    ts3callbackarguments.cpp \
+    ../shared/pythonhost.cpp \
+    ../shared/pythonqt/eventfilterobject.cpp \
+    ../shared/pythonqt/pythonqtpytson.cpp
 
 HEADERS += pytson.h \
-    pythonhost.h \
+    pytsonhost.h \
     singleton.h \
     global_shared.h \
     ts3logdispatcher.h \
     pyconversion.h \
     pythonqt/pythonqtpytson.h \
     pythonqt/eventfilterobject.h \
-    ts3callbackarguments.h
+    ts3callbackarguments.h \
+    ../shared/pythonhost.h \
+    ../shared/pythonqt/eventfilterobject.h \
+    ../shared/pythonqt/pythonqtpytson.h
 
 OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../templates/ts3lib.cpp.tpl \
@@ -60,6 +64,7 @@ OTHER_FILES += ../templates/ts3lib.h.tpl \
     ../ressources/ui/filecollision.ui \
     ../ressources/ui/filetransfer.ui
 
+INCLUDEPATH += ../shared
 
 unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN/pyTSon

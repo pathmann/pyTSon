@@ -1,328 +1,68 @@
-#include "pythonhost.h"
-
-#include <stdlib.h>
-#include <Python.h>
+#include "pytsonhost.h"
 
 #include <QWidget>
 
-#include "PythonQt.h"
-#include "PythonQt_QtAll.h"
-
-#include "pyconversion.h"
-#include "global_shared.h"
 #include "ts3logdispatcher.h"
+#include "pyconversion.h"
 #include "ts3lib.h"
 
-#include "pythonqt/pythonqtpytson.h"
-#include "pythonqt/eventfilterobject.h"
-
-#if defined(Q_OS_WIN)
-  #define INTERPRETER "python.exe"
-#else
-  //mac + linux
-  #define INTERPRETER "python"
-#endif
-
-PythonHost::PythonHost(): QObject(), singleton<PythonHost>(), m_interpreter(NULL), m_pluginmod(NULL), m_pmod(NULL), m_pyhost(NULL), m_callmeth(NULL), m_trace(NULL), m_inited(false) {
-
-}
-
-PythonHost::~PythonHost() {
-  if (m_interpreter)
-    PyMem_RawFree(m_interpreter);
-}
-
-bool PythonHost::setupDirectories(QString &error) {
-  char path[256];
-  ts3_funcs.getPluginPath(path, 256, ts3_pluginid);
-
-  m_base.setPath(path);
-
-  if (!m_base.exists()) {
-    error = QObject::tr("Error getting pluginpath");
-    return false;
-  }
-
-  if (!m_base.cd("pyTSon")) {
-    error = QObject::tr("Error changing directory to plugin directory");
-    return false;
-  }
-
-  QString interpreterpath = m_base.absoluteFilePath(INTERPRETER);
-  if (!QFile::exists(interpreterpath)) {
-    error = QObject::tr("Interpreter not found in").arg(interpreterpath);
-    return false;
-  }
-
-#ifdef Q_OS_UNIX
-  if (chmod(interpreterpath.toUtf8().data(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1)
-    ts3logdispatcher::instance()->add(QObject::tr("Setting file permissions of the python interpreter failed, you may need to manually set chmod u+x to %1 (%2)").arg(interpreterpath).arg(errno), LogLevel_ERROR);
-#endif
-
-  m_interpreter = Py_DecodeLocale(interpreterpath.toUtf8().data(), NULL);
-  if (!m_interpreter) {
-    error = QObject::tr("Error decoding interpreter path");
-    return false;
-  }
-
-  m_scriptsdir = m_base;
-  if (!m_scriptsdir.cd("scripts")) {
-    error = QObject::tr("Error changing directory to scripts directory");
-    return false;
-  }
-
-  m_includedir = m_base;
-  if (!m_includedir.cd("include")) {
-    error = QObject::tr("Error changing directory to include directory");
-    return false;
-  }
-
-  m_libdir = m_base;
-  bool havelib = true;
-  if (!m_libdir.cd("lib"))
-    havelib = false;
-
-  /* the plugin was updated, so we need to replace the old libdir */
-  QDir newincludelibdir = m_base;
-  if (newincludelibdir.cd("lib_new")) {
-    //delete the old lib
-    if (havelib) {
-      if (!m_libdir.removeRecursively()) {
-        error = QObject::tr("Error deleting old lib directory");
-        return false;
-      }
-    }
-
-    //move the new lib dir
-    QString newpath = m_libdir.absolutePath();
-    if (!havelib) {
-      newpath += QDir::separator();
-      newpath += "lib";
-    }
-
-    if (!newincludelibdir.rename(newincludelibdir.path(), newpath)) {
-      error = QObject::tr("Error moving new lib directory");
-      return false;
-    }
-
-    if (!havelib) {
-      if (!m_libdir.cd("lib")) {
-        error = QObject::tr("Error changing directory to new installed lib directory");
-        return false;
-      }
-    }
-
-    ts3logdispatcher::instance()->add(QObject::tr("New lib directory installed"), LogLevel_INFO);
-  }
-
-#ifndef Q_OS_WIN
-  if (!m_libdir.cd("python3.5")) {
-    error = QObject::tr("Error changing directory to standard lib directory");
-    return false;
-  }
-#endif
-
-  m_sitepackdir = m_libdir;
-  if (!m_sitepackdir.cd("site-packages")) {
-    error = QObject::tr("Error changing directory to site directory");
-    return false;
-  }
-
-  m_dynloaddir = m_libdir;
-  if (!m_dynloaddir.cd("lib-dynload")) {
-    error = QObject::tr("Error changing directory to dynload directory");
-    return false;
-  }
-
-  return true;
-}
-
-bool PythonHost::isReady() {
-  return (m_inited && m_pluginmod && m_pmod && m_pyhost && m_callmeth && m_trace);
-}
-
-QString PythonHost::formatError(const QString &fallback) {
-  if (!m_trace || !PyErr_Occurred())
-    return fallback;
-
-  QString error(fallback + "\n");
-  PyObject* pyerrtype = NULL, *pyerr = NULL, *pytrace = NULL;
-  PyErr_Fetch(&pyerrtype, &pyerr, &pytrace);
-  PyErr_NormalizeException(&pyerrtype, &pyerr, &pytrace);
-
-  bool success = false;
-  PyObject* formatfunc;
-  if (pytrace)
-    formatfunc = PyObject_GetAttrString(m_trace, "format_exception");
-  else formatfunc = PyObject_GetAttrString(m_trace, "format_exception_only");
-
-  if (formatfunc && PyCallable_Check(formatfunc)) {
-    PyObject* ret;
-    if (pytrace)
-      ret = PyObject_CallFunction(formatfunc, const_cast<char*>("OOO"), pyerrtype, pyerr, pytrace);
-    else ret = PyObject_CallFunction(formatfunc, const_cast<char*>("OO"), pyerrtype, pyerr);
-
-    if (ret && PyList_Check(ret)) {
-      for (int i = 0; i < PyList_Size(ret); ++i)
-        error.append(PyUnicode_AsUTF8(PyList_GetItem(ret, i)));
-
-      success = true;
-    }
-    Py_XDECREF(ret);
-  }
-  Py_XDECREF(formatfunc);
-
-
-  Py_XDECREF(pyerrtype);
-  Py_XDECREF(pyerr);
-  Py_XDECREF(pytrace);
-
-  if (success)
-    return error;
-  else return fallback;
-}
-
-bool PythonHost::setSysPath(QString& error) {
-  PyObject* syspath = PyList_New(5);
-  if (!syspath) {
-    error = QObject::tr("Memory error");
-    return false;
-  }
-
-  QDir pathdirs[] = {m_scriptsdir, m_includedir, m_libdir, m_dynloaddir, m_sitepackdir};
-  PyObject* pypath = NULL;
-  for (unsigned int i = 0; i < std::extent<decltype(pathdirs)>::value; ++i) {
-    pypath = Py_BuildValue("s", pathdirs[i].absolutePath().toUtf8().data());
-    if (!pypath) {
-      error = QObject::tr("Error creating directory string from path %1").arg(i);
-      Py_DECREF(syspath);
-      return false;
-    }
-
-    if (PyList_SetItem(syspath, i, pypath) != 0) {
-      error = QObject::tr("Error adding dir %1 to sys.path").arg(i);
-      Py_DECREF(pypath);
-      Py_DECREF(syspath);
-      return false;
-    }
-  }
-
-  //replace sys.path
-  if (PySys_SetObject("path", syspath) != 0) {
-    error = QObject::tr("Error setting sys.path");
-    Py_DECREF(syspath);
-    return false;
-  }
-
-  return true;
-}
-
-bool PythonHost::setModuleSearchpath(QString& error) {
-  QString libdir = m_libdir.absolutePath();
-#ifdef Q_OS_WIN
-  libdir += ";";
-#else
-  libdir += ":";
-#endif
-  libdir += m_dynloaddir.absolutePath();
-
-  wchar_t* wlibdir = Py_DecodeLocale(libdir.toUtf8().data(), NULL);
-  if (!wlibdir) {
-    error = QObject::tr("Error decoding module search path");
-    return false;
-  }
-  Py_SetPath(wlibdir);
-  PyMem_RawFree(wlibdir);
-
-  return true;
-}
-
-void PythonHost::initPythonQt() {
-  PythonQt::init(PythonQt::PythonAlreadyInitialized);
-  PythonQt_QtAll::init();
-
-  PythonQt::self()->registerClass(&EventFilterObject::staticMetaObject, "pytson");
-  PythonQt::self()->addDecorators(new pytsondecorator());
-}
-
-bool PythonHost::init(QString& error) {
+pytsonhost::pytsonhost(): QObject(), PythonHost() {
   qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
 
+  m_inittabs.append({"ts3lib", PyInit_ts3lib});
+
   m_mainthread = std::this_thread::get_id();
-  connect(this, &PythonHost::callInMainThread, this, &PythonHost::onCallInMainThread, Qt::QueuedConnection);
-
-  if (!setupDirectories(error))
-    return false;
-
-  if (PyImport_AppendInittab("ts3lib", &PyInit_ts3lib) == -1) {
-    ts3logdispatcher::instance()->add(QObject::tr("Error initializing ts3 module"), LogLevel_ERROR);
-    return false;
-  }
-
-  Py_FrozenFlag = 1;
-  Py_IgnoreEnvironmentFlag = 1;
-  Py_SetProgramName(m_interpreter);
-  Py_NoUserSiteDirectory = 1;
-
-  if (!setModuleSearchpath(error))
-    return false;
-
-  Py_Initialize();
-  if (PyErr_Occurred()) {
-    PyErr_Print();
-    return false;
-  }
-
-  if (!setSysPath(error))
-    return false;
-
-  initPythonQt();
-
-  m_trace = PyImport_ImportModule("traceback");
-  if (!m_trace) {
-    error = QObject::tr("Error importing traceback module");
-    return false;
-  }
-
-  m_pluginmod = PyImport_ImportModule("ts3plugin");
-  if (!m_pluginmod) {
-    error = formatError(QObject::tr("Error importing ts3plugin module"));
-    return false;
-  }
-
-  //import pluginhost module
-  m_pmod = PyImport_ImportModule("pluginhost");
-  if (!m_pmod) {
-    error = formatError(QObject::tr("Error importing pluginhost module"));
-    return false;
-  }
-
-  //get PluginHost class of module
-  m_pyhost = PyObject_GetAttrString(m_pmod, "PluginHost");
-  if (!m_pyhost) {
-    error = formatError(QObject::tr("Error getting PluginHost class"));
-    return false;
-  }
-
-  m_callmeth = PyObject_GetAttrString(m_pyhost, "callMethod");
-  if (!m_callmeth) {
-    error = formatError(QObject::tr("Error getting PluginHost.callMethod"));
-    return false;
-  }
-
-  //call PluginHost.init method
-  PyObject* ret = PyObject_CallMethod(m_pyhost, const_cast<char*>("init"), const_cast<char *>(""));
-  if (!ret) {
-    error = formatError(QObject::tr("Error calling PluginHost.init"));
-    return false;
-  }
-  else Py_DECREF(ret);
-
-  m_inited = true;
-  return true;
+  connect(this, &pytsonhost::callInMainThread, this, &pytsonhost::onCallInMainThread, Qt::QueuedConnection);
 }
 
-void PythonHost::shutdown() {
+pytsonhost::~pytsonhost() {
+
+}
+
+bool pytsonhost::init(const QDir& basedir, QString& error) {
+  bool superinit = PythonHost::init(basedir, error);
+
+  if (superinit) {
+    m_pluginmod = PyImport_ImportModule("ts3plugin");
+    if (!m_pluginmod) {
+      error = formatError(QObject::tr("Error importing ts3plugin module"));
+      return false;
+    }
+
+    //import pluginhost module
+    m_pmod = PyImport_ImportModule("pluginhost");
+    if (!m_pmod) {
+      error = formatError(QObject::tr("Error importing pluginhost module"));
+      return false;
+    }
+
+    //get PluginHost class of module
+    m_pyhost = PyObject_GetAttrString(m_pmod, "PluginHost");
+    if (!m_pyhost) {
+      error = formatError(QObject::tr("Error getting PluginHost class"));
+      return false;
+    }
+
+    m_callmeth = PyObject_GetAttrString(m_pyhost, "callMethod");
+    if (!m_callmeth) {
+      error = formatError(QObject::tr("Error getting PluginHost.callMethod"));
+      return false;
+    }
+
+    //call PluginHost.init method
+    PyObject* ret = PyObject_CallMethod(m_pyhost, const_cast<char*>("init"), const_cast<char *>(""));
+    if (!ret) {
+      error = formatError(QObject::tr("Error calling PluginHost.init"));
+      return false;
+    }
+    else Py_DECREF(ret);
+
+    return true;
+  }
+  else return false;
+}
+
+void pytsonhost::shutdown() {
   if (isReady()) {
     //call PluginHost.shutdown method
     PyObject* ret = PyObject_CallMethod(m_pyhost, const_cast<char*>("shutdown"), const_cast<char *>(""));
@@ -330,8 +70,6 @@ void PythonHost::shutdown() {
       ts3logdispatcher::instance()->add(QObject::tr("Error calling PluginHost.shutdown"), LogLevel_ERROR);
     else Py_DECREF(ret);
   }
-
-  m_inited = false;
 
   Py_XDECREF(m_callmeth);
   m_callmeth = NULL;
@@ -345,21 +83,15 @@ void PythonHost::shutdown() {
   Py_XDECREF(m_pluginmod);
   m_pluginmod = NULL;
 
-  Py_XDECREF(m_trace);
-  m_trace = NULL;
-
-  PythonQt::cleanup();
-
-  if (Py_IsInitialized())
-    Py_Finalize();
+  PythonHost::shutdown();
 }
 
-void PythonHost::freeMemory(void* data) {
+void pytsonhost::freeMemory(void* data) {
   if (data)
     free(data);
 }
 
-void PythonHost::configure(void* qParentWidget) {
+void pytsonhost::configure(void* qParentWidget) {
   PyObject* pywidget = PythonQt::priv()->wrapQObject((QWidget*)qParentWidget);
   if (!pywidget) {
     ts3logdispatcher::instance()->add(QObject::tr("Calling configure failed, qParentWidget not wrapped"), LogLevel_ERROR);
@@ -372,7 +104,7 @@ void PythonHost::configure(void* qParentWidget) {
   Py_DECREF(pywidget);
 }
 
-int PythonHost::processCommand(uint64 schid, const char* command) {
+int pytsonhost::processCommand(uint64 schid, const char* command) {
   PyObject* pyret;
   QString error;
   if (!callMethod(&pyret, error, "(sKs)", "processCommand", schid, command)) {
@@ -396,7 +128,7 @@ int PythonHost::processCommand(uint64 schid, const char* command) {
   }
 }
 
-void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, char** data) {
+void pytsonhost::infoData(uint64 schid, uint64 id, enum PluginItemType type, char** data) {
   PyObject* pyret;
   QString error;
   if (!callMethod(&pyret, error, "(sKKI)", "infoData", (unsigned long long)schid, (unsigned long long)id, (unsigned int)type)) {
@@ -437,7 +169,7 @@ void PythonHost::infoData(uint64 schid, uint64 id, enum PluginItemType type, cha
   strncpy(*data, str.data(), str.size() +1);
 }
 
-void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
+void pytsonhost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
   PyObject* pyret;
   QString error;
   if (!callMethod(&pyret, error, "(s)", "initMenus")) {
@@ -499,7 +231,7 @@ void PythonHost::initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) 
   Py_DECREF(pyret);
 }
 
-void PythonHost::initHotkeys(struct PluginHotkey*** hotkeys) {
+void pytsonhost::initHotkeys(struct PluginHotkey*** hotkeys) {
   *hotkeys = NULL;
 
   PyObject* pyret = NULL;
@@ -564,7 +296,7 @@ void PythonHost::initHotkeys(struct PluginHotkey*** hotkeys) {
   (*hotkeys)[PyList_Size(pyret)] = NULL;
 }
 
-int PythonHost::onServerErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, const char* extraMessage) {
+int pytsonhost::onServerErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, const char* extraMessage) {
   PyObject* pyret;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKsIss)", "onServerErrorEvent", (unsigned long long)schid, errorMessage, error, returnCode, extraMessage)) {
@@ -582,7 +314,7 @@ int PythonHost::onServerErrorEvent(uint64 schid, const char* errorMessage, unsig
   }
 }
 
-int PythonHost::onTextMessageEvent(uint64 schid, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
+int pytsonhost::onTextMessageEvent(uint64 schid, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
   PyObject* pyret;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKIIIsssi)", "onTextMessageEvent", (unsigned long long)schid, (unsigned int)targetMode, (unsigned int)toID, (unsigned int)fromID, fromName, fromUniqueIdentifier, message, ffIgnored)) {
@@ -600,7 +332,7 @@ int PythonHost::onTextMessageEvent(uint64 schid, anyID targetMode, anyID toID, a
   }
 }
 
-int PythonHost::onClientPokeEvent(uint64 schid, anyID fromClientID, const char* pokerName, const char* pokerUniqueIdentity, const char* message, int ffIgnored) {
+int pytsonhost::onClientPokeEvent(uint64 schid, anyID fromClientID, const char* pokerName, const char* pokerUniqueIdentity, const char* message, int ffIgnored) {
   PyObject* pyret;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKIsssi)", "onClientPokeEvent", (unsigned long long)schid, (unsigned int)fromClientID, pokerName, pokerUniqueIdentity, message, ffIgnored)) {
@@ -618,7 +350,7 @@ int PythonHost::onClientPokeEvent(uint64 schid, anyID fromClientID, const char* 
   }
 }
 
-int PythonHost::onServerPermissionErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, unsigned int failedPermissionID) {
+int pytsonhost::onServerPermissionErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, unsigned int failedPermissionID) {
   PyObject* pyret = NULL;
   QString errstr;
   if (!callMethod(&pyret, errstr, "(sKsIsI)", "onServerPermissionErrorEvent", (unsigned long long)schid, errorMessage, error, returnCode, failedPermissionID)) {
@@ -641,14 +373,14 @@ int PythonHost::onServerPermissionErrorEvent(uint64 schid, const char* errorMess
   }
 }
 
-void PythonHost::onUserLoggingMessageEvent(const char* logMessage, int logLevel, const char* logChannel, uint64 logID, const char* logTime, const char* completeLogString) {
+void pytsonhost::onUserLoggingMessageEvent(const char* logMessage, int logLevel, const char* logChannel, uint64 logID, const char* logTime, const char* completeLogString) {
   QString callerror;
-  if (!PythonHost::instance()->callMethod(NULL, callerror, "(ssisKss)", "onUserLoggingMessageEvent",  logMessage,  logLevel,  logChannel, (unsigned long long) logID,  logTime,  completeLogString)) {
+  if (!callMethod(NULL, callerror, "(ssisKss)", "onUserLoggingMessageEvent",  logMessage,  logLevel,  logChannel, (unsigned long long) logID,  logTime,  completeLogString)) {
     printf("%s\n", QObject::tr("Calling onUserLoggingMessageEvent failed with error \"%1\"\n").arg(callerror).toUtf8().data());
   }
 }
 
-void PythonHost::onEditPlaybackVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels) {
+void pytsonhost::onEditPlaybackVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels) {
   return;
   QString errstr;
   PyObject* pysamples;
@@ -702,7 +434,7 @@ void PythonHost::onEditPlaybackVoiceDataEvent(uint64 schid, anyID clientID, shor
   Py_DECREF(pyret);
 }
 
-void PythonHost::onEditPostProcessVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
+void pytsonhost::onEditPostProcessVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
   return;
   PyObject* pysamples = PyList_New(sampleCount);
   if (!pysamples) {
@@ -805,7 +537,7 @@ void PythonHost::onEditPostProcessVoiceDataEvent(uint64 schid, anyID clientID, s
   Py_DECREF(pyret);
 }
 
-void PythonHost::onEditMixedPlaybackVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
+void pytsonhost::onEditMixedPlaybackVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
   return;
   PyObject* pysamples = PyList_New(sampleCount);
   if (!pysamples) {
@@ -908,7 +640,7 @@ void PythonHost::onEditMixedPlaybackVoiceDataEvent(uint64 schid, short* samples,
   Py_DECREF(pyret);
 }
 
-void PythonHost::onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, int* edited) {
+void pytsonhost::onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, int* edited) {
   return;
   PyObject* pysamples = PyList_New(sampleCount);
   if (!pysamples) {
@@ -983,7 +715,7 @@ void PythonHost::onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int 
   Py_DECREF(pyret);
 }
 
-void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume) {
+void pytsonhost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume) {
   return;
   PyObject* pyret;
   QString errstr;
@@ -1002,7 +734,7 @@ void PythonHost::onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID cli
   Py_DECREF(pyret);
 }
 
-void PythonHost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
+void pytsonhost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
   return;
   PyObject* pyret;
   QString errstr;
@@ -1021,15 +753,15 @@ void PythonHost::onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 wave
   Py_DECREF(pyret);
 }
 
-void PythonHost::onFileTransferStatusEvent(anyID transferID, unsigned int status, const char *statusMessage, uint64 remotefileSize, uint64 schid) {
+void pytsonhost::onFileTransferStatusEvent(anyID transferID, unsigned int status, const char *statusMessage, uint64 remotefileSize, uint64 schid) {
   QString errstr;
   if (!callMethod(NULL, errstr, "(sIIsKK)", "onFileTransferStatusEvent", (unsigned int)transferID, status, statusMessage, (unsigned long long)remotefileSize, (unsigned long long)schid))
     ts3logdispatcher::instance()->add(QObject::tr("Calling onFileTransferStatusEvent failed with error \"%1\"").arg(errstr), LogLevel_ERROR, schid);
 }
 
-bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, ...) {
+bool pytsonhost::callMethod(PyObject** ret, QString& error, const char *format, ...) {
   if (!isReady()) {
-    error = QObject::tr("PythonHost is not ready");
+    error = QObject::tr("pytsonhost is not ready");
     return false;
   }
 
@@ -1075,10 +807,10 @@ bool PythonHost::callMethod(PyObject** ret, QString& error, const char *format, 
   return true;
 }
 
-void PythonHost::onCallInMainThread(const ts3callbackarguments args) {
+void pytsonhost::onCallInMainThread(const ts3callbackarguments args) {
   if (std::this_thread::get_id() == m_mainthread) {
     if (!isReady()) {
-      ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, PythonHost not ready anymore"), LogLevel_ERROR);
+      ts3logdispatcher::instance()->add(QObject::tr("Internal error in queued event, pytsonhost not ready anymore"), LogLevel_ERROR);
     }
     else {
       QString err;

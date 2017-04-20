@@ -1,6 +1,6 @@
 #include "ts3plugin.h"
 
-#include "pythonhost.h"
+#include "global_shared.h"
 #include "ts3logdispatcher.h"
 
 #include <QString>
@@ -10,7 +10,7 @@
 #define LOG_ADD (void*)
 #define QSTR (void*)
 #else
-#define PLUGIN_HOST_CALL PythonHost::instance()->callMethod
+#define PLUGIN_HOST_CALL pyhost->callMethod
 #define LOG_ADD ts3logdispatcher::instance()->add
 #define QSTR QString
 #endif

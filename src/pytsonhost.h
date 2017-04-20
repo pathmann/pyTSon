@@ -1,25 +1,27 @@
-#ifndef PYTHONHOST_H
-#define PYTHONHOST_H
+#ifndef PYTSONHOST_H
+#define PYTSONHOST_H
 
 #include <Python.h>
 
-#include "singleton.h"
-#include "ts3callbackarguments.h"
+#include <QObject>
+
+#include "pythonhost.h"
 
 #include "teamspeak/public_definitions.h"
 #include "plugin_definitions.h"
 
-#include <QObject>
-#include <QString>
-#include <QDir>
-
 #include <thread>
 
-class PythonHost: public QObject, public singleton<PythonHost> {
-    friend class singleton<PythonHost>;
+#include "ts3callbackarguments.h"
+
+class pytsonhost: public QObject, PythonHost {
     Q_OBJECT
+
   public:
-    bool init(QString& error);
+    pytsonhost();
+    ~pytsonhost();
+
+    bool init(const QDir& basedir, QString& error);
     void shutdown();
 
     void freeMemory(void* data);
@@ -45,37 +47,17 @@ class PythonHost: public QObject, public singleton<PythonHost> {
 
   signals:
     void callInMainThread(const ts3callbackarguments args);
+
   protected slots:
-    void onCallInMainThread(const ts3callbackarguments args);
-  protected:
-    bool setupDirectories(QString& error);
-    bool isReady();
+      void onCallInMainThread(const ts3callbackarguments args);
 
-    bool setModuleSearchpath(QString& error);
-    bool setSysPath(QString& error);
-
-    QString formatError(const QString& fallback);
-
-    void initPythonQt();
   private:
-    PythonHost();
-    ~PythonHost();
-
-    QDir m_scriptsdir;
-    QDir m_includedir;
-    QDir m_libdir;
-    QDir m_dynloaddir;
-    QDir m_sitepackdir;
-    QDir m_base;
-    wchar_t* m_interpreter;
     PyObject* m_pluginmod;
     PyObject* m_pmod;
     PyObject* m_pyhost;
     PyObject* m_callmeth;
-    PyObject* m_trace;
-    bool m_inited;
 
     std::thread::id m_mainthread;
 };
 
-#endif // PYTHONHOST_H
+#endif

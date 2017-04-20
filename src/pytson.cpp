@@ -34,7 +34,7 @@ void ts3plugin_setFunctionPointers(const struct TS3Functions functions) {
 }
 
 void ts3plugin_freeMemory(void* data) {
-  PythonHost::instance()->freeMemory(data);
+  pyhost->freeMemory(data);
 }
 
 void ts3plugin_registerPluginID(const char* id) {
@@ -47,8 +47,12 @@ int ts3plugin_init() {
 
   ts3logdispatcher::instance()->init("pyTSon");
 
+  char path[256];
+  ts3_funcs.getPluginPath(path, 256, ts3_pluginid);
+
   QString error;
-  if (PythonHost::instance()->init(error)) {
+  pyhost = new pytsonhost;
+  if (pyhost->init(QDir(path), error)) {
     return 0;
   }
   else {
@@ -58,7 +62,8 @@ int ts3plugin_init() {
 }
 
 void ts3plugin_shutdown() {
-  PythonHost::instance()->shutdown();
+  pyhost->shutdown();
+  delete pyhost;
 
   if (ts3_pluginid) {
     free(ts3_pluginid);
@@ -71,7 +76,7 @@ int ts3plugin_offersConfigure() {
 }
 
 void ts3plugin_configure(void* /*handle*/, void* qParentWidget) {
-  PythonHost::instance()->configure(qParentWidget);
+  pyhost->configure(qParentWidget);
 }
 
 const char* ts3plugin_commandKeyword() {
@@ -79,7 +84,7 @@ const char* ts3plugin_commandKeyword() {
 }
 
 int ts3plugin_processCommand(uint64 schid, const char* command) {
-  return PythonHost::instance()->processCommand(schid, command);
+  return pyhost->processCommand(schid, command);
 }
 
 const char* ts3plugin_infoTitle() {
@@ -87,15 +92,15 @@ const char* ts3plugin_infoTitle() {
 }
 
 void ts3plugin_infoData(uint64 schid, uint64 id, enum PluginItemType type, char** data) {
-  PythonHost::instance()->infoData(schid, id, type, data);
+  pyhost->infoData(schid, id, type, data);
 }
 
 void ts3plugin_initMenus(struct PluginMenuItem*** menuItems, char** menuIcon) {
-  PythonHost::instance()->initMenus(menuItems, menuIcon);
+  pyhost->initMenus(menuItems, menuIcon);
 }
 
 void ts3plugin_initHotkeys(struct PluginHotkey*** hotkeys) {
-  PythonHost::instance()->initHotkeys(hotkeys);
+  pyhost->initHotkeys(hotkeys);
 }
 
 int ts3plugin_requestAutoload() {
@@ -103,49 +108,49 @@ int ts3plugin_requestAutoload() {
 }
 
 int ts3plugin_onServerErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, const char* extraMessage) {
-  return PythonHost::instance()->onServerErrorEvent(schid, errorMessage, error, returnCode, extraMessage);
+  return pyhost->onServerErrorEvent(schid, errorMessage, error, returnCode, extraMessage);
 }
 
 int ts3plugin_onTextMessageEvent(uint64 schid, anyID targetMode, anyID toID, anyID fromID, const char* fromName, const char* fromUniqueIdentifier, const char* message, int ffIgnored) {
-  return PythonHost::instance()->onTextMessageEvent(schid, targetMode, toID, fromID, fromName, fromUniqueIdentifier, message, ffIgnored);
+  return pyhost->onTextMessageEvent(schid, targetMode, toID, fromID, fromName, fromUniqueIdentifier, message, ffIgnored);
 }
 
 int ts3plugin_onClientPokeEvent(uint64 schid, anyID fromClientID, const char* pokerName, const char* pokerUniqueIdentity, const char* message, int ffIgnored) {
-  return PythonHost::instance()->onClientPokeEvent(schid, fromClientID, pokerName, pokerUniqueIdentity, message, ffIgnored);
+  return pyhost->onClientPokeEvent(schid, fromClientID, pokerName, pokerUniqueIdentity, message, ffIgnored);
 }
 
 int ts3plugin_onServerPermissionErrorEvent(uint64 schid, const char* errorMessage, unsigned int error, const char* returnCode, unsigned int failedPermissionID) {
-  return PythonHost::instance()->onServerPermissionErrorEvent(schid, errorMessage, error, returnCode, failedPermissionID);
+  return pyhost->onServerPermissionErrorEvent(schid, errorMessage, error, returnCode, failedPermissionID);
 }
 
 void ts3plugin_onUserLoggingMessageEvent(const char* logMessage, int logLevel, const char* logChannel, uint64 logID, const char* logTime, const char* completeLogString) {
-  PythonHost::instance()->onUserLoggingMessageEvent(logMessage, logLevel, logChannel, logID, logTime, completeLogString);
+  pyhost->onUserLoggingMessageEvent(logMessage, logLevel, logChannel, logID, logTime, completeLogString);
 }
 
 void ts3plugin_onEditPlaybackVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels) {
-  PythonHost::instance()->onEditPlaybackVoiceDataEvent(schid, clientID, samples, sampleCount, channels);
+  pyhost->onEditPlaybackVoiceDataEvent(schid, clientID, samples, sampleCount, channels);
 }
 
 void ts3plugin_onEditPostProcessVoiceDataEvent(uint64 schid, anyID clientID, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
-  PythonHost::instance()->onEditPostProcessVoiceDataEvent(schid, clientID, samples, sampleCount, channels, channelSpeakerArray, channelFillMask);
+  pyhost->onEditPostProcessVoiceDataEvent(schid, clientID, samples, sampleCount, channels, channelSpeakerArray, channelFillMask);
 }
 
 void ts3plugin_onEditMixedPlaybackVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, const unsigned int* channelSpeakerArray, unsigned int* channelFillMask) {
-  PythonHost::instance()->onEditMixedPlaybackVoiceDataEvent(schid, samples, sampleCount, channels, channelSpeakerArray, channelFillMask);
+  pyhost->onEditMixedPlaybackVoiceDataEvent(schid, samples, sampleCount, channels, channelSpeakerArray, channelFillMask);
 }
 
 void ts3plugin_onEditCapturedVoiceDataEvent(uint64 schid, short* samples, int sampleCount, int channels, int* edited) {
-  PythonHost::instance()->onEditCapturedVoiceDataEvent(schid, samples, sampleCount, channels, edited);
+  pyhost->onEditCapturedVoiceDataEvent(schid, samples, sampleCount, channels, edited);
 }
 
 void ts3plugin_onCustom3dRolloffCalculationClientEvent(uint64 schid, anyID clientID, float distance, float* volume) {
-  PythonHost::instance()->onCustom3dRolloffCalculationClientEvent(schid, clientID, distance, volume);
+  pyhost->onCustom3dRolloffCalculationClientEvent(schid, clientID, distance, volume);
 }
 
 void ts3plugin_onCustom3dRolloffCalculationWaveEvent(uint64 schid, uint64 waveHandle, float distance, float* volume) {
-  PythonHost::instance()->onCustom3dRolloffCalculationWaveEvent(schid, waveHandle, distance, volume);
+  pyhost->onCustom3dRolloffCalculationWaveEvent(schid, waveHandle, distance, volume);
 }
 
 void ts3plugin_onFileTransferStatusEvent(anyID transferID, unsigned int status, const char* statusMessage, uint64 remotefileSize, uint64 schid) {
-  PythonHost::instance()->onFileTransferStatusEvent(transferID, status, statusMessage, remotefileSize, schid);
+  pyhost->onFileTransferStatusEvent(transferID, status, statusMessage, remotefileSize, schid);
 }
