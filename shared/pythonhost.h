@@ -13,8 +13,6 @@
 #include "pythonqt/pythonqtpytson.h"
 #include "pythonqt/eventfilterobject.h"
 
-#include <QDebug>
-
 #if defined(Q_OS_WIN)
   #define INTERPRETER "python.exe"
 #else

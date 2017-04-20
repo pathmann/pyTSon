@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = src interpreter
+SUBDIRS = src interpreter pythonqt_app

@@ -19,7 +19,7 @@
 #endif
 
 PythonHost::PythonHost(): m_interpreter(NULL), m_trace(NULL), m_inited(false) {
-qDebug() << "mother constr";
+
 }
 
 PythonHost::~PythonHost() {
@@ -240,9 +240,8 @@ bool PythonHost::init(const QDir& basedir, QString& error) {
 
   if (!setupDirectories(error))
     return false;
-qDebug() << "append all";
+
   for (pythoninittab tab: m_inittabs) {
-    qDebug() << "appending " << tab.name;
     if (PyImport_AppendInittab(tab.name, tab.initfunc) == -1) {
       error = QObject::tr("Error initializing module %1").arg(tab.name);
       return false;
