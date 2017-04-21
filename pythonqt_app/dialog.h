@@ -11,8 +11,10 @@ class Dialog : public QDialog, private Ui::pythonqtapp {
     Q_OBJECT
 
   public:
-    explicit Dialog(QWidget *parent = 0);
+    explicit Dialog(const QString& script = QString(), QWidget *parent = 0);
     ~Dialog();
+  protected slots:
+    void executeScript(const QString& filename);
   private slots:
     void on_fileButton_clicked();
     void on_fileEdit_textChanged(const QString &arg1);
