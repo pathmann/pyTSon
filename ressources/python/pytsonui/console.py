@@ -36,7 +36,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
                  font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
                  width=800, height=600, startup="", silentStartup=False,
-                 parent=None):
+                 parent=None, *, catchstd=False):
         super(QPlainTextEdit, self).__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -72,11 +72,23 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
 
         self.norformat = self.currentCharFormat()
 
+        if catchstd:
+            self.redirector = StdRedirector(self.appendLine)
+            self.stdout = sys.stdout
+            sys.stdout = self.redirector
+
+            self.connect("destroyed()", self._resetStdout)
+        else:
+            self.redirector = None
+
         if os.path.isfile(startup):
             with open(startup, "r") as f:
                 self.runCommand(f.read(), silentStartup)
 
         self.writePrompt(self.plainText != "")
+
+    def _resetStdout(self):
+        sys.stdout = self.stdout
 
     def setFont(self, f):
         QPlainTextEdit.setFont(self, f)
@@ -310,7 +322,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
         self.appendPlainText(text)
 
     def runCommand(self, cmd, silent):
-        if not silent:
+        if not self.redirector and not silent:
             tmp = sys.stdout
             sys.stdout = StdRedirector(self.appendLine)
 
@@ -325,7 +337,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
             if not silent:
                 self.appendLine(traceback.format_exc())
 
-        if not silent:
+        if not self.redirector and not silent:
             sys.stdout = tmp
 
     def doExecuteCommand(self):
