@@ -19,6 +19,8 @@ class PythonHost {
 
     virtual bool init(const QDir& basedir, QString& error);
     virtual void shutdown();
+
+    QString formatError(const QString& fallback);
   protected:
     bool setupDirectories(QString& error);
     bool isReady();
@@ -26,7 +28,6 @@ class PythonHost {
     bool setModuleSearchpath(QString& error);
 
     bool setSysPath(QString& error);
-    QString formatError(const QString& fallback);
 
     void initPythonQt();
 
