@@ -4,8 +4,13 @@
 #include <QFile>
 #include <QMessageBox>
 
-Dialog::Dialog(const QString& script, QWidget *parent): QDialog(parent), m_curpath(QDir::current()) {
+Dialog::Dialog(const QString& script, bool openconsole, QWidget *parent): QDialog(parent), m_curpath(QDir::current()) {
   setupUi(this);
+
+  PyRun_SimpleString("from pytsonui.console import PythonConsole\nconsole = None");
+
+  if (openconsole)
+    openConsole();
 
   if (!script.isEmpty()) {
     fileEdit->setText(script);
@@ -35,19 +40,19 @@ void Dialog::on_executeButton_clicked() {
 }
 
 void Dialog::on_consoleButton_clicked() {
-  PyRun_SimpleString("from pytsonui.console import PythonConsole\nconsole = PythonConsole()\nconsole.show()");
+  openConsole();
 }
 
 void Dialog::executeScript(const QString &filename) {
-  QFile file(filename);
-
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+  FILE* file = fopen(filename.toUtf8().constData(), "r");
+  if (!file) {
     QMessageBox::critical(this, tr("Error"), tr("Error opening file"));
     return;
   }
 
-  QString script = file.readAll();
-  file.close();
+  PyRun_SimpleFileEx(file, filename.toUtf8().constData(), 1);
+}
 
-  PyRun_SimpleString(script.toUtf8().constData());
+void Dialog::openConsole() {
+  PyRun_SimpleString("if not console:\n    console = PythonConsole(catchstd=True)\nconsole.show()");
 }

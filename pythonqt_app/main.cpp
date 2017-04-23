@@ -9,10 +9,11 @@
 #include "dialog.h"
 
 void printHelp(const char* execname) {
-  std::cout << execname << " [-h] [-p pyTSon-dir] [-e script]" << std::endl;
+  std::cout << execname << " [-h] [-p pyTSon-dir] [-e script] [-c]" << std::endl;
   std::cout << "-h\tShow this help" << std::endl;
   std::cout << "-p pyTSon-dir\tThe directory where pyTSon lives in (this might be your TS3 plugin path)" << std::endl;
   std::cout << "-e script\tScript to execute on startup" << std::endl;
+  std::cout << "-c\tOpen scripting console on startup" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
 
   QDir dir;
   QString script;
+  bool console = false;
   for (auto it = args.begin() +1; it != args.end(); ++it) {
     if (*it == "-p") {
       ++it;
@@ -58,6 +60,8 @@ int main(int argc, char** argv) {
         return 1;
       }
     }
+    else if (*it == "-c")
+      console = true;
     else {
       printHelp(argv[0]);
       std::cerr << "can't interpret argument: " << (*it).toUtf8().constData() << std::endl;
@@ -71,7 +75,7 @@ int main(int argc, char** argv) {
     if (!error.isEmpty())
       std::cout << error.toUtf8().data() << std::endl;
 
-    Dialog* dlg = new Dialog(script);
+    Dialog* dlg = new Dialog(script, console);
     dlg->show();
 
     app.connect(&app, &QApplication::aboutToQuit, [&]() {
