@@ -321,12 +321,21 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
 
     def appendLine(self, text):
         curline = self.currentLine()
+        sel = self.textCursor()
 
+        self.moveCursor(QTextCursor.End)
         self.appendPlainText(text)
 
         if not self.incmd:
             self.writePrompt(True)
-            self.textCursor().insertText(curline)
+
+            if curline != "":
+                self.textCursor().insertText(curline)
+
+                cur = self.promptCursor()
+                cur.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor,
+                                 sel.positionInBlock() - self.promptLength())
+                self.setTextCursor(cur)
 
     def runCommand(self, cmd, silent):
         self.incmd = True
