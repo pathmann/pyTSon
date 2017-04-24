@@ -63,6 +63,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
         self.globals = {}
         self.inmulti = False
         self.multi = ""
+        self.incmd = False
 
         self.comp = Completer(self.globals)
 
@@ -319,9 +320,17 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
             return
 
     def appendLine(self, text):
+        curline = self.currentLine()
+
         self.appendPlainText(text)
 
+        if not self.incmd:
+            self.writePrompt(True)
+            self.textCursor().insertText(curline)
+
     def runCommand(self, cmd, silent):
+        self.incmd = True
+
         if not self.redirector and not silent:
             tmp = sys.stdout
             sys.stdout = StdRedirector(self.appendLine)
@@ -339,6 +348,8 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
 
         if not self.redirector and not silent:
             sys.stdout = tmp
+
+        self.incmd = False
 
     def doExecuteCommand(self):
         cmd = self.currentLine().rstrip()
