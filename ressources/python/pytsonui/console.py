@@ -39,6 +39,8 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                  parent=None, *, catchstd=False):
         super(QPlainTextEdit, self).__init__(parent)
 
+        self.setLineWrapMode(QPlainTextEdit.NoWrap)
+
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle(self._tr("pyTSon Console"))
 
