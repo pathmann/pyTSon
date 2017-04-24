@@ -344,7 +344,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                 exec(cmd, self.globals)
         except:
             if not silent:
-                self.appendLine(traceback.format_exc())
+                self.appendLine(traceback.format_exc(chain=False))
 
         if not self.redirector and not silent:
             sys.stdout = tmp
