@@ -131,7 +131,9 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None,
                 setattr(obj, names[i], c)
 
             connectSignalSlotsByName(c, obj)
-            setIcon(c, iconpack, pluginicons)
+
+            if seticons:
+                setIcon(c, iconpack, pluginicons)
 
             retrieveWidgets(obj, c, grchilds[i], seticons, iconpack)
 
@@ -199,7 +201,9 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
             setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
-            setIcon(c, iconpack, pluginicons)
+
+            if seticons:
+                setIcon(c, iconpack, pluginicons)
 
             retrieveAllWidgets(obj, c, seticons, iconpack)
 
