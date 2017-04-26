@@ -158,8 +158,9 @@ class %s(ts3plugin):
         @rtype: bool
         """
         p = subprocess.Popen([sys.executable, "-m", "pip", "install",
-                              "--target", pytson.getPluginPath("include")] + deps,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                              "--target", pytson.getPluginPath("include")] +
+                             deps, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
         out, err = p.communicate()
 
         if err:
