@@ -16,7 +16,7 @@ def ts3print(msg, level, channel, aid):
         print(msg)
 
 
-def setIcon(obj, iconpack):
+def setIcon(obj, iconpack, pluginicons=None):
     """
     Sets the icon of a QWidget (if it has a property Icon) to an icon in the
     iconpack represented by a variable which is acquired by the property
@@ -29,6 +29,10 @@ def setIcon(obj, iconpack):
     @type obj: QWidget
     @param iconpack: the iconpack
     @type iconpack: ts3client.IconPack
+    @param pluginicons: callable which gets a string and either returns the
+    path to the image file or returns a QPixmap to set the icon property to;
+    defaults to None
+    @type pluginicons: Callable(str) -> str or QIcon
     """
     if iconpack:
         if hasattr(obj, "setIcon") and hasattr(obj, "pytsonicon"):
@@ -39,6 +43,13 @@ def setIcon(obj, iconpack):
                                      "octicons", var.split(":")[1]))
                 if os.path.isfile(fname):
                     obj.setIcon(QIcon(fname))
+            elif var.startswith("plugin:"):
+                if pluginicons:
+                    ico = pluginicons(var.split(":")[1])
+                    if type(ico) is str:
+                        obj.setIcon(QIcon(ico))
+                    else:
+                        obj.setIcon(ico)
             else:
                 obj.setIcon(QIcon(iconpack.icon(var)))
 
@@ -61,7 +72,8 @@ def connectSignalSlotsByName(sender, receiver):
                                                            sig.split('(')[0])))
 
 
-def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
+def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None,
+                    pluginicons=None):
     """
     Retrieves widgets from a list and adds them as attribute to another object.
     If defined, signals from widgets are connected by name to methods in obj.
@@ -81,6 +93,10 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
     @type seticons: bool
     @param iconpack: the iconpack
     @type iconpack: ts3client.IconPack
+    @param pluginicons: callable which gets a string and either returns the
+    path to the image file or returns a QPixmap to set the icon property to;
+    defaults to None
+    @type pluginicons: Callable(str) -> str or QIcon
     """
     if type(parent) is QTabWidget:
         childs = [parent.widget(i) for i in range(0, parent.count)]
@@ -115,7 +131,7 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
                 setattr(obj, names[i], c)
 
             connectSignalSlotsByName(c, obj)
-            setIcon(c, iconpack)
+            setIcon(c, iconpack, pluginicons)
 
             retrieveWidgets(obj, c, grchilds[i], seticons, iconpack)
 
@@ -135,7 +151,8 @@ def retrieveWidgets(obj, parent, widgets, seticons=True, iconpack=None):
         raise Exception("Malformed uifile, widgets not found: %s" % names)
 
 
-def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
+def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
+                       pluginicons=None):
     """
     Retrieves all child widgets from a parent widget and adds them as attribute
     to another object. If defined, signals from widgets are connected by name
@@ -149,6 +166,10 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
     @type seticons: bool
     @param iconpack: the iconpack
     @type iconpack: ts3client.IconPack
+    @param pluginicons: callable which gets a string and either returns the
+    path to the image file or returns a QPixmap to set the icon property to;
+    defaults to None
+    @type pluginicons: Callable(str) -> str or QIcon
     """
     root = False
     if seticons and not iconpack:
@@ -178,7 +199,7 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
             setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
-            setIcon(c, iconpack)
+            setIcon(c, iconpack, pluginicons)
 
             retrieveAllWidgets(obj, c, seticons, iconpack)
 
@@ -186,7 +207,8 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None):
         iconpack.close()
 
 
-def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None):
+def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
+            pluginicons=None):
     """
     Loads a Qt designer file (.ui), creates the widgets defined in and adds
     them as property to a given object. This internally calls retrieveWidgets,
@@ -208,6 +230,10 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None):
     @param iconpack: if set, the iconpack will be used, if None, the current
     iconpack is used
     @type iconpack: ts3client.IconPack
+    @param pluginicons: callable which gets a string and either returns the
+    path to the image file or returns a QPixmap to set the icon property to;
+    defaults to None
+    @type pluginicons: Callable(str) -> str or QIcon
     """
     root = False
     if seticons and not iconpack:
@@ -238,9 +264,9 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None):
         raise Exception("Could not find uifile")
 
     if widgets:
-        retrieveWidgets(obj, ui, widgets, seticons, iconpack)
+        retrieveWidgets(obj, ui, widgets, seticons, iconpack, pluginicons)
     else:
-        retrieveAllWidgets(obj, ui, seticons, iconpack)
+        retrieveAllWidgets(obj, ui, seticons, iconpack, pluginicons)
 
     if root:
         iconpack.close()
