@@ -516,8 +516,9 @@ class ServerCache:
         @param schid: the ID of the serverconnection
         @type schid: int
         """
-        err, uid = ts3lib.getServerVariableAsString(schid,
-                                                    ts3defines.VirtualServerProperties.VIRTUALSERVER_UNIQUE_IDENTIFIER)
+        err, uid = (ts3lib.getServerVariableAsString(schid,
+                    ts3defines.VirtualServerProperties.
+                    VIRTUALSERVER_UNIQUE_IDENTIFIER))
 
         if err != ts3defines.ERROR_ok:
             raise Exception("Error getting Server unique identifier: %s" % err)
