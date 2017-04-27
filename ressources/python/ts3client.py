@@ -147,8 +147,9 @@ class IconPack(object):
         cfg = Config()
         q = cfg.query("SELECT value FROM application WHERE key='IconPack'")
         if not q.next():
+            err = cfg.lastError()
             del cfg
-            raise Exception("Query failed: %s" % cfg.lastError())
+            raise Exception("Query failed: %s" % err)
 
         del cfg
         return IconPack(info=q.value(0))
