@@ -1,8 +1,10 @@
 import os
 
 from PythonQt.QtCore import QFile, QIODevice
-from PythonQt.QtGui import (QHBoxLayout, QIcon, QTabWidget, QSplitterHandle,
-                            QButtonGroup)
+from PythonQt.QtGui import (QIcon, QTabWidget, QSplitterHandle, QButtonGroup,
+                            QSplitter, QVBoxLayout, QHBoxLayout, QGridLayout,
+                            QFormLayout)
+
 from PythonQt.QtUiTools import QUiLoader
 
 import ts3lib
@@ -190,8 +192,9 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
 
     for c in parent.children():
         if not c.isWidgetType():
-            if not isinstance(c, (QButtonGroup)):
-                break
+            if not isinstance(c, (QButtonGroup, QSplitter, QVBoxLayout,
+                                  QHBoxLayout, QGridLayout, QFormLayout)):
+                continue
 
         if (c.objectName != "" and type(c) not in [QSplitterHandle] and
             c.objectName not in ["qt_scrollarea_viewport",
@@ -199,10 +202,8 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
                                  "qt_scrollarea_vcontainer",
                                  "qt_spinbox_lineedit",
                                  "qt_toolbox_toolboxbutton"]):
-            if hasattr(obj, c.objectName):
-                raise Exception("Widget objectName %s is not unique %s" %
-                                (c.objectName, type(c)))
-            setattr(obj, c.objectName, c)
+            if not hasattr(obj, c.objectName):
+                setattr(obj, c.objectName, c)
 
             connectSignalSlotsByName(c, obj)
 
@@ -213,6 +214,29 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
 
     if root:
         iconpack.close()
+
+
+class UiLoader(QUiLoader):
+    """
+    QUILoader subclass to omit the parent widget from being recreated.
+    """
+
+    def __init__(self, main, parent=None):
+        """
+        Instantiate a new object
+        @param main: parent class which will be omitted
+        @type main: QWidget
+        @param parent: parent class; defaults to None
+        @type parent: QObject
+        """
+        super().__init__(parent)
+        self.main = main
+
+    def createWidget(self, clsname, parent=None, name=''):
+        if parent is None:
+            return self.main
+        else:
+            return QUiLoader.createWidget(self, clsname, parent, name)
 
 
 def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
@@ -260,8 +284,8 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
     if os.path.isfile(uipath):
         f = QFile(uipath)
         if f.open(QIODevice.ReadOnly):
-            loader = QUiLoader()
-            ui = loader.load(f, obj)
+            loader = UiLoader(obj)
+            ui = loader.load(f)
             f.close()
 
             if not ui:
@@ -278,7 +302,3 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
 
     if root:
         iconpack.close()
-
-    layout = QHBoxLayout(obj)
-    layout.addWidget(ui)
-    obj.setLayout(layout)
