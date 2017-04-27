@@ -1,7 +1,8 @@
 import os
 
 from PythonQt.QtCore import QFile, QIODevice
-from PythonQt.QtGui import QHBoxLayout, QIcon, QTabWidget, QSplitterHandle
+from PythonQt.QtGui import (QHBoxLayout, QIcon, QTabWidget, QSplitterHandle,
+                            QButtonGroup)
 from PythonQt.QtUiTools import QUiLoader
 
 import ts3lib
@@ -188,8 +189,11 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
                      "pytsonui.retrieveAllWidgets.%s" % obj.objectName, 0)
 
     for c in parent.children():
-        if (c.isWidgetType() and c.objectName != "" and
-            type(c) not in [QSplitterHandle] and
+        if not c.isWidgetType():
+            if not isinstance(c, (QButtonGroup)):
+                break
+
+        if (c.objectName != "" and type(c) not in [QSplitterHandle] and
             c.objectName not in ["qt_scrollarea_viewport",
                                  "qt_scrollarea_hcontainer",
                                  "qt_scrollarea_vcontainer",
