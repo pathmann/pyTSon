@@ -24,7 +24,8 @@ class Config(object):
     class _config(object):
         def __init__(self):
             self.db = QSqlDatabase.addDatabase("QSQLITE", "__pyTSon_config__")
-            self.db.setDatabaseName(ts3lib.getConfigPath() + "settings.db")
+            self.db.setDatabaseName(os.path.join(ts3lib.getConfigPath(),
+                                                 "settings.db"))
 
             if not self.db.isValid():
                 raise Exception("Database not valid")
