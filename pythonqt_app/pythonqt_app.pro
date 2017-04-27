@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     ../shared/pythonhost.cpp \
     ../shared/pythonqt/eventfilterobject.cpp \
     ../shared/pythonqt/pythonqtpytson.cpp \
-    dummyts3lib.cpp
+    dummyts3lib.cpp \
+    global_shared.cpp
 
 HEADERS += \
     dialog.h \
@@ -27,7 +28,8 @@ HEADERS += \
     ../shared/pythonqt/eventfilterobject.h \
     ../shared/pythonqt/pythonqtpytson.h \
     pythonqtapphost.h \
-    dummyts3lib.h
+    dummyts3lib.h \
+    global_shared.h
 
 FORMS += \
     dialog.ui

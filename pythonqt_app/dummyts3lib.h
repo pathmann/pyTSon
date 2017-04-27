@@ -5,4 +5,8 @@
 
 PyMODINIT_FUNC PyInit_dummyts3lib(void);
 
+PyObject* getConfigPath(PyObject* self, PyObject* args);
+PyObject* getResourcesPath(PyObject* self, PyObject* args);
+PyObject* logMessage(PyObject* self, PyObject* args);
+
 #endif // DUMMYTS3LIB_H
