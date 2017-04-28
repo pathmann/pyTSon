@@ -210,7 +210,7 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
             if seticons:
                 setIcon(c, iconpack, pluginicons)
 
-            retrieveAllWidgets(obj, c, seticons, iconpack)
+            retrieveAllWidgets(obj, c, seticons, iconpack, pluginicons)
 
     if root:
         iconpack.close()
