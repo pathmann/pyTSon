@@ -1,9 +1,7 @@
 import os
 
 from PythonQt.QtCore import QFile, QIODevice
-from PythonQt.QtGui import (QIcon, QTabWidget, QSplitterHandle, QButtonGroup,
-                            QSplitter, QVBoxLayout, QHBoxLayout, QGridLayout,
-                            QFormLayout)
+from PythonQt.QtGui import (QIcon, QTabWidget, QSplitterHandle, QButtonGroup)
 
 from PythonQt.QtUiTools import QUiLoader
 
@@ -192,8 +190,7 @@ def retrieveAllWidgets(obj, parent, seticons=True, iconpack=None,
 
     for c in parent.children():
         if not c.isWidgetType():
-            if not isinstance(c, (QButtonGroup, QSplitter, QVBoxLayout,
-                                  QHBoxLayout, QGridLayout, QFormLayout)):
+            if not isinstance(c, (QButtonGroup)) or not c.inherits("QLayout"):
                 continue
 
         if (c.objectName != "" and type(c) not in [QSplitterHandle] and
