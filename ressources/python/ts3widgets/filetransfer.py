@@ -516,7 +516,7 @@ class FileBrowser(QDialog, pytson.Translatable):
                     iconpack=iconpack)
 
             self.statusbar = SmartStatusBar(self)
-            self.filebrowser.layout().addWidget(self.statusbar)
+            self.layout().addWidget(self.statusbar)
             self.statusbar.hide()
         except Exception as e:
             self.delete()
