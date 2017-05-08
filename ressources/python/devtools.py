@@ -170,64 +170,64 @@ class %s(ts3plugin):
 
         return p.returncode == 0
 
-    @staticmethod
-    def installedPackages():
-        """
-        Returns a list of installed packages (installed with pip).
-        @returns: a list of dictionaries containing name, version,
-        directory (dir) and dist-info directory (distdir)
-        @rtype: list[dict{str: str}]
-        """
-        # pip list (or freeze) does not work with the --target option, so
-        # we have to collect the packages manually
-        ret = []
-        inclpath = pytson.getPluginPath("include")
-        for d in glob.glob(os.path.join(inclpath, "*.dist-info/")):
-            mfile = os.path.join(d, "metadata.json")
-            if os.path.isfile(mfile):
-                with open(mfile, "r") as f:
-                    metadata = json.load(f)
 
-                name = metadata["name"]
-                version = metadata["version"]
+def installedPackages():
+    """
+    Returns a list of installed packages (installed with pip).
+    @returns: a list of dictionaries containing name, version,
+    directory (dir) and dist-info directory (distdir)
+    @rtype: list[dict{str: str}]
+    """
+    # pip list (or freeze) does not work with the --target option, so
+    # we have to collect the packages manually
+    ret = []
+    inclpath = pytson.getPluginPath("include")
+    for d in glob.glob(os.path.join(inclpath, "*.dist-info/")):
+        mfile = os.path.join(d, "metadata.json")
+        if os.path.isfile(mfile):
+            with open(mfile, "r") as f:
+                metadata = json.load(f)
 
-                tlf = os.path.join(d, "top_level.txt")
-                if os.path.isfile(tlf):
-                    with open(tlf, "r") as f:
-                        tld = f.read().strip()
+            name = metadata["name"]
+            version = metadata["version"]
 
-                    ret.append({"name": name, "version": version,
-                                "dir": os.path.join(inclpath, tld),
-                                "distdir": d})
+            tlf = os.path.join(d, "top_level.txt")
+            if os.path.isfile(tlf):
+                with open(tlf, "r") as f:
+                    tld = f.read().strip()
 
-        return ret
+                ret.append({"name": name, "version": version,
+                            "dir": os.path.join(inclpath, tld),
+                            "distdir": d})
 
-    @staticmethod
-    def removePackage(name, version):
-        """
-        Removes a package (installed with pip). Throws an exception if the
-        package could not be found
-        @param name: the name of the package
-        @type name: str
-        @param version: the version string of the package
-        @type version: str
-        """
-        inclpath = pytson.getPluginPath("include")
+    return ret
 
-        distdir = os.path.join(inclpath, "%s-%s.dist-info" % (name, version))
-        if not os.path.isdir(distdir):
-            raise Exception("dist-info directory not found")
 
-        tlf = os.path.join(distdir, "top_level.txt")
-        if not os.path.isfile(tlf):
-            raise Exception("top_level.txt not found")
+def removePackage(name, version):
+    """
+    Removes a package (installed with pip). Throws an exception if the
+    package could not be found
+    @param name: the name of the package
+    @type name: str
+    @param version: the version string of the package
+    @type version: str
+    """
+    inclpath = pytson.getPluginPath("include")
 
-        with open(tlf, "r") as f:
-            tld = f.read().strip()
+    distdir = os.path.join(inclpath, "%s-%s.dist-info" % (name, version))
+    if not os.path.isdir(distdir):
+        raise Exception("dist-info directory not found")
 
-        packdir = os.path.join(inclpath, tld)
-        if not os.path.isdir(packdir):
-            raise Exception("package directory not found")
+    tlf = os.path.join(distdir, "top_level.txt")
+    if not os.path.isfile(tlf):
+        raise Exception("top_level.txt not found")
 
-        shutil.rmtree(packdir)
-        shutil.rmtree(distdir)
+    with open(tlf, "r") as f:
+        tld = f.read().strip()
+
+    packdir = os.path.join(inclpath, tld)
+    if not os.path.isdir(packdir):
+        raise Exception("package directory not found")
+
+    shutil.rmtree(packdir)
+    shutil.rmtree(distdir)
