@@ -72,7 +72,6 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
         super(QDialog, self).__init__(parent)
 
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self._tr("pyTSon - Settings"))
 
         self.cfg = cfg
         self.host = host

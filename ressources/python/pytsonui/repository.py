@@ -23,7 +23,6 @@ class RepositoryDialog(QDialog, pytson.Translatable):
     def __init__(self, host, parent=None):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self._tr("pyTSon - Online repository"))
 
         self.host = host
 

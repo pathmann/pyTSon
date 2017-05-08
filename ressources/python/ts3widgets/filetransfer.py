@@ -501,16 +501,6 @@ class FileBrowser(QDialog, pytson.Translatable):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
 
-        err, cname = ts3lib.getChannelVariableAsString(schid, cid,
-                                                       ChannelProperties.
-                                                       CHANNEL_NAME)
-
-        if err == ERROR_ok:
-            self.setWindowTitle(self._tr("File Browser - {cname}").format(
-                                cname=cname))
-        else:
-            self.setWindowTitle(self._tr("File Browser"))
-
         iconpackopened = False
         if not iconpack:
             try:
@@ -531,6 +521,16 @@ class FileBrowser(QDialog, pytson.Translatable):
         except Exception as e:
             self.delete()
             raise e
+
+        err, cname = ts3lib.getChannelVariableAsString(schid, cid,
+                                                       ChannelProperties.
+                                                       CHANNEL_NAME)
+
+        if err == ERROR_ok:
+            self.setWindowTitle(self._tr("File Browser - {cname}").format(
+                                cname=cname))
+        else:
+            self.setWindowTitle(self._tr("File Browser"))
 
         self.schid = schid
         self.cid = cid
@@ -1475,8 +1475,6 @@ class FileTransferDialog(QDialog, pytson.Translatable):
     def __init__(self, schid, cid, password, parent=None):
         super(QDialog, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose)
-
-        self.setWindowTitle(self._tr("File Transfers"))
 
         try:
             setupUi(self, pytson.getPluginPath("ressources",
