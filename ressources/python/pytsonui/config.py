@@ -3,12 +3,12 @@ import os
 from PythonQt.QtCore import Qt, QLocale
 from PythonQt.QtGui import (QDialog, QHeaderView, QTableWidgetItem,
                             QToolButton, QIcon, QColor, QFont, QMessageBox,
-                            QCheckBox, QColorDialog, QFileDialog)
+                            QCheckBox, QColorDialog, QFileDialog, QInputDialog)
 
 import ts3defines
 
 from . import setupUi, ts3print
-from .repository import RepositoryDialog
+from .repository import RepositoryDialog, InstallDialog
 
 import pytson
 import ts3client
@@ -35,6 +35,12 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                         ("languageGroup", False, [
                             ("languageButton", True, []),
                             ("languageCombo", True, []),
+                        ]),
+                        ("siteGroup", False, [
+                            ("siteTable", True, []),
+                            ("sitereloadButton", True, []),
+                            ("siteaddButton", True, []),
+                            ("siteremoveButton", True, []),
                         ]),
                         ("loadMenusButton", True, []),
                         ("verboseButton", True, []),
@@ -71,12 +77,14 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
         self.cfg = cfg
         self.host = host
         self.rpd = None
+        self.sitepkgs = None
 
         try:
             setupUi(self, pytson.getPluginPath("ressources",
                                                "pyTSon-configdialog.ui"),
                     widgets=self.CONF_WIDGETS)
             self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+            self.siteTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
             self.setupValues()
             self.setupSlots()
@@ -190,6 +198,7 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
             self.verboseButton.setChecked(True)
 
         self.setupList()
+        self.reloadSite()
 
     def setupSlots(self):
         # you can of course connect signal-slots manually,
@@ -225,6 +234,7 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                                    self.onLanguageComboCurrentIndexChanged)
         self.verboseButton.connect("stateChanged(int)",
                                    self.onVerboseButtonStateChanged)
+        self.sitereloadButton.connect("clicked()", self.reloadSite)
 
     def onLoadMenusButtonChanged(self, state):
         if state == Qt.Checked:
@@ -407,3 +417,52 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
 
     def onVerboseButtonStateChanged(self, state):
         self.cfg.set("general", "verbose", str(state == Qt.Checked))
+
+    def reloadSite(self):
+        self.siteTable.clearContents()
+
+        self.sitepkgs = devtools.installedPackages()
+        self.siteTable.setRowCount(len(self.sitepkgs))
+
+        for i, pkg in enumerate(self.sitepkgs):
+            item = QTableWidgetItem(pkg["name"])
+            item.setData(Qt.UserRole, i)
+            self.siteTable.setItem(i, 0, item)
+
+            item = QTableWidgetItem(pkg["version"])
+            item.setData(Qt.UserRole, i)
+            self.siteTable.setItem(i, 1, item)
+
+        self.siteTable.sortItems(0)
+
+    def on_siteTable_itemSelectionChanged(self):
+        self.siteremoveButton.setEnabled(self.siteTable.selectedItems())
+
+    def on_siteaddButton_clicked(self):
+        pkg = QInputDialog.getText(self, self._tr("Install site package"),
+                                   self._tr("Package name[==version]")).strip()
+
+        if pkg != "":
+            self.installer = InstallDialog(self.host, self)
+            self.installer.show()
+            self.installer.installPackage(pkg)
+            self.reloadSite()
+
+    def on_siteremoveButton_clicked(self):
+        ids = {it.data(Qt.UserRole) for it in self.siteTable.selectedItems()}
+
+        if ids:
+            if (QMessageBox.question(self, self._tr("Remove site packages"),
+                                     self._tr("Are you sure to remove the "
+                                              "selected packages? Some "
+                                              "plugins might not work "
+                                              "properly.")) ==
+               QMessageBox.Yes):
+                try:
+                    for idx in ids:
+                        devtools.removePackage(self.sitepkgs[idx]["name"],
+                                               self.sitepkgs[idx]["version"])
+                except Exception as e:
+                    QMessageBox.critical(self, self._tr("Error"), str(e))
+
+        self.reloadSite()

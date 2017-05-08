@@ -414,7 +414,6 @@ class RepositoryDialog(QDialog, pytson.Translatable):
 class InstallDialog(QDialog, pytson.Translatable):
     def __init__(self, host, parent=None):
         super(QDialog, self).__init__(parent)
-        self.setWindowTitle(self._tr("pyTSon Plugin Installer"))
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setModal(True)
 
@@ -438,6 +437,10 @@ class InstallDialog(QDialog, pytson.Translatable):
 
         self.nwm.get(QNetworkRequest(QUrl(addon["url"])))
         self.consoleEdit.append("Downloading %s ..." % addon["url"])
+
+    def installPackage(self, pkgstr):
+        self.pip.installPackages([pkgstr])
+        self.closeFrame.show()
 
     def onNetworkReply(self, reply):
         if reply.error() == QNetworkReply.NoError:
