@@ -434,7 +434,9 @@ class InstallDialog(QDialog, pytson.Translatable):
     def install(self, addon):
         self.addon = addon
 
-        self.nwm.get(QNetworkRequest(QUrl(addon["url"])))
+        req = QNetworkRequest(QUrl(addon["url"]))
+        req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+        self.nwm.get(req)
         self.consoleEdit.append("Downloading %s ..." % addon["url"])
 
     def installPackage(self, pkgstr):
@@ -446,14 +448,14 @@ class InstallDialog(QDialog, pytson.Translatable):
             self.consoleEdit.append("Download finished.")
 
             try:
-                if (reply.header(QNetworkRequest.ContentTypeHeader) !=
-                   "application/zip"):
+                if ("application/zip" not in
+                   reply.header(QNetworkRequest.ContentTypeHeader)):
                     self.pip.installPlugin(self.addon,
                                            reply.readAll().data().
                                            decode('utf-8'))
                 else:
                     self.pip.installPlugin(self.addon,
-                                           io.BytesIO(reply.readAll()))
+                                           io.BytesIO(reply.readAll().data()))
             except Exception as e:
                 self.consoleEdit.append("Exception during installation: %s" %
                                         e)
