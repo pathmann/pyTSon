@@ -1132,6 +1132,8 @@ class FileCollisionDialog(QDialog, pytson.Translatable):
             self.existingLabel.text = remstr
             self.newLabel.text = locstr
 
+        self.adjustSize()
+
     def on_overwriteButton_clicked(self):
         ret = FileCollisionAction.overwrite
         if self.multiButton.isChecked():
