@@ -284,7 +284,7 @@ class Message(object):
         @rtype: ElementTree.Element
         """
         if self.isNumerous:
-            elem = etree.Element("message", attrib={"numerous": "yes"})
+            elem = etree.Element("message", attrib={"numerus": "yes"})
         else:
             elem = etree.Element("message")
 
