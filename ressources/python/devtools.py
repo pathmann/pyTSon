@@ -110,6 +110,27 @@ class %s(ts3plugin):
         else:
             print(msg)
 
+    @staticmethod
+    def _extractAddon(path, pkgzip, prefix):
+        if prefix:
+            prefpath = "/".join(prefix) + "/"
+
+            for finfo in pkgzip.infolist():
+                if not finfo.filename.startswith(prefpath):
+                    continue
+
+                relpath = ("/".join([path] +
+                           finfo.filename.split("/")[len(prefix):]))
+                if finfo.filename.endswith("/"):
+                    if not finfo.filename == prefpath:
+                        os.mkdir(relpath)
+                else:
+                    with pkgzip.open(finfo) as plugfile:
+                        with open(relpath, "wb") as outf:
+                            shutil.copyfileobj(plugfile, outf)
+        else:
+            pkgzip.extractall(path)
+
     def installPlugin(self, addon, data):
         """
         Installs a new plugin into the scripts directory.
@@ -143,26 +164,10 @@ class %s(ts3plugin):
             with open(fp, "w") as f:
                 f.write(data)
         else:
-            pluginpath = os.path.dirname(os.path.abspath(fp))
-
             with ZipFile(data) as pkgzip:
-                if "prefix" in addon and addon["prefix"]:
-                    prefix = "/".join(addon["prefix"]) + "/"
-
-                    for finfo in pkgzip.infolist():
-                        if not finfo.filename.startswith(prefix):
-                            continue
-
-                        relpath = "/".join([pluginpath] + finfo.filename.split("/")[len(addon["prefix"]):])
-                        if finfo.filename.endswith("/"):
-                            if not finfo.filename == prefix:
-                                os.mkdir(relpath)
-                        else:
-                            with pkgzip.open(finfo) as plugfile:
-                                with open(relpath, "wb") as outf:
-                                    shutil.copyfileobj(plugfile, outf)
-                else:
-                    pkgzip.extractall(pluginpath)
+                self._extractAddon(os.path.dirname(os.path.abspath(fp)),
+                                   pkgzip, addon["prefix"] if "prefix" in addon
+                                   else None)
 
         self._print("Plugin installed.")
         self.working = False
