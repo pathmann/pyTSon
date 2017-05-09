@@ -12,7 +12,9 @@ EXTRA_FILES = [("..", "..", "ressources", "python", "pytsonui"),
                ("..", "..", "ressources", "python", "ts3client.py"),
                ("..", "..", "ressources", "python", "pluginhost.py"),
                ("..", "..", "ressources", "python", "ts3widgets"),
-               ("..", "..", "ressources", "python", "pythonqtpytson.py")]
+               ("..", "..", "ressources", "python", "pythonqtpytson.py"),
+               ("..", "..", "ressources", "python", "signalslot.py"),
+               ("..", "..", "tools", "pylupdate.py")]
 
 
 def main(inpdir, outdir):
