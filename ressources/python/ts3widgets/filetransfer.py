@@ -1205,7 +1205,7 @@ class FileTransfer(pytson.Translatable):
         return self.err != ERROR_ok
 
 
-class Download(FileTransfer):
+class Download(FileTransfer, pytson.Translatable):
     """
     Container class to hold information on a download
     """
@@ -1236,7 +1236,7 @@ class Download(FileTransfer):
         return os.path.join(self.todir, self.file.name)
 
 
-class Upload(FileTransfer):
+class Upload(FileTransfer, pytson.Translatable):
     """
     Container class to hold information on an upload
     """
