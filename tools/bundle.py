@@ -38,7 +38,8 @@ FILES = [("ressources/octicons", "plugins/pyTSon/ressources/octicons"),
          ("ressources/python/signalslot.py",
           "plugins/pyTSon/include/signalslot.py"),
          ("generated/pregen/pyTSon-de_DE.qm",
-          "plugins/pyTSon/ressources/i18n/pyTSon-de_DE.qm")]
+          "plugins/pyTSon/ressources/i18n/pyTSon-de_DE.qm"),
+         ("Changelog.html", "plugins/pyTSon/Changelog.html")]
 
 ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                        ("build/python.exe", "plugins/pyTSon/python.exe")],

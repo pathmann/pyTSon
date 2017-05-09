@@ -1,0 +1,61 @@
+<html>
+    <body>
+    <p>
+        <h1>Version 1.2.0</h1>
+        <p>
+            <h2>New Features:</h2>
+            <ul>
+                <li>Added functions getVersion and getCurrentApiVersion to module pytson to query the current versions</li>
+                <li>Added callbackproxies to register classes to receive ts3 events outside ts3plugin objects</li>
+                <li>ts3plugin and PluginHost live now in different modules</li>
+                <li>Added ServerCache class to module ts3client to use the client's cached icons</li>
+                <li>Added CountryFlags class to module ts3client to use the client's flag icons</li>
+                <li>Added package ts3widgets</li>
+                <li>Added module serverview to ts3widgets to display a channel-client-tree with QWidgets</li>
+                <li>Added module filetransfer to ts3widgets to display a filebrowser and filetransfer dialogs with QWidgets</li>
+                <li>Added module PythonQt.pytson</li>
+                <li>Added EventFilterObject to PythonQt.pytson to use Qt's eventfilter system</li>
+                <li>Events called from another thread than the mainthread are now called asynchronous (from the mainthread) in pyTSon (this should make pyTSon alot more stable)</li>
+                <li>Re-added onUserLoggingMessageEvent</li>
+                <li>Re-added onFileTransferStatusEvent</li>
+                <li>pytsonui is now a package</li>
+                <li>all python code is now conform to PEP8 (with small exceptions :) )</li>
+                <li>pyTSon is now translatable</li>
+                <li>Added a german translation</li>
+                <li>Added pytson.tr and pytson.Translatable as translate function resp. baseclass</li>
+                <li>plugin authors might use pylupdate.py to extract translatable strings from uifiles and python code</li>
+                <li>Users now may activate verbose logging</li>
+                <li>Users now may manage sitepackages in the include directory in the settings dialog</li>
+                <li>Added some rare constants from the original pluginsdk to ts3defines module</li>
+                <li>functions in pytsonui now accept a new parameter pluginicons (see the docs for more information)</li>
+                <li>pytsonui.setupUi can now load the original designed class of a Qt Designer file</li>
+                <li>pytsonui.retrieveAllWidgets will now load QButtonGroup and QAction as well</li>
+                <li>Created pythonqt_app to allow testing PythonQt uis. pythonqt_app is a standalone app emulating pyTSon's environment. Get it from <a href="https://github.com/pathmann/pyTSon/releases">Github</a></li>
+                <li>Repository URLs can now have redirects</li>
+                <li>Repository plugins can now be extracted from a subdirectory in a zipped file</li>
+            </ul>
+        </p>
+        <p>
+            <h2>Bugfixes:</h2>
+            <ul>
+                <li>Unicode strings are now handled correctly in infoData</li>
+                <li>infoData is now only called on plugins, if the method exists</li>
+                <li>if infoData returns None, it is ignored now</li>
+                <li>menuitems are now sorted by their plugins names</li>
+                <li>functions of the ts3lib module returning a tuple containing the errorcode and some value, now return None as value on error</li>
+                <li>Fixed the internal conversion of bookmarklists, so ts3lib.getBookmarkList should work now</li>
+                <li>Emoticons of non-zipped Iconpacks in ts3client.IconPack are now loaded correctly</li>
+                <li>pytsonui.retrieveAllWidgets now ignores the subwidgets of combined widgets (like QSpinBox)</li>
+                <li>the scripting console does not use wordwrapping anymore, which should fix some odd behaviour</li>
+                <li>python caches are not bundled anymore</li>
+                <li>Fixed a bug where installation of plugins without dependencies from a repository was not possible</li>
+                <li>Fixed some bugs in PythonQt around QAbstractItemModel</li>
+                <li>Various updates to the documentation</li>
+                <li>Various small bugfixes</li>
+            </ul>
+        </p>
+    </p>
+
+    For older verions see the <a href="https://github.com/pathmann/pyTSon">Github-Page</a>.
+    </body>
+</html>
