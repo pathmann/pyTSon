@@ -205,10 +205,6 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
-      <source>Error requesting filellist</source>
-      <translation type="unfinished"></translation>
-    </message>
-    <message>
       <source>File</source>
       <translation type="unfinished"></translation>
     </message>

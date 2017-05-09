@@ -174,7 +174,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
         err = ts3lib.requestFileList(self.schid, self.cid, self.password,
                                      self.newpath, self.retcode)
         if err != ERROR_ok:
-            _errprint(self._tr("Error requesting filellist"), err, self.schid,
+            _errprint(self._tr("Error requesting filelist"), err, self.schid,
                       self.cid)
 
     def onFileListEvent(self, schid, channelID, path, name, size, date,
