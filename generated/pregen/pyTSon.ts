@@ -71,10 +71,6 @@ This will erase all script data of the plugin from disk.</source>
       <source>Startup script</source>
       <translation type="unfinished"></translation>
     </message>
-    <message>
-      <source>pyTSon - Settings</source>
-      <translation type="unfinished"></translation>
-    </message>
   </context>
   <context>
     <name>Download</name>
@@ -240,13 +236,6 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Progress</source>
-      <translation type="unfinished"></translation>
-    </message>
-  </context>
-  <context>
-    <name>InstallDialog</name>
-    <message>
-      <source>pyTSon Plugin Installer</source>
       <translation type="unfinished"></translation>
     </message>
   </context>
@@ -537,10 +526,6 @@ This will erase all script data of the plugin from disk.</source>
       <source>Your local version has a greater version number</source>
       <translation type="unfinished"></translation>
     </message>
-    <message>
-      <source>pyTSon - Online repository</source>
-      <translation type="unfinished"></translation>
-    </message>
   </context>
   <context>
     <name>Upload</name>
@@ -555,10 +540,6 @@ This will erase all script data of the plugin from disk.</source>
   </context>
   <context>
     <name>filebrowser</name>
-    <message>
-      <source>...</source>
-      <translation type="unfinished"></translation>
-    </message>
     <message>
       <source>Dialog</source>
       <translation type="unfinished"></translation>

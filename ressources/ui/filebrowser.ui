@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>filebrowser</class>
- <widget class="QWidget" name="filebrowser">
+ <widget class="QDialog" name="filebrowser">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string notr="true">Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -200,7 +200,8 @@
        </property>
        <property name="icon">
         <iconset theme="folder-new">
-         <normaloff>.</normaloff>.</iconset>
+         <normaloff/>
+        </iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -294,16 +295,7 @@
         </size>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
+        <property name="margin">
          <number>0</number>
         </property>
         <item>
@@ -386,16 +378,7 @@
      </property>
      <widget class="QWidget" name="listPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -424,16 +407,7 @@
      </widget>
      <widget class="QWidget" name="tablePage">
       <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -474,7 +448,7 @@
       <item>
        <widget class="QToolButton" name="clearButton">
         <property name="text">
-         <string>...</string>
+         <string notr="true">...</string>
         </property>
         <property name="pytsonicon" stdset="0">
          <string notr="true">FILTER_CLEAR</string>
