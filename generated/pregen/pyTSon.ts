@@ -7,6 +7,10 @@
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Are you sure to remove the selected packages? Some plugins might not work properly.</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Changes only take effect after a restart.</source>
       <translation type="unfinished"></translation>
     </message>
@@ -32,6 +36,10 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Error</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Error loading iconpack: {exception}</source>
       <translation type="unfinished"></translation>
     </message>
@@ -40,7 +48,19 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Install site package</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Package name[==version]</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Remove</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Remove site packages</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -57,6 +77,177 @@ This will erase all script data of the plugin from disk.</source>
     </message>
   </context>
   <context>
+    <name>Download</name>
+    <message>
+      <source>Downloading {filename}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error downloading {filename}: {errmsg}</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>FileBrowser</name>
+    <message>
+      <source>Copy URL</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Create Folder</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Delete</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Delete files</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Do you really want to delete all selected files?</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Download</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error creating directory</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error deleting files</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error getting server connection info</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>File Browser</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>File Browser - {cname}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Folder name:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Open</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Refresh</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Rename</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Upload files</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>{dircountstr} and {fcountstr}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message numerous="yes">
+      <source>{dircount} directory(s)</source>
+      <translation type="unfinished">
+        <numerusform></numerusform>
+        <numerusform/>
+      </translation>
+    </message>
+    <message numerous="yes">
+      <source>{filecount} file(s)</source>
+      <translation type="unfinished">
+        <numerusform></numerusform>
+        <numerusform/>
+      </translation>
+    </message>
+  </context>
+  <context>
+    <name>FileCollector</name>
+    <message>
+      <source>Error requesting filelist of {dirname}</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>FileCollisionDialog</name>
+    <message>
+      <source>Do you want to overwrite or resume the existing file</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Do you want to overwrite the existing file</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>FileListModel</name>
+    <message>
+      <source>Directory</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error renaming file</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error requesting filelist</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error requesting filellist</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>File</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Last Changed</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Name</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Size</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Type</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>FileTransfer</name>
+    <message>
+      <source>Unknown error {errcode}</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>FileTransferModel</name>
+    <message>
+      <source>Description</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Progress</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
     <name>InstallDialog</name>
     <message>
       <source>pyTSon Plugin Installer</source>
@@ -66,11 +257,35 @@ This will erase all script data of the plugin from disk.</source>
   <context>
     <name>PluginHost</name>
     <message>
+      <source>Activating plugin {name}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Callbackproxy {name} registered</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Callbackproxy {name} unregistered</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Check for update</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
       <source>Console</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Creating config dialog</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Creating scripting console</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Deactivating plugin {name}</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -126,6 +341,26 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Init success</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Initing hotkeys</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Initing menus</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Processing command {cmd}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Reloading plugins</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Settings</source>
       <translation type="unfinished"></translation>
     </message>
@@ -138,7 +373,23 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Shutting down</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Starting plugin {name}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Starting up</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>There is an update of pyTSon for your platform. Get it from &lt;a href='{url}'&gt;here&lt;/a&gt;</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Using translator from {file}</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -280,6 +531,24 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>pyTSon - Online repository</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>Upload</name>
+    <message>
+      <source>Error uploading {filename}: {errmsg}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Uploading {filename}</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>filetransfer</name>
+    <message>
+      <source>%Y-%m-%d %H:%M:%S</source>
       <translation type="unfinished"></translation>
     </message>
   </context>
