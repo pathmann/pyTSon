@@ -157,14 +157,14 @@ This will erase all script data of the plugin from disk.</source>
       <source>{dircountstr} and {fcountstr}</source>
       <translation type="unfinished"></translation>
     </message>
-    <message numerous="yes">
+    <message numerus="yes">
       <source>{dircount} directory(s)</source>
       <translation type="unfinished">
         <numerusform></numerusform>
         <numerusform/>
       </translation>
     </message>
-    <message numerous="yes">
+    <message numerus="yes">
       <source>{filecount} file(s)</source>
       <translation type="unfinished">
         <numerusform></numerusform>
