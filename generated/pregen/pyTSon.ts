@@ -546,9 +546,86 @@ This will erase all script data of the plugin from disk.</source>
     </message>
   </context>
   <context>
+    <name>filebrowser</name>
+    <message>
+      <source>...</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Dialog</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Download Folder:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Search:</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>filecollisiondialog</name>
+    <message>
+      <source>&amp;Apply to all files</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>&amp;Cancel</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>&amp;Overwrite</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>&amp;Resume</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>&amp;Skip</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>File Transfer</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>S&amp;kip All</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>This folder already contains a file</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>with this file</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
     <name>filetransfer</name>
     <message>
       <source>%Y-%m-%d %H:%M:%S</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Clean Up</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Close</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>File Transfers</source>
+      <translation type="unfinished"></translation>
+    </message>
+  </context>
+  <context>
+    <name>installer</name>
+    <message>
+      <source>Close</source>
       <translation type="unfinished"></translation>
     </message>
   </context>
@@ -583,7 +660,15 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Add</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Bac&amp;kground:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Changes require a restart</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -611,7 +696,15 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Language</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Load menuitems from inactive plugins on startup</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Name</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -620,6 +713,14 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Re&amp;quired:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Reload</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Remove</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -636,6 +737,10 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Silent</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Site packages</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -656,6 +761,18 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Te&amp;xt:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Use the client's language</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Verbose log output</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Version</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
@@ -710,6 +827,10 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Version:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>pyTSon - Online repository</source>
       <translation type="unfinished"></translation>
     </message>
   </context>
