@@ -14,8 +14,8 @@ import json
 from configparser import ConfigParser
 from pytsonui.console import PythonConsole
 from pytsonui.config import ConfigurationDialog
-from PythonQt.QtGui import QFont, QColor, QMessageBox
-from PythonQt.QtCore import QUrl, QTimer, QTranslator, QCoreApplication
+from PythonQt.QtGui import QFont, QColor, QMessageBox, QTextEdit
+from PythonQt.QtCore import Qt, QUrl, QTimer, QTranslator, QCoreApplication
 from PythonQt.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
                                 QNetworkReply)
 
@@ -557,7 +557,10 @@ class PluginHost(pytson.Translatable):
                                                   "settings.svg.png")),
                (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 2,
                 cls._tr("Check for update"), os.path.join(
-                        "ressources", "octicons", "cloud-download.svg.png"))]
+                        "ressources", "octicons", "cloud-download.svg.png")),
+               (ts3defines.PluginMenuType.PLUGIN_MENU_TYPE_GLOBAL, 3,
+                cls._tr("Changelog"), os.path.join("ressources", "octicons",
+                                                   "book.svg.png"))]
         nextid = len(ret)
 
         loadall = cls.cfg.getboolean("general", "loadAllMenus")
@@ -625,6 +628,9 @@ class PluginHost(pytson.Translatable):
         elif menuItemID == 2:
             cls.updateCheck()
             return
+        elif menuItemID == 3:
+            cls.showChangelog()
+            return
 
         if menuItemID in cls.menus:
             (plugin, locid) = cls.menus[menuItemID]
@@ -668,3 +674,20 @@ class PluginHost(pytson.Translatable):
                              trace=traceback.format_exc()),
                              ts3defines.LogLevel.LogLevel_ERROR,
                              "pyTSon.PluginHost.onHotkeyEvent")
+
+    @classmethod
+    def showChangelog(cls):
+        fname = pytson.getPluginPath("Changelog.html")
+        if not os.path.isfile(fname):
+            QMessageBox.critical(None, cls._tr("Error"), cls._tr("Can't find "
+                                                                 "Changelog"))
+            return
+
+        with open(fname, "r") as f:
+            # store it just to keep it in scope
+            cls.viewer = viewer = QTextEdit()
+            viewer.setAttribute(Qt.WA_DeleteOnClose)
+            viewer.readOnly = True
+            viewer.setHtml(f.read())
+
+            viewer.show()

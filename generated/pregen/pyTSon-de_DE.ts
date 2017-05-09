@@ -269,6 +269,14 @@ This will erase all script data of the plugin from disk.</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
+      <source>Can't find Changelog</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Changelog</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
       <source>Check for update</source>
       <translation type="unfinished"></translation>
     </message>
@@ -286,6 +294,10 @@ This will erase all script data of the plugin from disk.</source>
     </message>
     <message>
       <source>Deactivating plugin {name}</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Error</source>
       <translation type="unfinished"></translation>
     </message>
     <message>
