@@ -2,6 +2,7 @@
 
 import sys
 import os
+import glob
 
 from argparse import ArgumentParser
 
@@ -39,11 +40,20 @@ def main(inpdir, outdir):
                     elif incomment:
                         outf.write(l)
 
-    confpath = os.path.join(os.path.dirname(__file__), "epydoc.conf")
+    thisdir = os.path.dirname(__file__)
+    patches = glob.glob(os.path.join(thisdir, "*.patch"))
+
+    for patch in patches:
+        os.system("patch -p1 < %s" % patch)
+
+    confpath = os.path.join(thisdir, "epydoc.conf")
     os.system("epydoc %s --parse-only -o %s --html --config %s" %
               (" ".join(outfiles), outdir, confpath))
     os.system("epydoc %s --parse-only -o %s --pdf --config %s" %
               (" ".join(outfiles), outdir, confpath))
+
+    for patch in patches:
+        os.system("patch -p1 -R < %s" % patch)
 
 
 if __name__ == "__main__":

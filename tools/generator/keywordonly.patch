@@ -1,0 +1,83 @@
+diff --git a/ressources/python/pytson.py b/ressources/python/pytson.py
+index 9f351b4..bfce540 100644
+--- a/ressources/python/pytson.py
++++ b/ressources/python/pytson.py
+@@ -9,7 +9,7 @@ import ts3lib
+ from PythonQt.QtGui import QApplication
+ 
+ 
+-def tr(context, sourcetext, *, disambiguation="", n=-1):
++def tr(context, sourcetext, disambiguation="", n=-1):
+     """
+     Returns the current translation for a string. This function calls can be
+     extracted by pyTSon's pylupdate.py.
+@@ -35,7 +35,7 @@ class Translatable(object):
+     Baseclass for a class using translatable string literals.
+     """
+     @classmethod
+-    def _tr(cls, sourcetext, *, disambiguation="", n=-1, context=None):
++    def _tr(cls, sourcetext, disambiguation="", n=-1, context=None):
+         """
+         Returns the current translation for a string. This method calls can be
+         extracted by pyTSon's pylupdate.py.
+diff --git a/ressources/python/pytsonui/__init__.py b/ressources/python/pytsonui/__init__.py
+index cc2cd01..3bb53ec 100644
+--- a/ressources/python/pytsonui/__init__.py
++++ b/ressources/python/pytsonui/__init__.py
+@@ -238,7 +238,7 @@ class UiLoader(QUiLoader):
+             return QUiLoader.createWidget(self, clsname, parent, name)
+ 
+ 
+-def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
++def setupUi(obj, uipath, widgets=None, seticons=True, iconpack=None,
+             pluginicons=None):
+     """
+     Loads a Qt designer file (.ui), creates the widgets defined in and adds
+diff --git a/ressources/python/pytsonui/console.py b/ressources/python/pytsonui/console.py
+index 0b55b9e..09633c2 100644
+--- a/ressources/python/pytsonui/console.py
++++ b/ressources/python/pytsonui/console.py
+@@ -36,7 +36,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
+     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
+                  font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
+                  width=800, height=600, startup="", silentStartup=False,
+-                 parent=None, *, catchstd=False):
++                 parent=None, catchstd=False):
+         super(QPlainTextEdit, self).__init__(parent)
+ 
+         self.setLineWrapMode(QPlainTextEdit.NoWrap)
+diff --git a/ressources/python/ts3client.py b/ressources/python/ts3client.py
+index 1c01e6f..063105d 100644
+--- a/ressources/python/ts3client.py
++++ b/ressources/python/ts3client.py
+@@ -155,7 +155,7 @@ class IconPack(object):
+         del cfg
+         return IconPack(info=q.value(0))
+ 
+-    def __init__(self, *, info=None, name=None):
++    def __init__(self, info=None, name=None):
+         """
+         Instantiates a new IconPack object referenced by its name or the
+         internal info string (an Exception is raised if the iconpack could
+diff --git a/ressources/python/ts3widgets/filetransfer.py b/ressources/python/ts3widgets/filetransfer.py
+index 972ee85..94bff4b 100644
+--- a/ressources/python/ts3widgets/filetransfer.py
++++ b/ressources/python/ts3widgets/filetransfer.py
+@@ -123,7 +123,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
+     Itemmodel to abstract the files contained on a TS3 filepath.
+     """
+ 
+-    def __init__(self, schid, cid, password, parent=None, *, readonly=False):
++    def __init__(self, schid, cid, password, parent=None, readonly=False):
+         super(QAbstractItemModel, self).__init__(parent)
+ 
+         self.schid = schid
+@@ -467,7 +467,7 @@ class FileBrowser(QDialog, pytson.Translatable):
+     Dialog to display files contained on a TS3 filepath.
+     """
+ 
+-    def __init__(self, schid, cid, password='', path='/', parent=None, *,
++    def __init__(self, schid, cid, password='', path='/', parent=None,
+                  staticpath=False, readonly=False, downloaddir=None,
+                  iconpack=None):
+         """
