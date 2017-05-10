@@ -14,7 +14,7 @@ import json
 from configparser import ConfigParser
 from pytsonui.console import PythonConsole
 from pytsonui.config import ConfigurationDialog
-from PythonQt.QtGui import QFont, QColor, QMessageBox, QTextEdit
+from PythonQt.QtGui import QFont, QColor, QMessageBox, QTextBrowser
 from PythonQt.QtCore import Qt, QUrl, QTimer, QTranslator, QCoreApplication
 from PythonQt.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
                                 QNetworkReply)
@@ -685,9 +685,9 @@ class PluginHost(pytson.Translatable):
 
         with open(fname, "r") as f:
             # store it just to keep it in scope
-            cls.viewer = viewer = QTextEdit()
+            cls.viewer = viewer = QTextBrowser()
             viewer.setAttribute(Qt.WA_DeleteOnClose)
-            viewer.readOnly = True
+            viewer.openExternalLinks = True
             viewer.setHtml(f.read())
 
             viewer.show()
