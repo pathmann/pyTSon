@@ -143,7 +143,7 @@ INIBASE = """
 Name = pyTSon
 Type = Plugin
 Author = Thomas \\"PLuS\\" Pathmann
-Version = 1.1.0
+Version = 1.2.0
 Platforms = %s
 Description = "pyTSon - A python plugin to enhance the TS3 client with python\
 scripts"

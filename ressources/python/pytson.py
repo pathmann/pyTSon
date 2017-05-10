@@ -128,7 +128,7 @@ def getVersion():
     @return: the version as string
     @rtype: str
     """
-    return "1.1.0"
+    return "1.2.0"
 
 
 def getCurrentApiVersion():
