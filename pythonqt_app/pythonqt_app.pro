@@ -34,7 +34,7 @@ HEADERS += \
 FORMS += \
     dialog.ui
 
-unix:!mac {
+unix {
     QMAKE_RPATHDIR += $ORIGIN
 }
 
