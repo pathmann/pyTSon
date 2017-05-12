@@ -40,7 +40,8 @@ FILES = [("ressources/octicons", "plugins/pyTSon/ressources/octicons"),
          ("generated/pregen/pyTSon-de_DE.qm",
           "plugins/pyTSon/ressources/i18n/pyTSon-de_DE.qm"),
          ("Changelog.html", "plugins/pyTSon/Changelog.html"),
-         ("tools/pylupdate.py", "plugins/pyTSon/include/pylupdate.py")]
+         ("tools/pylupdate.py", "plugins/pyTSon/include/pylupdate.py"),
+         ("LICENSE", "plugins/pyTSon/LICENSE.txt")]
 
 ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                        ("build/python.exe", "plugins/pyTSon/python.exe")],
