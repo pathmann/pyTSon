@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
       QByteArray bytes = respath.toUtf8();
       resources_path = new char[bytes.length() +1];
       strncpy(resources_path, bytes.constData(), bytes.length());
-      ressources_path[bytes.length()] = '\0';
+      resources_path[bytes.length()] = '\0';
     }
 
     if (!cfgpath.isEmpty()) {
