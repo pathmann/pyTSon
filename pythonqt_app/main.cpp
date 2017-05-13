@@ -104,12 +104,14 @@ int main(int argc, char** argv) {
       QByteArray bytes = respath.toUtf8();
       resources_path = new char[bytes.length() +1];
       strncpy(resources_path, bytes.constData(), bytes.length());
+      ressources_path[bytes.length()] = '\0';
     }
 
     if (!cfgpath.isEmpty()) {
       QByteArray bytes = cfgpath.toUtf8();
       config_path = new char[bytes.length() +1];
       strncpy(config_path, bytes.constData(), bytes.length());
+      config_path[bytes.length()] = '\0';
     }
 
     Dialog* dlg = new Dialog(script, console);
