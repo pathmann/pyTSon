@@ -278,7 +278,7 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
             ts3print(pytson.tr("pytsonui", "Error loading iconpack: "
                      "{exception}").format(exception=e),
                      ts3defines.LogLevel.LogLevel_ERROR,
-                     "pytsonui.retrieveWidgets.%s" % obj.objectName, 0)
+                     "pytsonui.setupUi.%s" % obj.objectName, 0)
 
     if os.path.isfile(uipath):
         f = QFile(uipath)
