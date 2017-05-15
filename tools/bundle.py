@@ -3,6 +3,7 @@
 import sys
 import os
 import zipfile
+import shutil
 
 from argparse import ArgumentParser
 
@@ -41,7 +42,8 @@ FILES = [("ressources/octicons", "plugins/pyTSon/ressources/octicons"),
           "plugins/pyTSon/ressources/i18n/pyTSon-de_DE.qm"),
          ("Changelog.html", "plugins/pyTSon/Changelog.html"),
          ("tools/pylupdate.py", "plugins/pyTSon/include/pylupdate.py"),
-         ("LICENSE", "plugins/pyTSon/LICENSE.txt")]
+         ("LICENSE", "plugins/pyTSon/LICENSE.txt"),
+         ("VERSION", "plugins/pyTSon/VERSION")]
 
 ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                        ("build/python.exe", "plugins/pyTSon/python.exe")],
@@ -151,36 +153,50 @@ scripts"
 """
 
 
-def main(root, pythondir, outdir, arches):
+def writeFiles(root, files, tozip):
+    for loc, inzip in files:
+        locpath = os.path.join(root, loc)
+
+        if os.path.isfile(locpath):
+            tozip.write(locpath, inzip)
+        else:
+            for base, dirs, files in os.walk(locpath):
+                if not os.path.basename(base) == "__pycache__":
+                    for f in files:
+                        fn = os.path.join(base, f)
+                        tozip.write(fn, inzip + fn[len(locpath):])
+
+
+def main(root, pythondir, outdir, arches, buildbase, update):
     for a in arches:
-        zip = zipfile.ZipFile(os.path.join(outdir, "pyTSon_%s.ts3_plugin" % a),
-                              "w", zipfile.ZIP_DEFLATED)
-        for loc, inzip in FILES + ARCHFILES[a]:
-            locpath = os.path.join(root, loc)
+        if update:
+            shutil.copyfile(os.path.join(outdir, "pyTSon_%s.base" % a),
+                            os.path.join(outdir, "pyTSon_%s.ts3_plugin" % a))
+            zipout = zipfile.ZipFile(os.path.join(outdir,
+                                                  "pyTSon_%s.ts3_plugin" % a),
+                                     "a", zipfile.ZIP_DEFLATED)
+        elif buildbase:
+            zipout = zipfile.ZipFile(os.path.join(outdir,
+                                                  "pyTSon_%s.base" % a),
+                                     "w", zipfile.ZIP_DEFLATED)
+        else:
+            zipout = zipfile.ZipFile(os.path.join(outdir,
+                                                  "pyTSon_%s.ts3_plugin" % a),
+                                     "w", zipfile.ZIP_DEFLATED)
 
-            if os.path.isfile(locpath):
-                zip.write(locpath, inzip)
-            else:
-                for base, dirs, files in os.walk(locpath):
-                    if not os.path.basename(base) == "__pycache__":
-                        for f in files:
-                            fn = os.path.join(base, f)
-                            zip.write(fn, inzip + fn[len(locpath):])
+        if update:
+            writeFiles(root, FILES, zipout)
+        elif buildbase:
+            writeFiles(root, ARCHFILES[a], zipout)
+            writeFiles(pythondir, PYTHONFILES[a], zipout)
+        else:
+            writeFiles(root, FILES + ARCHFILES[a], zipout)
+            writeFiles(pythondir, PYTHONFILES[a], zipout)
 
-        for loc, inzip in PYTHONFILES[a]:
-            locpath = os.path.join(pythondir, loc)
+        if not buildbase:
+            zipout.writestr("package.ini", INIBASE % a)
 
-            if os.path.isfile(locpath):
-                zip.write(locpath, inzip)
-            else:
-                for base, dirs, files in os.walk(locpath):
-                    if not os.path.basename(base) == "__pycache__":
-                        for f in files:
-                            fn = os.path.join(base, f)
-                            zip.write(fn, inzip + fn[len(locpath):])
-
-        zip.writestr("package.ini", INIBASE % a)
-        zip.close()
+        zipout.close()
 
 
 if __name__ == "__main__":
@@ -192,13 +208,30 @@ if __name__ == "__main__":
                         help='The directory, where output files should be \
                         placed in')
     parser.add_argument('arch', nargs='+', help='architecture to bundle')
+    parser.add_argument('-u', '--update', dest='update', action='store_true',
+                        help='Create a bundle by merging a base arch bundle \
+                        with the non-arch-dependent files, argument pythondir \
+                        will be ignored')
+    parser.add_argument('-b', '--base', dest='base', action='store_true',
+                        help='Create a base arch bundle')
 
     args = parser.parse_args()
+
+    if args.update and args.base:
+        print("update and base are mutual exclusive")
+        sys.exit(1)
 
     for key in args.arch:
         if key not in ARCHFILES:
             print("Unrecognized architecture, possible values are: \
                   %s" % ", ".join(ARCHFILES.keys()))
             sys.exit(1)
+        elif args.update:
+            path = os.path.join(args.outputdir, "pyTSon_%s.base" % key)
+            if not os.path.isfile(path):
+                print("Could not find base arch bundle in outputdir for \
+                       architecture %s" % key)
+                sys.exit(1)
 
-    main(args.rootdir, args.pythondir, args.outputdir, args.arch)
+    main(args.rootdir, args.pythondir, args.outputdir, args.arch, args.base,
+         args.update)
