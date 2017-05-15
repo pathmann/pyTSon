@@ -4,17 +4,81 @@
 #include "ts3logdispatcher.h"
 #include "global_shared.h"
 
-#if defined(Q_OS_WIN)
+#ifndef WIN32
+#include <dlfcn.h>
+#include <QDebug>
+
+void unixDllMain() {
+  Dl_info dl_info;
+
+  if (dladdr((void *)loadVersion, &dl_info) != 0) {
+    loadVersion(QString(dl_info.dli_fname));
+    return;
+  }
+
+  setVersion("unkown");
+}
+#else
 #define PATH_LEN 256
+
+BOOL DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID /*lpReserved*/) {
+  wchar_t path[MAXPATH];
+  switch (ul_reason_for_call) {
+    case DLL_PROCESS_ATTACH:
+      if (GetModuleFileName(hModule, path, PATH_LEN) != 0) {
+        loadVersion(QString::fromWCharArray(path));
+        return;
+      }
+
+      setVersion("unkown");
+      break;
+    case DLL_PROCESS_DETACH:
+      freeVersion();
+      break;
+    default:
+      break;
+  }
+}
+
 #endif
 
+void loadVersion(const QString &thislibpath) {
+  QFileInfo info(thislibpath);
+  QDir dir = info.absoluteDir();
+
+  if (dir.cd("pyTSon")) {
+    if (dir.exists("VERSION")) {
+      QFile file(dir.absoluteFilePath("VERSION"));
+
+      if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray ver = file.readLine().trimmed();
+        file.close();
+
+        setVersion(ver.trimmed());
+        return;
+      }
+    }
+  }
+
+  setVersion("unkown");
+}
+
+void setVersion(const QByteArray& ver) {
+  pytson_version = new char[ver.length() + 1];
+  strncpy(pytson_version, ver, ver.length());
+  pytson_version[ver.length()] = '\0';
+}
+
+void freeVersion() {
+  delete[] pytson_version;
+}
 
 const char* ts3plugin_name() {
   return "pyTSon";
 }
 
 const char* ts3plugin_version() {
-  return "1.2.0";
+  return pytson_version;
 }
 
 int ts3plugin_apiVersion() {

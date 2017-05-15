@@ -5,3 +5,4 @@
 struct TS3Functions ts3_funcs;
 char* ts3_pluginid = NULL;
 pytsonhost* pyhost = NULL;
+char* pytson_version = NULL;

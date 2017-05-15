@@ -7,5 +7,6 @@
 extern struct TS3Functions ts3_funcs;
 extern char* ts3_pluginid;
 extern pytsonhost* pyhost;
+extern char* pytson_version;
 
 #endif // GLOBAL_SHARED_H

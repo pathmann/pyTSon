@@ -9,6 +9,8 @@
 
 #include <Python.h>
 
+#include <QByteArray>
+
 #include "teamspeak/public_definitions.h"
 #include "plugin_definitions.h"
 #include "ts3_functions.h"
@@ -17,6 +19,16 @@
 extern "C" {
 #endif
 
+#ifdef WIN32
+BOOL DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+void freeVersion();
+#else
+__attribute__((constructor)) void unixDllMain();
+__attribute__((destructor)) void freeVersion();
+#endif
+
+void loadVersion(const QString& thislibpath);
+void setVersion(const QByteArray& ver);
 
 EXPORT_SYMBOL const char* ts3plugin_name();
 EXPORT_SYMBOL const char* ts3plugin_version();
