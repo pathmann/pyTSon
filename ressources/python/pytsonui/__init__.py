@@ -288,7 +288,8 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
             f.close()
 
             if not ui:
-                raise Exception("Error creating widget from uifile")
+                raise Exception("Error creating widget from uifile: %s" %
+                                loader.errorString())
         else:
             raise Exception("Could not open uifile")
     else:
