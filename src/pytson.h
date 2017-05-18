@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 #ifdef WIN32
+#include <windows.h>
 BOOL DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
 void freeVersion();
 #else

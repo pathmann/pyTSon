@@ -22,15 +22,13 @@ void unixDllMain() {
 #define PATH_LEN 256
 
 BOOL DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID /*lpReserved*/) {
-  wchar_t path[MAXPATH];
+  wchar_t path[PATH_LEN];
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
-      if (GetModuleFileName(hModule, path, PATH_LEN) != 0) {
+      if (GetModuleFileName(hModule, path, PATH_LEN) != 0)
         loadVersion(QString::fromWCharArray(path));
-        return;
-      }
+      else setVersion("unknown");
 
-      setVersion("unkown");
       break;
     case DLL_PROCESS_DETACH:
       freeVersion();
@@ -38,6 +36,8 @@ BOOL DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID /*lpReserved*/) {
     default:
       break;
   }
+  
+  return TRUE;
 }
 
 #endif
