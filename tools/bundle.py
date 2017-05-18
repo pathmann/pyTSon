@@ -146,7 +146,7 @@ INIBASE = """
 Name = pyTSon
 Type = Plugin
 Author = Thomas \\"PLuS\\" Pathmann
-Version = 1.2.1
+Version = %s
 Platforms = %s
 Description = "pyTSon - A python plugin to enhance the TS3 client with python\
 scripts"
@@ -168,6 +168,14 @@ def writeFiles(root, files, tozip):
 
 
 def main(root, pythondir, outdir, arches, buildbase, update):
+    verpath = os.path.join(root, "VERSION")
+    if not os.path.isfile(verpath):
+        print("Could not find VERSION file in rootdir")
+        sys.exit(1)
+
+    with open(verpath, "r") as f:
+        ver = f.readline()
+
     for a in arches:
         if update:
             shutil.copyfile(os.path.join(outdir, "pyTSon_%s.base" % a),
@@ -194,7 +202,7 @@ def main(root, pythondir, outdir, arches, buildbase, update):
             writeFiles(pythondir, PYTHONFILES[a], zipout)
 
         if not buildbase:
-            zipout.writestr("package.ini", INIBASE % a)
+            zipout.writestr("package.ini", INIBASE % (ver, a))
 
         zipout.close()
 
