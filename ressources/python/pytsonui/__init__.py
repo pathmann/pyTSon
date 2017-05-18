@@ -299,5 +299,10 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
     else:
         retrieveAllWidgets(obj, ui, seticons, iconpack, pluginicons)
 
+    if hasattr(obj, "parent") and obj.parent():
+        par = obj.parent()
+        obj.move(par.window().frameGeometry.topLeft() +
+                 par.window().rect.center() - obj.rect.center())
+
     if root:
         iconpack.close()
