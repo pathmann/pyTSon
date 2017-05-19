@@ -832,15 +832,6 @@ class ServerviewModel(QAbstractItemModel):
         self.cgicons = {}
         self.sgicons = {}
 
-        err, self.myid = ts3lib.getClientID(schid)
-
-        err = ts3lib.requestServerGroupList(schid)
-        if err != ts3defines.ERROR_ok:
-            _errprint("Error requesting servergrouplist", err, self.schid)
-        err = ts3lib.requestChannelGroupList(schid)
-        if err != ts3defines.ERROR_ok:
-            _errprint("Error requesting channelgroups", err, self.schid)
-
         self._reload()
 
         try:
@@ -876,7 +867,20 @@ class ServerviewModel(QAbstractItemModel):
 
         self.countries.close()
 
+    def setServerConnectionHandlerId(self, schid):
+        self.schid = schid
+        self._reload()
+
     def _reload(self):
+        err, self.myid = ts3lib.getClientID(self.schid)
+
+        err = ts3lib.requestServerGroupList(self.schid)
+        if err != ts3defines.ERROR_ok:
+            _errprint("Error requesting servergrouplist", err, self.schid)
+        err = ts3lib.requestChannelGroupList(self.schid)
+        if err != ts3defines.ERROR_ok:
+            _errprint("Error requesting channelgroups", err, self.schid)
+
         self.beginResetModel()
 
         self.allchans = {}
@@ -1378,7 +1382,7 @@ class Serverview(QTreeView):
     A QTreeView widget to display the complete view on a TS3 Server.
     """
 
-    def __init__(self, schid, parent=None):
+    def __init__(self, parent=None, *, schid=None):
         """
         Instantiates a new Serverview widget (including model and delegate).
         @param schid: the ID of the serverconnection
@@ -1388,17 +1392,26 @@ class Serverview(QTreeView):
         """
         super().__init__(parent)
 
-        try:
-            self.svmodel = ServerviewModel(schid, None, self)
-            delegate = ServerviewDelegate(self)
-        except Exception as e:
-            self.delete()
-            raise e
+        self.svmodel = None
+
+        delegate = ServerviewDelegate(self)
+        self.setItemDelegate(delegate)
 
         self.header().hide()
 
-        self.setItemDelegate(delegate)
-        self.setModel(self.svmodel)
+        if schid:
+            try:
+                self.setServerConnectionHandlerId(schid)
+            except Exception as e:
+                self.delete()
+                raise e
+
+    def setServerConnectionHandlerId(self, schid):
+        if not self.svmodel:
+            self.svmodel = ServerviewModel(schid, None, self)
+            self.setModel(self.svmodel)
+        else:
+            self.svmode.setServerConnectionHandlerId(schid)
 
         self.expandAll()
 
@@ -1410,4 +1423,7 @@ class Serverview(QTreeView):
         @return: the wrapped viewitem
         @rtype: Server or Channel or Client
         """
-        return self.svmodel._indexObject(index)
+        if self.svmodel:
+            return self.svmodel._indexObject(index)
+        else:
+            return None
