@@ -220,26 +220,37 @@ class UiLoader(QUiLoader):
     QUILoader subclass to omit the parent widget from being recreated.
     """
 
-    def __init__(self, main, parent=None):
+    def __init__(self, main, parent=None, *, extraWidgets=None):
         """
         Instantiate a new object
         @param main: parent class which will be omitted
         @type main: QWidget
         @param parent: parent class; defaults to None
         @type parent: QObject
+        @param extraWidgets: list of extra classes to be created, there must
+        be a constructor which takes only the parent object
+        @type extraWidgets: list(QWidget type)
         """
         super().__init__(parent)
         self.main = main
+        self.extraWidgets = extraWidgets
 
     def createWidget(self, clsname, parent=None, name=''):
         if parent is None:
             return self.main
         else:
+            if self.extraWidgets:
+                for w in self.extraWidgets:
+                    if w.__name__ == clsname:
+                        obj = w(parent)
+                        obj.setObjectName(name)
+                        return obj
+
             return QUiLoader.createWidget(self, clsname, parent, name)
 
 
 def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
-            pluginicons=None):
+            pluginicons=None, extraWidgets=None):
     """
     Loads a Qt designer file (.ui), creates the widgets defined in and adds
     them as property to a given object. This internally calls retrieveWidgets,
@@ -265,6 +276,9 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
     path to the image file or returns a QPixmap to set the icon property to;
     defaults to None
     @type pluginicons: Callable(str) -> str or QIcon
+    @param extraWidgets: list of extra classes to be created, there must be a
+    constructor which takes only the parent object
+    @type extraWidgets: list(QWidget type)
     """
     root = False
     if seticons and not iconpack:
@@ -283,7 +297,7 @@ def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
     if os.path.isfile(uipath):
         f = QFile(uipath)
         if f.open(QIODevice.ReadOnly):
-            loader = UiLoader(obj)
+            loader = UiLoader(obj, extraWidgets=extraWidgets)
             ui = loader.load(f)
             f.close()
 
