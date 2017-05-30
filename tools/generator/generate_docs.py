@@ -15,7 +15,8 @@ EXTRA_FILES = [("..", "..", "ressources", "python", "pytsonui"),
                ("..", "..", "ressources", "python", "ts3widgets"),
                ("..", "..", "ressources", "python", "pythonqtpytson.py"),
                ("..", "..", "ressources", "python", "signalslot.py"),
-               ("..", "..", "tools", "pylupdate.py")]
+               ("..", "..", "tools", "pylupdate.py"),
+               ("..", "..", "generated", "pregen", "ts3defines.py")]
 
 
 def main(inpdir, outdir):
