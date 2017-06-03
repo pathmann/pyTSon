@@ -32,8 +32,7 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
                         ("requiredApiEdit", True, [])
                     ]),
                     ("generalTab", False, [
-                        ("languageGroup", False, [
-                            ("languageButton", True, []),
+                        ("languageButton", True, [
                             ("languageCombo", True, []),
                         ]),
                         ("siteGroup", False, [
@@ -80,6 +79,7 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
 
         try:
             setupUi(self, pytson.getPluginPath("ressources",
+                                               "ui",
                                                "pyTSon-configdialog.ui"),
                     widgets=self.CONF_WIDGETS)
             self.pluginsTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
@@ -191,7 +191,6 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
 
         if self.cfg.get("general", "language") == "inherited":
             self.languageButton.setChecked(True)
-            self.languageCombo.setEnabled(False)
 
         if self.cfg.getboolean("general", "verbose"):
             self.verboseButton.setChecked(True)
@@ -411,8 +410,6 @@ class ConfigurationDialog(QDialog, pytson.Translatable):
             self.cfg.set("general", "language", "inherited")
         else:
             self.cfg.set("general", "language", self.languageCombo.currentData)
-
-        self.languageCombo.setEnabled(state == Qt.Unchecked)
 
     def onVerboseButtonStateChanged(self, state):
         self.cfg.set("general", "verbose", str(state == Qt.Checked))

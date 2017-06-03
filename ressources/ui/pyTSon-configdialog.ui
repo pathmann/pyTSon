@@ -225,21 +225,14 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QGroupBox" name="languageGroup">
-         <property name="toolTip">
-          <string>Changes require a restart</string>
-         </property>
+        <widget class="QGroupBox" name="languageButton">
          <property name="title">
-          <string>Language</string>
+          <string>Don't use the client's language</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <widget class="QCheckBox" name="languageButton">
-            <property name="text">
-             <string>Use the client's language</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QComboBox" name="languageCombo"/>
           </item>
@@ -335,6 +328,19 @@
           <string>Verbose log output</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
