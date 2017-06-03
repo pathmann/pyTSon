@@ -258,7 +258,7 @@ static PyMethodDef ts3modfuncs[] = {
 
 static PyModuleDef mdef = {
   PyModuleDef_HEAD_INIT,
-  "ts3lib",
+  "_ts3lib",
   NULL,
   -1,
   ts3modfuncs,

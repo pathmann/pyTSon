@@ -11,7 +11,7 @@
 pytsonhost::pytsonhost(): QObject(), PythonHost() {
   qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
 
-  m_inittabs.append({"ts3lib", PyInit_ts3lib});
+  m_inittabs.append({"_ts3lib", PyInit_ts3lib});
 
   m_mainthread = std::this_thread::get_id();
   connect(this, &pytsonhost::callInMainThread, this, &pytsonhost::onCallInMainThread, Qt::QueuedConnection);
