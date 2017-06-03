@@ -10,11 +10,12 @@ import traceback
 import io
 
 from PythonQt.QtCore import Qt, QUrl
-from PythonQt.QtGui import (QDialog, QMovie, QListWidgetItem, QMessageBox,
+from PythonQt.QtGui import (QDialog, QWidget, QMovie, QListWidgetItem, QMessageBox,
                             QInputDialog, QLineEdit)
 from PythonQt.QtNetwork import (QNetworkAccessManager, QNetworkRequest,
                                 QNetworkReply)
 from PythonQt import BoolResult
+from ts3defines import PluginMessageTarget
 
 
 class RepositoryDialog(QDialog, pytson.Translatable):
@@ -250,6 +251,17 @@ class RepositoryDialog(QDialog, pytson.Translatable):
 
     def on_updateButton_clicked(self):
         self.updateMaster()
+
+    def _print(self, text): self.log.append("%s"%text)
+
+    def on_addPyButton_clicked(self):
+        try:
+            _package = QInputDialog.getText(self, "Install PyPi Package", "Package Name:")
+            if _package == "": QMessageBox.warning("Warning", "No package entered");return
+            self.log=[];result = devtools.PluginInstaller.installPackages(self,[_package])
+            if result: QMessageBox.information(self, "Success", "Successfully installed PyPi package: %s"%_package)
+            else: QMessageBox.critical(self, "Error", "Failed to install PyPi package: {package}\n\n{log}".format(package=_package,log="".format("\n".join(self.log))))
+        except: from traceback import format_exc;from ts3lib import logMessage;logMessage(format_exc(), ts3defines.LogLevel.LogLevel_ERROR, "pytsonui.repository.on_addPyButton_clicked", 0)
 
     def on_addButton_clicked(self):
         (res, name, url) = MultiInputDialog.getTexts(self._tr("Add repository"),
