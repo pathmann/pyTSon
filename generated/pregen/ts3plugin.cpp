@@ -1537,13 +1537,13 @@ void ts3plugin_onPlaybackShutdownCompleteEvent(uint64 serverConnectionHandlerID)
 
 void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand) {
   /*
-    def onPluginCommandEvent(self, serverConnectionHandlerID, pluginName, pluginCommand):
+    def onPluginCommandEvent(self, serverConnectionHandlerID, sender, pluginCommand):
         """
         This is called whenever pyTSon receives a plugincommand from another client. All pyTSon plugins will receive this callback. pyTSon recommends to prefix plugincommands with the pluginname.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param pluginName: the name of the sending plugin
-        @type pluginName: str
+        @param sender: the id of the sending client
+        @type sender: int
         @param pluginCommand: the command
         @type pluginCommand: str
         """

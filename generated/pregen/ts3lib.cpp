@@ -6241,6 +6241,8 @@ def sendPluginCommand(serverConnectionHandlerID, command, targetMode, targetIDs,
     @type targetMode: int
     @param targetIDs: a list of client IDs, only needed if targetMode == ts3defines.PluginTargetMode.PluginCommandTarget_CLIENT
     @type targetIDs: list [int]
+    @return: the errorcode (as this is wrapped in python, there could be errors)
+    @rtype: int
     """
   */
   unsigned long long schid;
