@@ -101,7 +101,7 @@ def getClientVariable(schid, clientID, flag):
         return _ts3lib.getClientVariableAsString(schid, clientID, flag)
 
 
-def getClientSelfVariable(schid, clientID, flag):
+def getClientSelfVariable(schid, flag):
     if flag in [ClientProperties.CLIENT_FLAG_TALKING,
                 ClientProperties.CLIENT_INPUT_MUTED,
                 ClientProperties.CLIENT_OUTPUT_MUTED,
@@ -118,21 +118,21 @@ def getClientSelfVariable(schid, clientID, flag):
                 ClientPropertiesRare.CLIENT_IS_PRIORITY_SPEAKER,
                 ClientPropertiesRare.CLIENT_IS_CHANNEL_COMMANDER,
                 ]:
-        return _ts3lib.getlientSelfVariableAsInt(schid, clientID, flag)
+        return _ts3lib.getlientSelfVariableAsInt(schid, flag)
     elif flag in [ClientProperties.CLIENT_VOLUME_MODIFICATOR]:
-        err, ret = _ts3lib.getClientSelfVariableAsString(schid, clientID, flag)
+        err, ret = _ts3lib.getClientSelfVariableAsString(schid, flag)
         if err == ts3defines.ERROR_ok:
             return (err, float(ret))
         else:
             return (err, None)
     elif flag in [ClientPropertiesRare.CLIENT_SERVERGROUPS]:
-        err, ret = _ts3lib.getClientSelfVariableAsString(schid, clientID, flag)
+        err, ret = _ts3lib.getClientSelfVariableAsString(schid, flag)
         if err == ts3defines.ERROR_ok:
             return (err, map(int, ret.split(',')))
         else:
             return (err, None)
     else:
-        return _ts3lib.getClientSelfVariableAsString(schid, clientID, flag)
+        return _ts3lib.getClientSelfVariableAsString(schid, flag)
 
 
 def getServerVariable(schid, flag):
