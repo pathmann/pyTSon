@@ -1147,6 +1147,13 @@ class ServerviewModel(QAbstractItemModel):
         self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID,
                                visibility, "")
 
+    def onClientKickFromServerEvent(self, schid, clientID, oldChannelID,
+                                    newChannelID, visibility, kickerID,
+                                    kickerName, kickerUniqueIdentifier,
+                                    kickMessage):
+        self.onClientMoveEvent(schid, clientID, oldChannelID, newChannelID,
+                               visibility, "")
+
     def onClientDisplayNameChanged(self, schid, clientID, displayName, uid):
         self.onUpdateClientEvent(schid, clientID, 0, "", "")
 
