@@ -393,13 +393,28 @@ class _PluginCommandHandler(object):
     Because the plugin sdk does not emit the sender of a plugin command, we
     have to bypass it with some PublicKey infrastructure to add sender
     integrity to plugincmds.
-    To achieve that, each uid has a (temporary) RSA key. The public key can
-    be requested per plugincommand. We could store the public key in the
-    client's meta data, but I don't like occupying it.
+    To achieve that, each schid has a (temporary) RSA key. The public key can
+    be requested per plugincommand. This is all done by this class internally,
+    so script developers can use sendPluginCommand in the usual way.
+    There are some drawbacks:
+    * PluginCommandTarget_CURRENT_CHANNEL_SUBSCRIBED_CLIENTS can't be used
+    anymore, the receiver list is generated on the server, so we can't send
+    or to be more exact receive commands with this targetmode. The id of the
+    receiving client has to be in the signed part of the command, otherwise
+    one could store the raw (signed) command and resend it to another client.
+    * Same goes for PluginCommandTarget_SERVER, the receiver list is generated
+    on the server as well. So if someone uses this targetmode here, it's more
+    like a convenience function, because the clientlist is called and the
+    command is sent to each clientlist. So the command is only sent to all
+    clients on the server which are in the sending client's view.
+    * Because of the above two points there is more traffic on the sending
+    client's side and hence on the serverside
+
     Furthermore long plugincommands are splitted in parts.
-    A simplified procedure between client A and client B:
+
+    A simplified procedure of the keyexchange between client A and client B:
     A: sendPluginCommand normal sender.id receiver.id data sign(hash(ALL))
-    B: if have the public key, handle normally (possibly wait for all parts)
+    B: if I have the public key, handle normally (possibly wait for all parts)
     B: if not, queue the command,
     sendPluginCommand RequestKey sender.id receiver.id AnswerToken
     A: sendPluginCommand SendKey sender.id receiver.id AnswerToken publicKey
@@ -663,7 +678,14 @@ class _PluginCommandHandler(object):
     @classmethod
     def handlePluginCommand(cls, schid, cmd):
         """
-
+        This is called by the PluginHost with the raw plugincommand received
+        by pyTSon's core. It will request public keys from the sender
+        accordingly and might queue commands to fire the event in a later
+        call.
+        @param schid: the id of the server connection handler
+        @type schid: int
+        @param cmd: the plugincommand
+        @type cmd: str
         @return: a tuple containing a boolean which is true, if the events
         should be fired; the id of the server connection handler; the sending
         client and the full cmd (possibly merged with other splitted parts)
