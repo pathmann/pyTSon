@@ -416,12 +416,14 @@ class _PluginCommandHandler(object):
                                   [snd.receiver], retcode)
 
     @classmethod
-    def _processCommandstore(cls, schid, clid):
-        firecmds = []
-        junkkeys = []
+    def _processCommands(cls, schid, cmds):
+        if not cmds:
+            return (False, None, None)
+
         store = cls.getStore(schid)
-        cmds = store.popStoredCommands(clid)
-        pubkey = store.publickey(clid)
+        pubkey = store.publickey(cmds[0].sender)
+        junkkeys = []
+        firecmds = []
 
         for cmd in cmds:
             if cmd.pkgkey in junkkeys:
@@ -444,7 +446,7 @@ class _PluginCommandHandler(object):
                     firecmds.append(merge.content)
 
         if len(firecmds) > 0:
-            return (True, clid, firecmds)
+            return (True, cmds[0].sender, firecmds)
         else:
             return (False, None, None)
 
@@ -470,30 +472,7 @@ class _PluginCommandHandler(object):
             cls._sendRequestKey(schid, myid, cmd.sender)
             return (False, None, None)
 
-        if not cmd.verify(pubkey):
-            # seems to be a faked sender
-            # there might be another (verified) part
-            store.removeMerge(cmd.pkgkey)
-            _ts3lib.logMessage("Plugincommand merge junked",
-                               ts3defines.LogLevel.LogLevel_DEBUG,
-                               "pyTSon._PluginCommandHandler", 0)
-            return (False, None, None)
-
-        if cmd.isComplete():
-            return (True, cmd.sender, [cmd.data])
-        else:
-            merge = store.getMerge(cmd.pkgkey)
-            if not merge.add(cmd):
-                store.removeMerge(cmd.pkgkey)
-                _ts3lib.logMessage("Plugincommand merge junked",
-                                   ts3defines.LogLevel.LogLevel_DEBUG,
-                                   "pyTSon._PluginCommandHandler", 0)
-                return (False, None, None)
-            elif merge.isComplete():
-                store.removeMerge(cmd.pkgkey)
-                return (True, cmd.sender, [merge.content])
-
-            return (False, None, None)
+        return cls._processCommands(schid, [cmd])
 
     @classmethod
     def _handleRequestKey(cls, schid, cmd):
@@ -517,10 +496,12 @@ class _PluginCommandHandler(object):
         if err != ts3defines.ERROR_ok or snd.receiver != myid:
             return
 
-        if cls.getStore(schid).hasRequest(snd.sender, snd.token):
-            cls.getStore(schid).removeRequests(snd.sender)
-            cls.getStore(schid).addPublickey(snd.sender, snd.publickey)
-            return cls._processCommandstore(schid, snd.sender)
+        store = cls.getStore(schid)
+        if store.hasRequest(snd.sender, snd.token):
+            store.removeRequests(snd.sender)
+            store.addPublickey(snd.sender, snd.publickey)
+            return cls._processCommands(schid,
+                                        store.popStoredCommands(snd.sender))
 
         return (False, None, None)
 
