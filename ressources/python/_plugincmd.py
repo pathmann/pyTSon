@@ -462,16 +462,18 @@ class _PluginCommandHandler(object):
         if myid != cmd.receiver:
             return (False, None, None)
 
-        pubkey = cls.getStore(schid).publickey(cmd.sender)
+        store = cls.getStore(schid)
+
+        pubkey = store.publickey(cmd.sender)
         if pubkey is None:
-            cls.getStore(schid).storeCommand(cmd)
+            store.storeCommand(cmd)
             cls._sendRequestKey(schid, myid, cmd.sender)
             return (False, None, None)
 
         if not cmd.verify(pubkey):
             # seems to be a faked sender
             # there might be another (verified) part
-            cls.getStore(schid).removeMerge(cmd.pkgkey)
+            store.removeMerge(cmd.pkgkey)
             _ts3lib.logMessage("Plugincommand merge junked",
                                ts3defines.LogLevel.LogLevel_DEBUG,
                                "pyTSon._PluginCommandHandler", 0)
@@ -480,15 +482,15 @@ class _PluginCommandHandler(object):
         if cmd.isComplete():
             return (True, cmd.sender, [cmd.data])
         else:
-            merge = cls.getStore(schid).getMerge(cmd.pkgkey)
+            merge = store.getMerge(cmd.pkgkey)
             if not merge.add(cmd):
-                cls.getStore(schid).removeMerge(cmd.pkgkey)
+                store.removeMerge(cmd.pkgkey)
                 _ts3lib.logMessage("Plugincommand merge junked",
                                    ts3defines.LogLevel.LogLevel_DEBUG,
                                    "pyTSon._PluginCommandHandler", 0)
                 return (False, None, None)
             elif merge.isComplete():
-                cls.getStore(schid).removeMerge(cmd.pkgkey)
+                store.removeMerge(cmd.pkgkey)
                 return (True, cmd.sender, [merge.content])
 
             return (False, None, None)
