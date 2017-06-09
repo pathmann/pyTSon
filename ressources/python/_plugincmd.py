@@ -267,22 +267,10 @@ class _PluginCommandStore(object):
         else:
             self.cmdstore[cmd.sender].append(cmd)
 
-    def popStoredCommands(self, *, clid=None, pkgkey=None):
+    def popStoredCommands(self, clid):
         if clid:
             if clid in self.cmdstore:
                 return self.cmdstore.pop(clid)
-        elif pkgkey:
-            ret = []
-            for cl in list(self.cmdstore.keys()):
-                for i in reversed(range(len(self.cmdstore[cl]))):
-                    if self.cmdstore[cl][i].pkgkey == pkgkey:
-                        ret.append(self.cmdstore[cl].pop(i))
-
-                if ret:
-                    # a pkgkey should only occure for one client (in theory)
-                    return ret
-
-            return ret
 
         return []
 
@@ -432,7 +420,7 @@ class _PluginCommandHandler(object):
         firecmds = []
         junkkeys = []
         store = cls.getStore(schid)
-        cmds = store.popStoredCommands(clid=clid)
+        cmds = store.popStoredCommands(clid)
         pubkey = store.publickey(clid)
 
         for cmd in cmds:
