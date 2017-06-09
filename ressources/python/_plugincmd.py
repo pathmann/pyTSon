@@ -206,7 +206,7 @@ class _PluginCommandMerge(object):
     def add(self, cmd):
         if self._content is None:
             self._content = [None] * cmd.count
-        elif cmd.part >= len(self._content):
+        elif cmd.part > len(self._content):
             return False
 
         if self._content[cmd.part - 1] is None:
