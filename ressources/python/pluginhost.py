@@ -3,7 +3,7 @@ import os
 import glob
 
 import ts3lib
-from ts3lib import _PluginCommandHandler
+from _plugincmd import _PluginCommandHandler
 import ts3defines
 import pytson
 import ts3client
