@@ -73,10 +73,25 @@ class _PluginCommandType(object):
 
 
 class _GenericPluginCommand(object):
+    """
+    Baseclass for all bypassed plugincommands. Handles too long messages
+    based on MAX_CMD_SIZE and splits the data to multiple packages.
+    """
     pkgtype = _PluginCommandType.unknown
 
     @classmethod
     def pack(cls, sender, receiver, data):
+        """
+        Packs some string data to one or more PluginCommands
+        @param sender: the own client id
+        @type sender: int
+        @param receiver: id of the target client
+        @type receiver: int
+        @param data: data to send
+        @type data: str
+        @return: a list of plugincommands
+        @rtype: list(_GenericPluginCommand)
+        """
         pkgcount = math.ceil(len(data) / MAX_CMD_SIZE)
         key = "".join(random.sample(PKGKEY_ALPHABET, 4))
 
@@ -89,6 +104,13 @@ class _GenericPluginCommand(object):
 
     @classmethod
     def fromString(cls, s):
+        """
+        Parses some a raw data string to a PluginCommand
+        @param s:
+        @type s: str
+        @return: the created PluginCommand or None if parsing failed
+        @rtype: _GenericPluginCommand
+        """
         tokens = s.split(" ")
         if len(tokens) < 7:
             return None
@@ -106,6 +128,23 @@ class _GenericPluginCommand(object):
 
     def __init__(self, sender, receiver, data, *, part=1, count=1,
                  pkgkey=None):
+        """
+        Instantiates a new object. This should not be invoked directly, use
+        pack instead.
+        @param sender: id of the sending client
+        @type sender: int
+        @param receiver: id of the receiving client
+        @type receiver: int
+        @param data: data of the PluginCommand
+        @type data: str
+        @param part: number of the splitted package, defaults to 1
+        @type part: int
+        @param count: count of splitted packages, defaults to 1
+        @type count: int
+        @param pkgkey: key of the package, defaults to None, then a random key
+        is generated
+        @type pkgkey: str
+        """
         super().__init__()
         if pkgkey:
             self.pkgkey = pkgkey
@@ -118,17 +157,38 @@ class _GenericPluginCommand(object):
         self.count = count
 
     def fields(self):
+        """
+        List of data fields to pack in serialized string. Each field must be
+        convertable to string
+        @return: the datalist
+        @rtype: list(str-convertable)
+        """
         return [self.pkgtype, self.pkgkey, self.sender,
                 self.receiver, self.part, self.count, self.data]
 
     def toString(self):
+        """
+        Returns the package as serialized string
+        @return: the serialized PluginCommand
+        @rtype: str
+        """
         return " ".join(map(str, self.fields()))
 
     def isComplete(self):
+        """
+        @return: Returns True if the command is complete and not part of a
+        splitted package
+        @rtype: bool
+        """
         return self.part == self.count == 1
 
 
 class _PluginCommand(_GenericPluginCommand):
+    """
+    Class to abstract user-created PluginCommands. The data can be signed
+    with PKCS1 v1.5
+    """
+
     pkgtype = _PluginCommandType.normal
 
     @classmethod
@@ -157,11 +217,22 @@ class _PluginCommand(_GenericPluginCommand):
         return super().fields() + [self.signature]
 
     def sign(self, signer):
+        """
+        Signs the data. The signature is appended to the serialized form
+        returned by toString
+        @param signer: with privatekey initialized PKCS1 v1.5 signer
+        @type signer: Crypto.Signature.PKCS1_v1_5
+        """
         self.signature = ""
         h = SHA256.new("".join(map(str, self.fields()[:-1])).encode("utf-8"))
         self.signature = b64encode(signer.sign(h)).decode("utf-8")
 
     def verify(self, pubkey):
+        """
+        Verifies that the signature is created by the corresponding privatekey
+        @param pubkey: the PEM-encoded publickey
+        @type pubkey: bytes
+        """
         try:
             rsapub = RSA.importKey(pubkey)
             verifier = PKCS1_v1_5.new(rsapub)
@@ -173,37 +244,82 @@ class _PluginCommand(_GenericPluginCommand):
 
 
 class _RequestKey(_GenericPluginCommand):
+    """
+    Class to send a keyrequest to another client. The answer has to contain
+    the requesttoken (send with each request)
+    """
     pkgtype = _PluginCommandType.requestKey
 
     @classmethod
     def pack(cls, sender, receiver):
+        """
+        Creates a new keyrequest
+        @param sender: the id of the sending client
+        @type sender: int
+        @param receiver: the id of the target client
+        @type receiver: int
+        @return: the created keyrequest command
+        @rtype: _RequestKey
+        """
         return _RequestKey(sender, receiver,
                            "".join(random.sample(PKGKEY_ALPHABET, 4)))
 
 
 class _SendKey(_GenericPluginCommand):
+    """
+    Class to answer a keyrequest of _RequestKey
+    """
     pkgtype = _PluginCommandType.sendKey
 
     @classmethod
     def pack(cls, reqcmd, publickey):
+        """
+        Creates a new answer to a keyrequest
+        @param reqcmd: the keyrequest command
+        @type reqcmd: _RequestKey
+        @param publickey: the PEM-encoded publickey
+        @type publickey: bytes
+        @return: the created keyrequest answer
+        @rtype: _SendKey
+        """
         return _SendKey(reqcmd.receiver, reqcmd.sender,
                         reqcmd.data + " " + publickey.decode("utf-8"))
 
     @property
     def token(self):
+        """
+        Returns the request token of the corresponding keyrequest
+        @return: the token
+        @rtype: str
+        """
         return self.data.split(" ")[0]
 
     @property
     def publickey(self):
+        """
+        Returns the publickey of the sending client
+        @return: the PEM-encoded publickey
+        @rtype: bytes
+        """
         return "".join(self.data.split(" ")[1:]).encode("utf-8")
 
 
 class _PluginCommandMerge(object):
+    """
+    Class to merge splitted parts of a PluginCommand
+    """
     def __init__(self):
         super().__init__()
         self._content = None
 
     def add(self, cmd):
+        """
+        Adds a plugincommand to the merge
+        @param cmd: the command to add
+        @type cmd: _PluginCommand
+        @return: returns False on failure, True otherwise
+        @rtype: bool
+        """
         if self._content is None:
             self._content = [None] * cmd.count
         elif cmd.part > len(self._content):
@@ -216,6 +332,11 @@ class _PluginCommandMerge(object):
             return False
 
     def isComplete(self):
+        """
+        @return: Returns True, if all parts are contained in the merge, False
+        otherwise
+        @rtype: bool
+        """
         if self._content:
             return all(self._content)
         else:
@@ -223,10 +344,18 @@ class _PluginCommandMerge(object):
 
     @property
     def content(self):
+        """
+        @return: Returns the aggregated data of all splitted parts
+        @rtype: str
+        """
         return "".join(self._content)
 
 
 class _PluginCommandStore(object):
+    """
+    Class to store all needed data by _PluginCommandHandler for one
+    server connection
+    """
     def __init__(self):
         self.privkey = RSA.generate(KEYBYTE_SIZE * 8)
         self.pubkeys = dict()
@@ -343,6 +472,10 @@ class _PluginCommandStore(object):
 
 
 class _PluginCommandHandler(object):
+    """
+    Class to handle the raw plugincommand data strings to verify the sender
+    and strip the used overhead to emit only the userdata
+    """
     stores = dict()
 
     @classmethod

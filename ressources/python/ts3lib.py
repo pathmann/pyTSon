@@ -7,7 +7,6 @@ from ts3defines import (ClientProperties, ClientPropertiesRare,
 from _plugincmd import _PluginCommandHandler
 
 
-
 def getChannelVariable(schid, channelID, flag):
     if flag in [ChannelProperties.CHANNEL_CODEC,
                 ChannelProperties.CHANNEL_CODEC_QUALITY,
