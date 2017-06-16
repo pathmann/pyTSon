@@ -380,7 +380,7 @@ class PluginHost(pytson.Translatable):
         if meth:
             return meth(*args)
 
-        cls.invokePlugins(name, *args)
+        return cls.invokePlugins(name, *args)
 
     @classmethod
     def invokePlugins(cls, name, *args):
