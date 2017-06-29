@@ -1,5 +1,4 @@
 from pydoc import help as pydochelp
-import ts3lib
 
 
 def help(obj):
