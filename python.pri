@@ -2,11 +2,9 @@ JENKINS = $$(JENKINS_BUILD)
 
 unix:!mac {
     equals(JENKINS, 1) {
-message(jenkins build)
         PYTHONPATH = /home/build/libs/python/3.5.2/install
     }
     else {
-message(no jenkins build)
         PYTHONPATH = $$PWD/includes/python-352/install
     }
 
