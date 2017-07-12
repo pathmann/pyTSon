@@ -3,10 +3,10 @@ unix:!mac {
         PYTHONPATH = /home/build/libs/python/3.5.2/install
     }
     else {
-        PYTHONPATH = $$PWD/includes/python-352/install/
+        PYTHONPATH = $$PWD/includes/python-352/install
     }
 
-    INCLUDEPATH += $${PYTHONPATH}/install/include/python3.5m
+    INCLUDEPATH += $${PYTHONPATH}/include/python3.5m
     LIBS += $${PYTHONPATH}/lib/libpython3.5m.so
     LIBS += -lpthread -ldl -lutil
 
