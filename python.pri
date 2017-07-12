@@ -1,8 +1,12 @@
+JENKINS = $$(JENKINS_BUILD)
+
 unix:!mac {
-    JENKINS {
+    equals(JENKINS, 1) {
+message(jenkins build)
         PYTHONPATH = /home/build/libs/python/3.5.2/install
     }
     else {
+message(no jenkins build)
         PYTHONPATH = $$PWD/includes/python-352/install
     }
 
@@ -19,7 +23,7 @@ unix:!mac {
 }
 
 macx {
-    JENKINS {
+    equals(JENKINS, 1) {
         PYTHONPATH = /Users/build/libs/python/3.5.2/install
     }
     else {
@@ -33,7 +37,7 @@ macx {
 
 win32 {
     contains(QMAKE_TARGET.arch, x86_64) {
-        JENKINS {
+        equals(JENKINS, 1) {
             PYTHONPATH = C:\libs\amd64\python\3.5.2
         }
         else {
@@ -41,7 +45,7 @@ win32 {
         }
     }
     else {
-        JENKINS {
+        equals(JENKINS, 1) {
             PYTHONPATH = C:\libs\x86\python\3.5.2
         }
         else {
