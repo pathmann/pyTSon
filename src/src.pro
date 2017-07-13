@@ -29,8 +29,6 @@ HEADERS += pytson.h \
     global_shared.h \
     ts3logdispatcher.h \
     pyconversion.h \
-    pythonqt/pythonqtpytson.h \
-    pythonqt/eventfilterobject.h \
     ts3callbackarguments.h \
     ../shared/pythonhost.h \
     ../shared/pythonqt/eventfilterobject.h \
