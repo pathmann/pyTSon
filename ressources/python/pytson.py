@@ -9,6 +9,9 @@ import ts3lib
 from PythonQt.QtGui import QApplication
 
 
+_PYTSON_VERSION = "1.2.1"
+
+
 def tr(context, sourcetext, *, disambiguation="", n=-1):
     """
     Returns the current translation for a string. This function calls can be
@@ -109,6 +112,10 @@ def _setup():
     if not os.path.exists(confpath):
         shutil.copy(respath, confpath)
 
+    with open(getPluginPath("VERSION"), "r") as f:
+        global _PYTSON_VERSION
+        _PYTSON_VERSION = f.readline().strip()
+
 
 def platformstr():
     """
@@ -128,7 +135,7 @@ def getVersion():
     @return: the version as string
     @rtype: str
     """
-    return "1.2.1"
+    return _PYTSON_VERSION
 
 
 def getCurrentApiVersion():
