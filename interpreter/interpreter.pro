@@ -18,9 +18,9 @@ unix:!mac {
     QMAKE_RPATHDIR += $ORIGIN
 }
 
+include ($$PWD/../python.pri)
+
 macx {
   CONFIG -= app_bundle
-  QMAKE_POST_LINK += install_name_tool -change $$absolute_path("../includes/python-352/install/lib/libpython3.5m.dylib") @loader_path/libpython3.5m.dylib ${DESTDIR}${TARGET} &
+  QMAKE_POST_LINK += install_name_tool -change $$absolute_path("$${PYTHONPATH}/lib/libpython3.5m.dylib") @loader_path/libpython3.5m.dylib ${DESTDIR}${TARGET} &
 }
-
-include ($$PWD/../python.pri)
