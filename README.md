@@ -106,3 +106,6 @@ Releases
 ========
 Personally I work on my linux amd64 machine, other platforms are only tested for basic running, but of course feel free to open an issue, if there is something wrong on your platform and I'll have a look into it.
 
+Check the [release page](https://github.com/pathmann/pyTSon/releases) or myteamspeak.com within your client.
+If you are interested in the most recent version, check [this repository](https://repo.4qt.de/pyTSon/nightlies/) for automatic (untested) builds.
+
