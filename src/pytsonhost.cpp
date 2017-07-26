@@ -271,7 +271,7 @@ void pytsonhost::initHotkeys(struct PluginHotkey*** hotkeys) {
     if (!tup || !PyTuple_Check(tup) || PyTuple_Size(tup) != 2) {
       ts3logdispatcher::instance()->add(QObject::tr("Calling initHotkeys failed, no list of tuples(2) returned"), LogLevel_ERROR);
       Py_DECREF(pyret);
-      for (int k = i -1; k >= 0; --i)
+      for (int k = i -1; k >= 0; --k)
         free((*hotkeys)[k]);
       free(*hotkeys);
       *hotkeys = NULL;
@@ -281,7 +281,7 @@ void pytsonhost::initHotkeys(struct PluginHotkey*** hotkeys) {
     if (!PyUnicode_Check(PyTuple_GetItem(tup, 0)) || !PyUnicode_Check(PyTuple_GetItem(tup, 1))) {
       ts3logdispatcher::instance()->add(QObject::tr("Calling initHotkeys failed, no list of tuples(str, str) returned"), LogLevel_ERROR);
       Py_DECREF(pyret);
-      for (int k = i -1; k >= 0; --i)
+      for (int k = i -1; k >= 0; --k)
         free((*hotkeys)[k]);
       free(*hotkeys);
       *hotkeys = NULL;
