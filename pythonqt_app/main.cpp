@@ -7,7 +7,7 @@
 
 #include "pythonqtapphost.h"
 #include "dialog.h"
-#include "global_shared_app.h"
+#include "global_shared.h"
 
 void printHelp(const char* execname) {
   std::cout << execname << " [-h] [-p pyTSon-dir] [-e script] [-c]" << std::endl;

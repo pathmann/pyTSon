@@ -6,10 +6,10 @@ TARGET = pyTSon
 TEMPLATE = lib
 
 DESTDIR = ../build
-OBJECTS_DIR = ../objs
-MOC_DIR = ../objs
-RCC_DIR = ../objs
-UI_DIR = ../objs
+OBJECTS_DIR = build
+MOC_DIR = build
+RCC_DIR = build
+UI_DIR = build
 
 INCLUDEPATH += ../includes/pluginsdk/21/include
 
