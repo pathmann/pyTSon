@@ -1,6 +1,6 @@
 #include "dummyts3lib.h"
 
-#include "global_shared.h"
+#include "global_shared_app.h"
 
 static PyMethodDef ts3moddummyfuncs[] = {
   {"getConfigPath", getConfigPath, METH_VARARGS, "fake config path function"},
