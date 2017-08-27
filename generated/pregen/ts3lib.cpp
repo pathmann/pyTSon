@@ -4755,10 +4755,8 @@ def requestClientSetWhisperList(serverConnectionHandlerID, clientID, targetChann
   }
 
   unsigned int res = ts3_funcs.requestClientSetWhisperList((uint64)schid, (anyID)clientID, targetChannelIDArray, targetClientIDArray, returnCode);
-  if (targetChannelIDArray)
-    free(targetChannelIDArray);
-  if (targetClientIDArray)
-    free(targetClientIDArray);
+  free(targetChannelIDArray);
+  free(targetClientIDArray);
 
   return Py_BuildValue("I", res);
 }
