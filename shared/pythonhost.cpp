@@ -248,7 +248,6 @@ bool PythonHost::init(const QDir& basedir, QString& error) {
     }
   }
 
-
   Py_FrozenFlag = 1;
   Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(m_interpreter);

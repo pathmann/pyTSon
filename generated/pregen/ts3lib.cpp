@@ -4714,9 +4714,9 @@ def requestClientSetWhisperList(serverConnectionHandlerID, clientID, targetChann
     @type serverConnectionHandlerID: int
     @param clientID: the ID of the client whose whisperlist is modified. If set to 0, the own whisper list is modified
     @type clientID: int
-    @param targetChannelIDArray: a list of channel IDs the client will whisper to
+    @param targetChannelIDArray: a list of channel IDs the client will whisper to. Pass None to clear it
     @type targetChannelIDArray: list [int]
-    @param targetClientIDArray: a list of client IDs the client will whisper to
+    @param targetClientIDArray: a list of client IDs the client will whisper to. Pass None to clear it
     @type targetClientIDArray: list [int]
     @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
     @type returnCode: string
@@ -4735,20 +4735,30 @@ def requestClientSetWhisperList(serverConnectionHandlerID, clientID, targetChann
 
   QString error;
   uint64* targetChannelIDArray;
-  if (!PYLIST_TO_ARRAY(uint64, pytargetChannelIDArray, error, &targetChannelIDArray, true)) {
-    PyErr_SetString(PyExc_AttributeError, TRANS("Conversion of targetChannelIDArray failed with error \"%1\"").arg(error).toUtf8().data());
-    return NULL;
+  if (pytargetChannelIDArray == Py_None)
+    targetChannelIDArray = NULL;
+  else {
+    if (!PYLIST_TO_ARRAY(uint64, pytargetChannelIDArray, error, &targetChannelIDArray, true)) {
+      PyErr_SetString(PyExc_AttributeError, TRANS("Conversion of targetChannelIDArray failed with error \"%1\"").arg(error).toUtf8().data());
+      return NULL;
+    }
   }
 
   anyID* targetClientIDArray;
-  if (!PYLIST_TO_ARRAY(anyID, pytargetClientIDArray, error, &targetClientIDArray, true)) {
-    PyErr_SetString(PyExc_AttributeError, TRANS("Conversion of targetClientIDArray failed with error \"%1\"").arg(error).toUtf8().data());
-    return NULL;
+  if (pytargetClientIDArray == Py_None)
+    targetClientIDArray = NULL;
+  else {
+    if (!PYLIST_TO_ARRAY(anyID, pytargetClientIDArray, error, &targetClientIDArray, true)) {
+      PyErr_SetString(PyExc_AttributeError, TRANS("Conversion of targetClientIDArray failed with error \"%1\"").arg(error).toUtf8().data());
+      return NULL;
+    }
   }
 
   unsigned int res = ts3_funcs.requestClientSetWhisperList((uint64)schid, (anyID)clientID, targetChannelIDArray, targetClientIDArray, returnCode);
-  free(targetChannelIDArray);
-  free(targetClientIDArray);
+  if (targetChannelIDArray)
+    free(targetChannelIDArray);
+  if (targetClientIDArray)
+    free(targetClientIDArray);
 
   return Py_BuildValue("I", res);
 }
