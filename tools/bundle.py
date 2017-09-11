@@ -200,8 +200,7 @@ def main(root, pythondir, outdir, arches, buildbase, update):
         ver = f.readline()
 
     for a in arches:
-        tmp = tempfile.TemporaryDirectory()
-        tempdir = tmp.name
+        tempdir = tempfile.mkdtemp()
 
         if update:
             copyFiles(root, FILES, tempdir)
@@ -295,6 +294,7 @@ def main(root, pythondir, outdir, arches, buildbase, update):
             zipout.writestr("package.ini", INIBASE % (ver, a))
 
         zipout.close()
+        shutil.rmtree(tempdir)
 
 
 if __name__ == "__main__":
