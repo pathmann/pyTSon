@@ -65,7 +65,7 @@ ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                      ("build/python", "plugins/pyTSon/python")]}
 
 PYTHONFILES = {'win32': [("python35.dll", "plugins/pyTSon/python35.dll"),
-                         ("Lib", "plugins/pyTSon/"),
+                         ("Lib", "plugins/pyTSon/lib"),
                          ("DLLs/_bz2.pyd",
                           "plugins/pyTSon/lib/lib-dynload/_bz2.pyd"),
                          ("DLLs/_ctypes.pyd",
