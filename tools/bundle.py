@@ -4,6 +4,8 @@ import sys
 import os
 import zipfile
 import shutil
+import tempfile
+import subprocess
 
 from argparse import ArgumentParser
 
@@ -63,86 +65,86 @@ ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                      ("build/python", "plugins/pyTSon/python")]}
 
 PYTHONFILES = {'win32': [("python35.dll", "plugins/pyTSon/python35.dll"),
-                         ("Lib", "plugins/pyTSon/lib_new"),
+                         ("Lib", "plugins/pyTSon/"),
                          ("DLLs/_bz2.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_bz2.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_bz2.pyd"),
                          ("DLLs/_ctypes.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_ctypes.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_ctypes.pyd"),
                          ("DLLs/_decimal.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_decimal.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_decimal.pyd"),
                          ("DLLs/_elementtree.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_elementtree.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_elementtree.pyd"),
                          ("DLLs/_hashlib.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_hashlib.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_hashlib.pyd"),
                          ("DLLs/_lzma.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_lzma.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_lzma.pyd"),
                          ("DLLs/_msi.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_msi.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_msi.pyd"),
                          ("DLLs/_multiprocessing.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_multiprocessing.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_multiprocessing.pyd"),
                          ("DLLs/_overlapped.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_overlapped.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_overlapped.pyd"),
                          ("DLLs/_socket.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_socket.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_socket.pyd"),
                          ("DLLs/_ssl.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_ssl.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_ssl.pyd"),
                          ("DLLs/pyexpat.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/pyexpat.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/pyexpat.pyd"),
                          ("DLLs/select.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/select.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/select.pyd"),
                          ("DLLs/unicodedata.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/unicodedata.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/unicodedata.pyd"),
                          ("DLLs/winsound.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/winsound.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/winsound.pyd"),
                          ("include", "plugins/pyTSon/include/python3.5m"), ],
                'win64': [("python35.dll", "plugins/pyTSon/python35.dll"),
-                         ("Lib", "plugins/pyTSon/lib_new"),
+                         ("Lib", "plugins/pyTSon/lib"),
                          ("DLLs/_bz2.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_bz2.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_bz2.pyd"),
                          ("DLLs/_ctypes.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_ctypes.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_ctypes.pyd"),
                          ("DLLs/_decimal.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_decimal.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_decimal.pyd"),
                          ("DLLs/_elementtree.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_elementtree.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_elementtree.pyd"),
                          ("DLLs/_hashlib.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_hashlib.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_hashlib.pyd"),
                          ("DLLs/_lzma.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_lzma.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_lzma.pyd"),
                          ("DLLs/_msi.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_msi.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_msi.pyd"),
                          ("DLLs/_multiprocessing.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_multiprocessing.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_multiprocessing.pyd"),
                          ("DLLs/_overlapped.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_overlapped.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_overlapped.pyd"),
                          ("DLLs/_socket.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_socket.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_socket.pyd"),
                          ("DLLs/_sqlite3.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_sqlite3.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_sqlite3.pyd"),
                          ("DLLs/_ssl.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/_ssl.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/_ssl.pyd"),
                          ("DLLs/pyexpat.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/pyexpat.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/pyexpat.pyd"),
                          ("DLLs/select.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/select.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/select.pyd"),
                          ("DLLs/unicodedata.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/unicodedata.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/unicodedata.pyd"),
                          ("DLLs/winsound.pyd",
-                          "plugins/pyTSon/lib_new/lib-dynload/winsound.pyd"),
+                          "plugins/pyTSon/lib/lib-dynload/winsound.pyd"),
                          ("include", "plugins/pyTSon/include/python3.5m"), ],
                'linux_x86': [("lib/libpython3.5m.so.1.0",
                               "plugins/pyTSon/libpython3.5m_32.so"),
                              ("lib/python3.5",
-                              "plugins/pyTSon/lib_new/python3.5"),
+                              "plugins/pyTSon/lib/python3.5"),
                              ("include", "plugins/pyTSon/include"), ],
                'linux_amd64': [("lib/libpython3.5m.so.1.0",
                                 "plugins/pyTSon/libpython3.5m_64.so"),
                                ("lib/python3.5",
-                                "plugins/pyTSon/lib_new/python3.5"),
+                                "plugins/pyTSon/lib/python3.5"),
                                ("include", "plugins/pyTSon/include"), ],
                'mac': [("lib/libpython3.5m.dylib",
                         "plugins/pyTSon/libpython3.5m.dylib"),
-                       ("lib/python3.5", "plugins/pyTSon/lib_new/python3.5"),
+                       ("lib/python3.5", "plugins/pyTSon/lib/python3.5"),
                        ("include", "plugins/pyTSon/include"), ]}
 
 INIBASE = """
@@ -156,18 +158,36 @@ scripts"
 """
 
 
-def writeFiles(root, files, tozip):
+def copyFiles(root, files, tempdir):
     for loc, inzip in files:
         locpath = os.path.join(root, loc)
 
         if os.path.isfile(locpath):
-            tozip.write(locpath, inzip)
+            filepath = os.path.join(tempdir, inzip)
+            filedir = os.path.dirname(filepath)
+
+            if not os.path.isdir(filedir):
+                os.makedirs(filepath)
+            shutil.copy(locpath, filepath)
         else:
             for base, dirs, files in os.walk(locpath):
-                if not os.path.basename(base) == "__pycache__":
-                    for f in files:
-                        fn = os.path.join(base, f)
-                        tozip.write(fn, inzip + fn[len(locpath):])
+                for f in files:
+                    fn = os.path.join(base, f)
+
+                    filepath = os.path.join(tempdir, inzip +
+                                            fn[len(locpath):])
+                    filedir = os.path.dirname(filepath)
+                    if not os.path.isdir(filedir):
+                        os.makedirs(filedir)
+                    shutil.copy(fn, filepath)
+
+
+def writeZip(tempdir, tozip):
+    for base, dirs, files in os.walk(tempdir):
+        if not os.path.basename(base) == "__pycache__":
+            for f in files:
+                fn = os.path.join(base, f)
+                tozip.write(fn, fn[len(tempdir):])
 
 
 def main(root, pythondir, outdir, arches, buildbase, update):
@@ -180,6 +200,81 @@ def main(root, pythondir, outdir, arches, buildbase, update):
         ver = f.readline()
 
     for a in arches:
+        tmp = tempfile.TemporaryDirectory()
+        tempdir = tmp.name
+
+        if update:
+            copyFiles(root, FILES, tempdir)
+        elif buildbase:
+            copyFiles(root, ARCHFILES[a], tempdir)
+            copyFiles(pythondir, PYTHONFILES[a], tempdir)
+        else:
+            copyFiles(root, FILES + ARCHFILES[a], tempdir)
+            copyFiles(pythondir, PYTHONFILES[a], tempdir)
+
+        if not update:
+            stddir = os.path.join(tempdir, "plugins", "pyTSon", "lib")
+            if not os.path.isdir(stddir):
+                print("The python standard library coult not be found, check "
+                      "%s for the directory structure" % tempdir)
+
+            if a in ["win32", "win64"]:
+                intpath = os.path.join(tempdir, "plugins", "pyTSon",
+                                       "python.exe")
+            else:
+                intpath = os.path.join(tempdir, "plugins", "pyTSon", "python")
+
+            if not os.path.isfile(intpath):
+                print("The python interpreter could not be found, check %s "
+                      "for the directory structure" % tempdir)
+                sys.exit(1)
+
+            if a in ["win32", "win64"]:
+                sitedir = os.path.join(stddir, "site-packages")
+            else:
+                sitedir = os.path.join(stddir, "python3.5", "site-packages")
+            if not os.path.isdir(sitedir):
+                print("The site directory could not be found, check "
+                      "%s for the directory structure" % tempdir)
+                sys.exit(1)
+
+            # update pip: python -m pip install --update --target sitedir pip
+            p = subprocess.Popen([intpath, "-m", "pip", "install", "--target",
+                                  sitedir, "--upgrade", "pip"],
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            if err:
+                print("Error updating pip:")
+                print(err)
+                if out:
+                    print(out)
+                sys.exit(1)
+            elif out:
+                print(out)
+
+            reqfile = os.path.join(root, "requirements.txt")
+            if os.path.isfile(reqfile):
+                p = subprocess.Popen([intpath, "-m", "pip", "install",
+                                      "--target", sitedir, "-r", reqfile],
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+                out, err = p.communicate()
+                if err:
+                    print("Error installing requirements:")
+                    print(err)
+                    if out:
+                        print(out)
+                    sys.exit(1)
+                elif out:
+                    print(out)
+            else:
+                print("Warning: No requirements.txt found")
+
+            # move the lib dir to lib_new
+            shutil.move(stddir, os.path.join(tempdir, "plugins", "pyTSon",
+                                             "lib_new"))
+
         if update:
             shutil.copyfile(os.path.join(outdir, "pyTSon_%s.base" % a),
                             os.path.join(outdir, "pyTSon_%s.ts3_plugin" % a))
@@ -195,15 +290,7 @@ def main(root, pythondir, outdir, arches, buildbase, update):
                                                   "pyTSon_%s.ts3_plugin" % a),
                                      "w", zipfile.ZIP_DEFLATED)
 
-        if update:
-            writeFiles(root, FILES, zipout)
-        elif buildbase:
-            writeFiles(root, ARCHFILES[a], zipout)
-            writeFiles(pythondir, PYTHONFILES[a], zipout)
-        else:
-            writeFiles(root, FILES + ARCHFILES[a], zipout)
-            writeFiles(pythondir, PYTHONFILES[a], zipout)
-
+        writeZip(tempdir, zipout)
         if not buildbase:
             zipout.writestr("package.ini", INIBASE % (ver, a))
 
@@ -230,6 +317,10 @@ if __name__ == "__main__":
 
     if args.update and args.base:
         print("update and base are mutual exclusive")
+        sys.exit(1)
+
+    if not args.update and len(args.arch) > 1:
+        print("Only updates are supported on foreign platforms")
         sys.exit(1)
 
     for key in args.arch:
