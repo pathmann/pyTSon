@@ -8,7 +8,7 @@
 
 #include "PythonQt.h"
 
-pytsonhost::pytsonhost(): QObject(), PythonHost() {
+pytsonhost::pytsonhost(): QObject(), PythonHost(), m_pluginmod(0), m_pmod(0), m_pyhost(0), m_callmeth(0) {
   qRegisterMetaType<ts3callbackarguments>("ts3callbackarguments");
 
   m_inittabs.append({"_ts3lib", PyInit_ts3lib});
@@ -63,6 +63,11 @@ bool pytsonhost::init(const QDir& basedir, QString& error) {
   }
   else return false;
 }
+
+bool pytsonhost::isReady() {
+  return PythonHost::isReady() && m_callmeth;
+}
+
 
 void pytsonhost::shutdown() {
   if (isReady()) {

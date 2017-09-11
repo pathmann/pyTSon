@@ -51,6 +51,9 @@ class pytsonhost: public QObject, PythonHost {
   protected slots:
       void onCallInMainThread(const ts3callbackarguments args);
 
+  protected:
+      bool isReady();
+
   private:
     PyObject* m_pluginmod;
     PyObject* m_pmod;
