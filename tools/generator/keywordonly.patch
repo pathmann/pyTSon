@@ -1,9 +1,9 @@
 diff --git a/ressources/python/pytson.py b/ressources/python/pytson.py
-index 9f351b4..bfce540 100644
+index f3dd4dd..3ad853b 100644
 --- a/ressources/python/pytson.py
 +++ b/ressources/python/pytson.py
-@@ -9,7 +9,7 @@ import ts3lib
- from PythonQt.QtGui import QApplication
+@@ -12,7 +12,7 @@ from PythonQt.QtGui import QApplication
+ _PYTSON_VERSION = "1.2.2"
  
  
 -def tr(context, sourcetext, *, disambiguation="", n=-1):
@@ -11,7 +11,7 @@ index 9f351b4..bfce540 100644
      """
      Returns the current translation for a string. This function calls can be
      extracted by pyTSon's pylupdate.py.
-@@ -35,7 +35,7 @@ class Translatable(object):
+@@ -38,7 +38,7 @@ class Translatable(object):
      Baseclass for a class using translatable string literals.
      """
      @classmethod
@@ -21,16 +21,25 @@ index 9f351b4..bfce540 100644
          Returns the current translation for a string. This method calls can be
          extracted by pyTSon's pylupdate.py.
 diff --git a/ressources/python/pytsonui/__init__.py b/ressources/python/pytsonui/__init__.py
-index cc2cd01..3bb53ec 100644
+index 28be23d..f1a4c04 100644
 --- a/ressources/python/pytsonui/__init__.py
 +++ b/ressources/python/pytsonui/__init__.py
-@@ -238,7 +238,7 @@ class UiLoader(QUiLoader):
+@@ -220,7 +220,7 @@ class UiLoader(QUiLoader):
+     QUILoader subclass to omit the parent widget from being recreated.
+     """
+ 
+-    def __init__(self, main, parent=None, *, extraWidgets=None):
++    def __init__(self, main, parent=None, extraWidgets=None):
+         """
+         Instantiate a new object
+         @param main: parent class which will be omitted
+@@ -249,7 +249,7 @@ class UiLoader(QUiLoader):
              return QUiLoader.createWidget(self, clsname, parent, name)
  
  
 -def setupUi(obj, uipath, *, widgets=None, seticons=True, iconpack=None,
 +def setupUi(obj, uipath, widgets=None, seticons=True, iconpack=None,
-             pluginicons=None):
+             pluginicons=None, extraWidgets=None):
      """
      Loads a Qt designer file (.ui), creates the widgets defined in and adds
 diff --git a/ressources/python/pytsonui/console.py b/ressources/python/pytsonui/console.py
@@ -81,3 +90,16 @@ index 972ee85..94bff4b 100644
                   staticpath=False, readonly=False, downloaddir=None,
                   iconpack=None):
          """
+diff --git a/ressources/python/ts3widgets/serverview.py b/ressources/python/ts3widgets/serverview.py
+index 0b87d7f..346c5bb 100644
+--- a/ressources/python/ts3widgets/serverview.py
++++ b/ressources/python/ts3widgets/serverview.py
+@@ -1389,7 +1389,7 @@ class Serverview(QTreeView):
+     A QTreeView widget to display the complete view on a TS3 Server.
+     """
+ 
+-    def __init__(self, parent=None, *, schid=None):
++    def __init__(self, parent=None, schid=None):
+         """
+         Instantiates a new Serverview widget (including model and delegate).
+         @param schid: the ID of the serverconnection

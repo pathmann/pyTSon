@@ -43,8 +43,8 @@ class EventFilterObject(QObject):
     def addType(self, eventtype):
         """
         Adds an eventtype to the list.
-        @type eventtype: an eventtype (see QEvent::Type)
-        @rtype eventtype: int
+        @param eventtype: an eventtype (see QEvent::Type)
+        @type eventtype: int
         """
         pass
 

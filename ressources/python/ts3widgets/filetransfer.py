@@ -861,9 +861,9 @@ class FileBrowser(QDialog, pytson.Translatable):
 
     def _startDownload(self, collection):
         """
-        @param files: list of tuples containing the download directory and the
-        list of files to download to that directory
-        @type files: list[tuple(str, list[File])]
+        @param collection: list of tuples containing the download directory and
+        the list of files to download to that directory
+        @type collection: list[tuple(str, list[File])]
         """
         if not collection:
             return

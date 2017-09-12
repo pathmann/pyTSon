@@ -576,7 +576,7 @@ class CountryFlags:
         Returns a QPixmap containing the flag of the given country code if
         exist.
         @param code: the country code
-        @rtype code: str
+        @type code: str
         @returns: the flag
         @rtype: QPixmap
         """
