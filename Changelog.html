@@ -1,6 +1,28 @@
 <html>
     <body>
     <p>
+        <h1>Version 1.2.2</h1>
+        <p>
+            <h2>New Features:</h2>
+            <ul>
+                <li>pytsonui.setupUi can now take a new keyword argument extraWidgets with python implemented widgets to be used in ui files</li>
+                <li>ts3widgets.Serverview is now constructable by setupUi (schid parameter is now a keyword argument)</li>
+                <li>added some convenience functions to query variables (getChannelVariable, getClientVariable, getClientSelfVariable, getServerVariable) which will choose (in most cases) the right ctype function</li>
+                <li>plugincommands have now sender integrity builtin pyTSon (see _plugincmd.py for limitations and additional documentation)</li>
+            </ul>
+        </p>
+        <p>
+            <h2>Bugfixes:</h2>
+            <ul>
+                <li>ts3widgets.ServerviewModel will now react to kicked clients accordingly</li>
+                <li>Fixed a possible crash in initHotkeys</li>
+                <li>Adopted the variable handling of the plugin sdk's function requestClientSetWhisperList</li>
+                <li>Fixed a crash if some initial imports on pyTSon's initiation failed</li>
+            </ul>
+        </p>
+    </p>
+
+    <p>
         <h1>Version 1.2.1</h1>
         <p>
             <h2>New Features:</h2>

@@ -9,7 +9,7 @@ import ts3lib
 from PythonQt.QtGui import QApplication
 
 
-_PYTSON_VERSION = "1.2.1"
+_PYTSON_VERSION = "1.2.2"
 
 
 def tr(context, sourcetext, *, disambiguation="", n=-1):
