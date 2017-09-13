@@ -167,7 +167,7 @@ def copyFiles(root, files, tempdir):
             filedir = os.path.dirname(filepath)
 
             if not os.path.isdir(filedir):
-                os.makedirs(filepath)
+                os.makedirs(filedir)
             shutil.copy(locpath, filepath)
         else:
             for base, dirs, files in os.walk(locpath):
