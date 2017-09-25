@@ -6680,7 +6680,7 @@ PyObject* startVoiceRecording(PyObject* /*self*/, PyObject* args) {
   /*
 def startVoiceRecording(serverConnectionHandlerID):
     """
-    Starts voice recording on a serverconnection.
+    Sets the voice recording flag of the own client on a serverconnection.
     @param serverConnectionHandlerID: the ID of the serverconnection
     @type serverConnectionHandlerID: int
     @return: the errorcode
@@ -6727,7 +6727,7 @@ PyObject* stopVoiceRecording(PyObject* /*self*/, PyObject* args) {
   /*
 def stopVoiceRecording(serverConnectionHandlerID):
     """
-    Stops voice recording on a serverconnection
+    Removes the voice recording flag of the own client on a serverconnection
     @param serverConnectionHandlerID: the ID of the serverconnection
     @type serverConnectionHandlerID: int
     @return: the errorcode
