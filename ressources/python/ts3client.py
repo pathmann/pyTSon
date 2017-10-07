@@ -249,7 +249,7 @@ class IconPack(object):
                 if "settings.ini" not in self.cont.namelist():
                     raise Exception("No settings.ini in iconpack found")
 
-                self.settings = ConfigParser()
+                self.settings = ConfigParser(strict=False)
                 with self.cont.open("settings.ini") as f:
                     self.settings.read_string(f.read().decode('utf-8'))
 
@@ -262,7 +262,7 @@ class IconPack(object):
                not os.path.isfile(os.path.join(self.path, "settings.ini"))):
                 raise Exception("No settings.ini in iconpack found")
 
-            self.settings = ConfigParser()
+            self.settings = ConfigParser(strict=False)
             self.settings.read(os.path.join(self.path, "settings.ini"))
 
             emconf = os.path.join(self.path, "emoticons", "emoticons.txt")
