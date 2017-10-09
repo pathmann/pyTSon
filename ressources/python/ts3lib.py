@@ -111,7 +111,7 @@ def getClientSelfVariable(schid, flag):
                 ClientPropertiesRare.CLIENT_IS_PRIORITY_SPEAKER,
                 ClientPropertiesRare.CLIENT_IS_CHANNEL_COMMANDER,
                 ]:
-        return _ts3lib.getlientSelfVariableAsInt(schid, flag)
+        return _ts3lib.getClientSelfVariableAsInt(schid, flag)
     elif flag in [ClientProperties.CLIENT_VOLUME_MODIFICATOR]:
         err, ret = _ts3lib.getClientSelfVariableAsString(schid, flag)
         if err == ts3defines.ERROR_ok:
