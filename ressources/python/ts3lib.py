@@ -59,7 +59,7 @@ def getClientVariable(schid, clientID, flag):
                 ClientPropertiesRare.CLIENT_IS_PRIORITY_SPEAKER,
                 ClientPropertiesRare.CLIENT_IS_CHANNEL_COMMANDER,
                 ]:
-        return _ts3lib.getlientVariableAsInt(schid, clientID, flag)
+        return _ts3lib.getClientVariableAsInt(schid, clientID, flag)
     elif flag in [ClientProperties.CLIENT_IDLE_TIME,
                   ClientPropertiesRare.CLIENT_LAST_VAR_REQUEST,
                   ClientPropertiesRare.CLIENT_DATABASE_ID,
