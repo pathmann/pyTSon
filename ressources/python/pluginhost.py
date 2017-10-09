@@ -397,7 +397,8 @@ class PluginHost(pytson.Translatable):
                                   methname=name, name=name,
                                   trace=traceback.format_exc())
                     print(msg)
-                    cls.verboseLog(msg)
+                    if name != "onUserLoggingMessageEvent":
+                        cls.verboseLog(msg)
 
         # call callback proxies; they can't affect the return value
         zombies = []
