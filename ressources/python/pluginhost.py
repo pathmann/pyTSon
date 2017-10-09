@@ -392,10 +392,12 @@ class PluginHost(pytson.Translatable):
                 try:
                     ret.append(meth(*args))
                 except:
-                    print(cls._tr("Error calling method {methname} of plugin "
+                    msg = cls._tr("Error calling method {methname} of plugin "
                                   "{name}: {trace}").format(
                                   methname=name, name=name,
-                                  trace=traceback.format_exc()))
+                                  trace=traceback.format_exc())
+                    print(msg)
+                    cls.verboseLog(msg)
 
         # call callback proxies; they can't affect the return value
         zombies = []
@@ -409,10 +411,12 @@ class PluginHost(pytson.Translatable):
                     try:
                         meth(*args)
                     except:
-                        print(cls._tr("Error calling method {methname} in "
+                        msg = cls._tr("Error calling method {methname} in "
                                       "callbackproxy: {trace}").format(
                                       methname=name,
-                                      trace=traceback.format_exc()))
+                                      trace=traceback.format_exc())
+                        print(msg)
+                        cls.verboseLog(msg)
 
         for z in zombies:
             del cls.proxies[z]
