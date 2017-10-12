@@ -398,7 +398,7 @@ class PluginHost(pytson.Translatable):
                                   trace=traceback.format_exc())
                     print(msg)
                     if name != "onUserLoggingMessageEvent":
-                        cls.verboseLog(msg)
+                        cls.verboseLog(msg, "pyTSon.PluginHost.invokePlugins")
 
         # call callback proxies; they can't affect the return value
         zombies = []
@@ -417,7 +417,7 @@ class PluginHost(pytson.Translatable):
                                       methname=name,
                                       trace=traceback.format_exc())
                         print(msg)
-                        cls.verboseLog(msg)
+                        cls.verboseLog(msg, "pyTSon.PluginHost.invokePlugins")
 
         for z in zombies:
             del cls.proxies[z]
