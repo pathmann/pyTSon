@@ -394,7 +394,7 @@ class PluginHost(pytson.Translatable):
                 except:
                     msg = cls._tr("Error calling method {methname} of plugin "
                                   "{name}: {trace}").format(
-                                  methname=name, name=name,
+                                  methname=name, name=key,
                                   trace=traceback.format_exc())
                     print(msg)
                     if name != "onUserLoggingMessageEvent":
