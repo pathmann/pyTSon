@@ -260,7 +260,7 @@ inline bool pyListToArray<int>(PyObject* list, QString& error, int** ret, bool a
       return false;
     }
 
-    (*ret[i]) = (int)PyLong_AsLong(item);
+    (*ret)[i] = (int)PyLong_AsLong(item);
   }
 
   return true;
@@ -290,7 +290,7 @@ inline bool pyListToArray<unsigned int>(PyObject* list, QString& error, unsigned
       return false;
     }
 
-    (*ret[i]) = (unsigned int)PyLong_AsUnsignedLong(item);
+    (*ret)[i] = (unsigned int)PyLong_AsUnsignedLong(item);
   }
 
   return true;
@@ -320,7 +320,7 @@ inline bool pyListToArray<uint64>(PyObject* list, QString& error, uint64** ret, 
       return false;
     }
 
-    (*ret[i]) = (uint64)PyLong_AsUnsignedLongLong(item);
+    (*ret)[i] = (uint64)PyLong_AsUnsignedLongLong(item);
   }
 
   return true;
@@ -350,7 +350,7 @@ inline bool pyListToArray<short>(PyObject* list, QString& error, short** ret, bo
       return false;
     }
 
-    (*ret[i]) = (short)PyLong_AsLong(item);
+    (*ret)[i] = (short)PyLong_AsLong(item);
   }
 
   return true;
@@ -380,7 +380,7 @@ inline bool pyListToArray<anyID>(PyObject* list, QString& error, anyID** ret, bo
       return false;
     }
 
-    (*ret[i]) = (anyID)PyLong_AsUnsignedLong(item);
+    (*ret)[i] = (anyID)PyLong_AsUnsignedLong(item);
   }
 
   return true;
