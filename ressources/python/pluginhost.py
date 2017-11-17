@@ -410,7 +410,7 @@ class PluginHost(pytson.Translatable):
 
                 if meth:
                     try:
-                        meth(*args)
+                        ret.append(meth(*args))
                     except:
                         msg = cls._tr("Error calling method {methname} in "
                                       "callbackproxy: {trace}").format(

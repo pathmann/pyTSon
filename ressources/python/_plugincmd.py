@@ -713,7 +713,7 @@ class _PluginCommandHandler(object):
     def onServerErrorEvent(cls, schid, errorMessage, error, returnCode,
                            extraMessage):
         if schid not in cls.stores:
-            return
+            return False
 
         store = cls.getStore(schid)
         if returnCode in store.sendKeyReturnCodes:
@@ -723,13 +723,15 @@ class _PluginCommandHandler(object):
                                    "pyTSon._PluginCommandHandler", 0)
 
             store.sendKeyReturnCodes.remove(returnCode)
-            return
-        elif error == ts3defines.ERROR_ok:
-            return
+            return True
 
         (clid, reqkey) = store.getRequest(returnCode)
         if clid:
-            store.removeRequest(clid, reqkey, returnCode)
-            _ts3lib.logMessage("Requestkey failed: %s" % errorMessage,
-                               ts3defines.LogLevel.LogLevel_DEBUG,
-                               "pyTSon._PluginCommandHandler", 0)
+            if error != ts3defines.ERROR_ok:
+                store.removeRequest(clid, reqkey, returnCode)
+                _ts3lib.logMessage("Requestkey failed: %s" % errorMessage,
+                                   ts3defines.LogLevel.LogLevel_DEBUG,
+                                   "pyTSon._PluginCommandHandler", 0)
+            return True
+
+        return False
