@@ -77,7 +77,7 @@ def getClientVariable(schid, clientID, flag):
                   ClientPropertiesRare.CLIENT_ICON_ID,
                   ClientPropertiesRare.CLIENT_CHANNEL_GROUP_INHERITED_CHANNEL_ID,
                   ]:
-        return _ts3lib.getClientVariableAsUint64(schid, clientID, flag)
+        return _ts3lib.getClientVariableAsUInt64(schid, clientID, flag)
     elif flag in [ClientProperties.CLIENT_VOLUME_MODIFICATOR]:
         err, ret = _ts3lib.getClientVariableAsString(schid, clientID, flag)
         if err == ts3defines.ERROR_ok:
