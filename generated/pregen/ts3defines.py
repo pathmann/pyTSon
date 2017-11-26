@@ -1,4 +1,5 @@
 from collections import namedtuple
+from enum import Enum
 
 TS3Vector = namedtuple('TS3Vecor', 'x y')
 
@@ -458,18 +459,18 @@ ERROR_whisper_too_many_targets = 0x070b
 
 
 
-class ACLType(object):
+class ACLType(Enum):
     ACL_NONE = 0
     ACL_WHITE_LIST = 1
     ACL_BLACK_LIST = 2
 
 
-class AwayStatus(object):
+class AwayStatus(Enum):
     AWAY_NONE = 0
     AWAY_ZZZ = 1
 
 
-class BBCodeTags(object):
+class BBCodeTags(Enum):
     BBCodeTag_B = 0x00000001
     BBCodeTag_I = 0x00000002
     BBCodeTag_U = 0x00000004
@@ -499,7 +500,7 @@ class BBCodeTags(object):
     BBCodeTag_def_extended = (((((BBCodeTag_group_text | BBCodeTag_group_align) | BBCodeTag_URL) | BBCodeTag_IMAGE) | BBCodeTag_HR) | BBCodeTag_group_list) | BBCodeTag_group_table
 
 
-class ChannelProperties(object):
+class ChannelProperties(Enum):
     CHANNEL_NAME = 0
     CHANNEL_TOPIC = 1
     CHANNEL_DESCRIPTION = 2
@@ -520,7 +521,7 @@ class ChannelProperties(object):
     CHANNEL_ENDMARKER = 17
 
 
-class ChannelPropertiesRare(object):
+class ChannelPropertiesRare(Enum):
     CHANNEL_DUMMY_2 = 17
     CHANNEL_DUMMY_3 = 18
     CHANNEL_DUMMY_4 = 19
@@ -540,7 +541,7 @@ class ChannelPropertiesRare(object):
     CHANNEL_ENDMARKER_RARE = 33
 
 
-class ClientCommand(object):
+class ClientCommand(Enum):
     CLIENT_COMMAND_requestConnectionInfo = 0
     CLIENT_COMMAND_requestClientMove = 1
     CLIENT_COMMAND_requestXXMuteClients = 2
@@ -557,7 +558,7 @@ class ClientCommand(object):
     CLIENT_COMMAND_ENDMARKER = 13
 
 
-class ClientProperties(object):
+class ClientProperties(Enum):
     CLIENT_UNIQUE_IDENTIFIER = 0
     CLIENT_NICKNAME = 1
     CLIENT_VERSION = 2
@@ -582,7 +583,7 @@ class ClientProperties(object):
     CLIENT_ENDMARKER = 21
 
 
-class ClientPropertiesRare(object):
+class ClientPropertiesRare(Enum):
     CLIENT_DUMMY_3 = 21
     CLIENT_DUMMY_4 = 22
     CLIENT_DUMMY_5 = 23
@@ -626,18 +627,18 @@ class ClientPropertiesRare(object):
     CLIENT_ENDMARKER_RARE = 61
 
 
-class ClientType(object):
+class ClientType(Enum):
     ClientType_NORMAL = 0
     ClientType_SERVERQUERY = 1
 
 
-class CodecEncryptionMode(object):
+class CodecEncryptionMode(Enum):
     CODEC_ENCRYPTION_PER_CHANNEL = 0
     CODEC_ENCRYPTION_FORCED_OFF = 1
     CODEC_ENCRYPTION_FORCED_ON = 2
 
 
-class CodecType(object):
+class CodecType(Enum):
     CODEC_SPEEX_NARROWBAND = 0
     CODEC_SPEEX_WIDEBAND = 1
     CODEC_SPEEX_ULTRAWIDEBAND = 2
@@ -646,12 +647,12 @@ class CodecType(object):
     CODEC_OPUS_MUSIC = 5
 
 
-class CommandLinePropertiesRare(object):
+class CommandLinePropertiesRare(Enum):
     COMMANDLINE_NOTHING = 0
     COMMANDLINE_ENDMARKER_RARE = 1
 
 
-class ConnectionProperties(object):
+class ConnectionProperties(Enum):
     CONNECTION_PING = 0
     CONNECTION_PING_DEVIATION = 1
     CONNECTION_CONNECTED_TIME = 2
@@ -707,7 +708,7 @@ class ConnectionProperties(object):
     CONNECTION_ENDMARKER = 52
 
 
-class ConnectionPropertiesRare(object):
+class ConnectionPropertiesRare(Enum):
     CONNECTION_DUMMY_0 = 52
     CONNECTION_DUMMY_1 = 53
     CONNECTION_DUMMY_2 = 54
@@ -725,7 +726,7 @@ class ConnectionPropertiesRare(object):
     CONNECTION_ENDMARKER_RARE = 66
 
 
-class ConnectStatus(object):
+class ConnectStatus(Enum):
     STATUS_DISCONNECTED = 0
     STATUS_CONNECTING = 1
     STATUS_CONNECTED = 2
@@ -733,18 +734,18 @@ class ConnectStatus(object):
     STATUS_CONNECTION_ESTABLISHED = 4
 
 
-class FileListType(object):
+class FileListType(Enum):
     FileListType_Directory = 0
     FileListType_File = 1
 
 
-class FileTransferState(object):
+class FileTransferState(Enum):
     FILETRANSFER_INITIALISING = 0
     FILETRANSFER_ACTIVE = 1
     FILETRANSFER_FINISHED = 2
 
 
-class FTAction(object):
+class FTAction(Enum):
     FT_INIT_SERVER = 0
     FT_INIT_CHANNEL = 1
     FT_UPLOAD = 2
@@ -756,13 +757,13 @@ class FTAction(object):
     FT_FILEINFO = 8
 
 
-class GroupShowNameTreeMode(object):
+class GroupShowNameTreeMode(Enum):
     GroupShowNameTreeMode_NONE = 0
     GroupShowNameTreeMode_BEFORE = 1
     GroupShowNameTreeMode_BEHIND = 2
 
 
-class GroupWhisperTargetMode(object):
+class GroupWhisperTargetMode(Enum):
     GROUPWHISPERTARGETMODE_ALL = 0
     GROUPWHISPERTARGETMODE_CURRENTCHANNEL = 1
     GROUPWHISPERTARGETMODE_PARENTCHANNEL = 2
@@ -773,7 +774,7 @@ class GroupWhisperTargetMode(object):
     GROUPWHISPERTARGETMODE_ENDMARKER = 7
 
 
-class GroupWhisperType(object):
+class GroupWhisperType(Enum):
     GROUPWHISPERTYPE_SERVERGROUP = 0
     GROUPWHISPERTYPE_CHANNELGROUP = 1
     GROUPWHISPERTYPE_CHANNELCOMMANDER = 2
@@ -781,47 +782,47 @@ class GroupWhisperType(object):
     GROUPWHISPERTYPE_ENDMARKER = 4
 
 
-class HardwareInputStatus(object):
+class HardwareInputStatus(Enum):
     HARDWAREINPUT_DISABLED = 0
     HARDWAREINPUT_ENABLED = 1
 
 
-class HardwareOutputStatus(object):
+class HardwareOutputStatus(Enum):
     HARDWAREOUTPUT_DISABLED = 0
     HARDWAREOUTPUT_ENABLED = 1
 
 
-class HostBannerMode(object):
+class HostBannerMode(Enum):
     HostBannerMode_NO_ADJUST = 0
     HostBannerMode_ADJUST_IGNORE_ASPECT = 1
     HostBannerMode_ADJUST_KEEP_ASPECT = 2
 
 
-class HostMessageMode(object):
+class HostMessageMode(Enum):
     HostMessageMode_NONE = 0
     HostMessageMode_LOG = 1
     HostMessageMode_MODAL = 2
     HostMessageMode_MODALQUIT = 3
 
 
-class InputDeactivationStatus(object):
+class InputDeactivationStatus(Enum):
     INPUT_ACTIVE = 0
     INPUT_DEACTIVATED = 1
 
 
-class LicenseViolationType(object):
+class LicenseViolationType(Enum):
     NO_VIOLATION = 0
     SLOT_VIOLATION = 1
     SLOT_SUSPICION = 2
 
 
-class LocalTestMode(object):
+class LocalTestMode(Enum):
     TEST_MODE_OFF = 0
     TEST_MODE_VOICE_LOCAL_ONLY = 1
     TEST_MODE_VOICE_LOCAL_AND_REMOTE = 2
 
 
-class LogLevel(object):
+class LogLevel(Enum):
     LogLevel_CRITICAL = 0
     LogLevel_ERROR = 1
     LogLevel_WARNING = 2
@@ -830,7 +831,7 @@ class LogLevel(object):
     LogLevel_DEVEL = 5
 
 
-class LogTypes(object):
+class LogTypes(Enum):
     LogType_NONE = 0x0000
     LogType_FILE = 0x0001
     LogType_CONSOLE = 0x0002
@@ -840,35 +841,35 @@ class LogTypes(object):
     LogType_SYSLOG = 0x0020
 
 
-class MonoSoundDestination(object):
+class MonoSoundDestination(Enum):
     MONO_SOUND_DESTINATION_ALL = 0
     MONO_SOUND_DESTINATION_FRONT_CENTER = 1
     MONO_SOUND_DESTINATION_FRONT_LEFT_AND_RIGHT = 2
 
 
-class MuteInputStatus(object):
+class MuteInputStatus(Enum):
     MUTEINPUT_NONE = 0
     MUTEINPUT_MUTED = 1
 
 
-class MuteOutputStatus(object):
+class MuteOutputStatus(Enum):
     MUTEOUTPUT_NONE = 0
     MUTEOUTPUT_MUTED = 1
 
 
-class PluginConfigureOffer(object):
+class PluginConfigureOffer(Enum):
     PLUGIN_OFFERS_NO_CONFIGURE = 0
     PLUGIN_OFFERS_CONFIGURE_NEW_THREAD = 1
     PLUGIN_OFFERS_CONFIGURE_QT_THREAD = 2
 
 
-class PluginConnectTab(object):
+class PluginConnectTab(Enum):
     PLUGIN_CONNECT_TAB_NEW = 0
     PLUGIN_CONNECT_TAB_CURRENT = 1
     PLUGIN_CONNECT_TAB_NEW_IF_CURRENT_CONNECTED = 2
 
 
-class PluginGuiProfile(object):
+class PluginGuiProfile(Enum):
     PLUGIN_GUI_SOUND_CAPTURE = 0
     PLUGIN_GUI_SOUND_PLAYBACK = 1
     PLUGIN_GUI_HOTKEY = 2
@@ -876,24 +877,24 @@ class PluginGuiProfile(object):
     PLUGIN_GUI_IDENTITY = 4
 
 
-class PluginItemType(object):
+class PluginItemType(Enum):
     PLUGIN_SERVER = 0
     PLUGIN_CHANNEL = 1
     PLUGIN_CLIENT = 2
 
 
-class PluginMenuType(object):
+class PluginMenuType(Enum):
     PLUGIN_MENU_TYPE_GLOBAL = 0
     PLUGIN_MENU_TYPE_CHANNEL = 1
     PLUGIN_MENU_TYPE_CLIENT = 2
 
 
-class PluginMessageTarget(object):
+class PluginMessageTarget(Enum):
     PLUGIN_MESSAGE_TARGET_SERVER = 0
     PLUGIN_MESSAGE_TARGET_CHANNEL = 1
 
 
-class PluginTargetMode(object):
+class PluginTargetMode(Enum):
     PluginCommandTarget_CURRENT_CHANNEL = 0
     PluginCommandTarget_SERVER = 1
     PluginCommandTarget_CLIENT = 2
@@ -901,7 +902,7 @@ class PluginTargetMode(object):
     PluginCommandTarget_MAX = 4
 
 
-class ReasonIdentifier(object):
+class ReasonIdentifier(Enum):
     REASON_NONE = 0
     REASON_MOVED = 1
     REASON_SUBSCRIPTION = 2
@@ -916,18 +917,18 @@ class ReasonIdentifier(object):
     REASON_CLIENTDISCONNECT_SERVER_SHUTDOWN = 11
 
 
-class SecuritySaltOptions(object):
+class SecuritySaltOptions(Enum):
     SECURITY_SALT_CHECK_NICKNAME = 1
     SECURITY_SALT_CHECK_META_DATA = 2
 
 
-class SERVER_BINDING(object):
+class SERVER_BINDING(Enum):
     SERVER_BINDING_VIRTUALSERVER = 0
     SERVER_BINDING_SERVERQUERY = 1
     SERVER_BINDING_FILETRANSFER = 2
 
 
-class ServerInstancePropertiesRare(object):
+class ServerInstancePropertiesRare(Enum):
     SERVERINSTANCE_DATABASE_VERSION = 0
     SERVERINSTANCE_FILETRANSFER_PORT = 1
     SERVERINSTANCE_SERVER_ENTROPY = 2
@@ -947,20 +948,20 @@ class ServerInstancePropertiesRare(object):
     SERVERINSTANCE_ENDMARKER_RARE = 16
 
 
-class TalkStatus(object):
+class TalkStatus(Enum):
     STATUS_NOT_TALKING = 0
     STATUS_TALKING = 1
     STATUS_TALKING_WHILE_DISABLED = 2
 
 
-class TextMessageTargetMode(object):
+class TextMessageTargetMode(Enum):
     TextMessageTarget_CLIENT = 1
     TextMessageTarget_CHANNEL = 2
     TextMessageTarget_SERVER = 3
     TextMessageTarget_MAX = 4
 
 
-class VirtualServerProperties(object):
+class VirtualServerProperties(Enum):
     VIRTUALSERVER_UNIQUE_IDENTIFIER = 0
     VIRTUALSERVER_NAME = 1
     VIRTUALSERVER_WELCOMEMESSAGE = 2
@@ -976,7 +977,7 @@ class VirtualServerProperties(object):
     VIRTUALSERVER_ENDMARKER = 12
 
 
-class VirtualServerPropertiesRare(object):
+class VirtualServerPropertiesRare(Enum):
     VIRTUALSERVER_DUMMY_0 = 12
     VIRTUALSERVER_DUMMY_1 = 13
     VIRTUALSERVER_DUMMY_2 = 14
@@ -1051,7 +1052,7 @@ class VirtualServerPropertiesRare(object):
     VIRTUALSERVER_ENDMARKER_RARE = 83
 
 
-class Visibility(object):
+class Visibility(Enum):
     ENTER_VISIBILITY = 0
     RETAIN_VISIBILITY = 1
     LEAVE_VISIBILITY = 2

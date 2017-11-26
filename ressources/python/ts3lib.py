@@ -6,6 +6,8 @@ from ts3defines import (ClientProperties, ClientPropertiesRare,
 
 from _plugincmd import _PluginCommandHandler
 
+def logMessage(logMessage, severity, channel, logID):
+    return _ts3lib.logMessage(logMessage, severity.value, channel, logID)
 
 def getChannelVariable(schid, channelID, flag):
     if flag in [ChannelProperties.CHANNEL_CODEC,
