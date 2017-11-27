@@ -2,10 +2,10 @@ import _ts3lib
 import ts3defines
 from ts3defines import (ClientProperties, ClientPropertiesRare,
                         ChannelProperties, ChannelPropertiesRare,
-                        VirtualServerProperties, VirtualServerPropertiesRare)
+                        VirtualServerProperties, VirtualServerPropertiesRare,
+                        ConnectionProperties, ConnectionPropertiesRare)
 
 from _plugincmd import _PluginCommandHandler
-
 
 def getChannelVariable(schid, channelID, flag):
     if flag in [ChannelProperties.CHANNEL_CODEC,
@@ -197,11 +197,68 @@ def getServerVariable(schid, flag):
         return _ts3lib.getServerVariableAsString(schid, flag)
 
 
-"""
-To be done (?):
 def getConnectionVariable(schid, clientID, flag):
-    pass
-"""
+    if flag in [ConnectionProperties.CONNECTION_CLIENT2SERVER_PACKETLOSS_CONTROL,
+                ConnectionProperties.CONNECTION_CLIENT2SERVER_PACKETLOSS_KEEPALIVE,
+                ConnectionProperties.CONNECTION_CLIENT2SERVER_PACKETLOSS_SPEECH,
+                ConnectionProperties.CONNECTION_CLIENT2SERVER_PACKETLOSS_TOTAL,
+                ConnectionProperties.CONNECTION_SERVER2CLIENT_PACKETLOSS_CONTROL,
+                ConnectionProperties.CONNECTION_SERVER2CLIENT_PACKETLOSS_KEEPALIVE,
+                ConnectionProperties.CONNECTION_SERVER2CLIENT_PACKETLOSS_SPEECH,
+                ConnectionProperties.CONNECTION_SERVER2CLIENT_PACKETLOSS_TOTAL,
+                ConnectionProperties.CONNECTION_PACKETLOSS_CONTROL,
+                ConnectionProperties.CONNECTION_PACKETLOSS_KEEPALIVE,
+                ConnectionProperties.CONNECTION_PACKETLOSS_SPEECH,
+                ConnectionProperties.CONNECTION_PACKETLOSS_TOTAL,
+                ConnectionProperties.CONNECTION_PING,
+                ConnectionProperties.CONNECTION_PING_DEVIATION,
+                ConnectionPropertiesRare.CONNECTION_FILETRANSFER_BANDWIDTH_RECEIVED,
+                ConnectionPropertiesRare.CONNECTION_FILETRANSFER_BANDWIDTH_SENT,
+                ConnectionPropertiesRare.CONNECTION_FILETRANSFER_BYTES_RECEIVED_TOTAL,
+                ConnectionPropertiesRare.CONNECTION_FILETRANSFER_BYTES_SENT_TOTAL
+                ]:
+        return _ts3lib.getConnectionVariableAsDouble(schid, clientID, flag)
+    elif flag in [ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_MINUTE_CONTROL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_MINUTE_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_MINUTE_SPEECH,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_MINUTE_TOTAL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_SECOND_CONTROL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_SECOND_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_SECOND_SPEECH,
+                ConnectionProperties.CONNECTION_BANDWIDTH_RECEIVED_LAST_SECOND_TOTAL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_MINUTE_CONTROL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_MINUTE_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_MINUTE_SPEECH,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_MINUTE_TOTAL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_SECOND_CONTROL,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_SECOND_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_SECOND_SPEECH,
+                ConnectionProperties.CONNECTION_BANDWIDTH_SENT_LAST_SECOND_TOTAL,
+                ConnectionProperties.CONNECTION_BYTES_RECEIVED_CONTROL,
+                ConnectionProperties.CONNECTION_BYTES_RECEIVED_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BYTES_RECEIVED_SPEECH,
+                ConnectionProperties.CONNECTION_BYTES_RECEIVED_TOTAL,
+                ConnectionProperties.CONNECTION_BYTES_SENT_CONTROL,
+                ConnectionProperties.CONNECTION_BYTES_SENT_KEEPALIVE,
+                ConnectionProperties.CONNECTION_BYTES_SENT_SPEECH,
+                ConnectionProperties.CONNECTION_BYTES_SENT_TOTAL,
+                ConnectionProperties.CONNECTION_CLIENT_PORT,
+                ConnectionProperties.CONNECTION_SERVER_PORT,
+                ConnectionProperties.CONNECTION_CONNECTED_TIME,
+                ConnectionProperties.CONNECTION_IDLE_TIME,
+                ConnectionProperties.CONNECTION_PACKETS_RECEIVED_CONTROL,
+                ConnectionProperties.CONNECTION_PACKETS_RECEIVED_KEEPALIVE,
+                ConnectionProperties.CONNECTION_PACKETS_RECEIVED_SPEECH,
+                ConnectionProperties.CONNECTION_PACKETS_RECEIVED_TOTAL,
+                ConnectionProperties.CONNECTION_PACKETS_SENT_CONTROL,
+                ConnectionProperties.CONNECTION_PACKETS_SENT_KEEPALIVE,
+                ConnectionProperties.CONNECTION_PACKETS_SENT_SPEECH,
+                ConnectionProperties.CONNECTION_PACKETS_SENT_TOTAL
+                  ]:
+        return _ts3lib.getConnectionVariableAsUInt64(schid, clientID, flag)
+    else:
+        return _ts3lib.getConnectionVariableAsString(schid, clientID, flag)
+
 
 
 def sendPluginCommand(schid, command, targetMode, targetIDs, *returnCode):
