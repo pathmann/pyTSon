@@ -267,8 +267,9 @@ class PluginHost(pytson.Translatable):
             try:
                 # remove hotkeys
                 for key in cls.hotkeys:
-                    if cls.hotkeys[key][0].name == pname:
-                        cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
+                    if type(cls.hotkeys[key][0]) is not str:
+                        if cls.hotkeys[key][0].name == pname:
+                            cls.hotkeys[key] = (pname, cls.hotkeys[key][1])
 
                 # remove menuItems
                 for key in cls.menus:
