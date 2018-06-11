@@ -1266,10 +1266,13 @@ def getChannelIDFromChannelNames(serverConnectionHandlerID, channelNameArray):
     return NULL;
   }
 
+  char estr = '\0';
+  channelNameArray[PyList_Size(pychannelNameArray)] = &estr;
+
   uint64 result = 0;
   unsigned int res = ts3_funcs.getChannelIDFromChannelNames((uint64)schid, channelNameArray, &result);
-  for (int i = 0; channelNameArray[i] != NULL; ++i)
-    free(channelNameArray);
+  for (int i = 0; channelNameArray[i] != &estr; ++i)
+    free(channelNameArray[i]);
   free(channelNameArray);
 
   if (res == ERROR_ok)
