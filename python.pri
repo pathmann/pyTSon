@@ -1,11 +1,13 @@
 JENKINS = $$(JENKINS_BUILD)
 
 unix:!mac {
-    equals(JENKINS, 1) {
-        PYTHONPATH = /home/build/libs/python/3.5.2/install
-    }
-    else {
-        PYTHONPATH = $$PWD/includes/python-352/install
+    isEmpty(PYTHONPATH) {
+        equals(JENKINS, 1) {
+            PYTHONPATH = /home/build/libs/python/3.5.2/install
+        }
+        else {
+            PYTHONPATH = $$PWD/includes/python-352/install
+        }
     }
 
     INCLUDEPATH += $${PYTHONPATH}/include/python3.5m
@@ -21,11 +23,13 @@ unix:!mac {
 }
 
 macx {
-    equals(JENKINS, 1) {
-        PYTHONPATH = /Users/build/libs/python/3.5.2/install
-    }
-    else {
-        PYTHONPATH = $$PWD/includes/python-352/install
+    isEmpty(PYTHONPATH) {
+        equals(JENKINS, 1) {
+            PYTHONPATH = /Users/build/libs/python/3.5.2/install
+        }
+        else {
+            PYTHONPATH = $$PWD/includes/python-352/install
+        }
     }
 
     INCLUDEPATH += $${PYTHONPATH}/include/python3.5m
@@ -34,20 +38,22 @@ macx {
 }
 
 win32 {
-    contains(QMAKE_TARGET.arch, x86_64) {
-        equals(JENKINS, 1) {
-            PYTHONPATH = C:\libs\amd64\python\3.5.2
+    isEmpty(PYTHONPATH) {
+        contains(QMAKE_TARGET.arch, x86_64) {
+            equals(JENKINS, 1) {
+                PYTHONPATH = C:\libs\amd64\python\3.5.2
+            }
+            else {
+                PYTHONPATH = C:\python-352\64bit
+            }
         }
         else {
-            PYTHONPATH = C:\python-352\64bit
-        }
-    }
-    else {
-        equals(JENKINS, 1) {
-            PYTHONPATH = C:\libs\x86\python\3.5.2
-        }
-        else {
-            PYTHONPATH = C:\python-352\32bit
+            equals(JENKINS, 1) {
+                PYTHONPATH = C:\libs\x86\python\3.5.2
+            }
+            else {
+                PYTHONPATH = C:\python-352\32bit
+            }
         }
     }
 
