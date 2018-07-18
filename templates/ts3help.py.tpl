@@ -11,7 +11,7 @@ def help(obj):
 
         txt = ""
         if name:
-            {% for name, f in functions.items() %}
+            {% for name, f in functions|dictsort %}
                 {% if loop.index == 1 %}
             if name == "{{name}}":
                 {% else %}
@@ -29,4 +29,3 @@ def help(obj):
             return
 
     return pydochelp(obj)
-
