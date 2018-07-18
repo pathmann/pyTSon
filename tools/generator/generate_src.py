@@ -58,12 +58,12 @@ def main(sdkdir, tpldir, outdir, ignore, excludes):
     sdkinclude = os.path.join(sdkdir, "include")
 
     if not ignore:
-        fpath = os.path.join(outdir, "ts3module.cpp")
+        fpath = os.path.join(outdir, "ts3lib.cpp")
         if os.path.exists(fpath):
             log.info("Loading old functions")
             oldfuncs = parsing.getSymbols(fpath, [sdkinclude], False)[3]
 
-        fpath = os.path.join(outdir, "plugin.cpp")
+        fpath = os.path.join(outdir, "ts3plugin.cpp")
         if os.path.exists(fpath):
             log.info("Loading old callbacks")
             oldcallbacks = parsing.getSymbols(fpath, [sdkinclude], False)[2]
