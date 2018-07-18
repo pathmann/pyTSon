@@ -67,8 +67,8 @@ def locales():
     """
     Generator function to return all locale codes available for translation
     in format language_country (see ISO 639 and ISO 3166)
-    @return: the language code
-    @rtype: str
+    @return: Generator function to return the language codes
+    @rtype: Generator[str]
     """
     for f in glob.glob(getPluginPath("ressources", "i18n", "pyTSon-*.qm")):
         m = re.match(r'^pyTSon-(\w\w_\w\w).qm$', os.path.split(f)[-1])

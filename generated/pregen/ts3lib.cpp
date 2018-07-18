@@ -2525,7 +2525,7 @@ def getPlaybackModeList():
 PyObject* getPluginPath(PyObject* /*self*/, PyObject* args) {
   //void getPluginPath(char *path, size_t maxLen, const char *pluginID)
   /*
-def getPluginPath(path, maxLen, pluginID):
+def getPluginPath(maxLen):
     """
     Returns the TeamSpeak 3 client's pluginpath.
     @param maxLen: the size of the buffer passed to the clientlib. Optional, defaults to 256
