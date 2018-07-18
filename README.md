@@ -46,7 +46,7 @@ How to use
 
 How to build
 ============
-* Adjust the python include and lib path in [python.pri](https://github.com/pathmann/pyTSon/blob/master/python.pri)
+* Adjust the python include and lib path in [python.pri](https://github.com/pathmann/pyTSon/blob/master/python.pri) or run qmake with `qmake [...] PYTHONPATH=<your-python-path>`
 * Download/Clone PythonQt from [here](https://github.com/pathmann/PythonQt) to includes/
 ```
 qmake
