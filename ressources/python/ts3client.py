@@ -267,7 +267,7 @@ class IconPack(object):
 
             emconf = os.path.join(self.path, "emoticons", "emoticons.txt")
             if os.path.isfile(emconf):
-                with open(emconf, "r") as f:
+                with open(emconf, "r", encoding="utf-8") as f:
                     self._loadEmoticonSettings(f)
 
     def close(self):
