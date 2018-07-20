@@ -1,6 +1,32 @@
 <html>
     <body>
     <p>
+        <h1>Version 1.2.3</h1>
+        <p>
+            <h2>New Features:</h2>
+            <ul>
+                <li>Testing: Standard stream encoding (eg. sys.stdout) is utf-8 now (this change should only affect Windows, it's default on all other platforms since the beginning)</li>
+                <li>Callbackproxies can now affect the global return value (if the callback has one)</li>
+                <li>Exceptions (in plugin callbacks) are now printed to verbose log</li>
+                <li>Added convenience function getConnectionVariable in ts3lib module</li>
+                <li>SSL support is now statically linked (on Unix systems)</li>
+            </ul>
+        </p>
+        <p>
+            <h2>Bugfixes:</h2>
+            <ul>
+                <li>Under specific circumstances a plugin with hotkeys could not be deactivated</li>
+                <li>Some lists coming from the C SDK were not correctly converted to a pythonlist</li>
+                <li>Emoticon settings from Iconpacks are now loaded with utf-8 encoding</li>
+                <li>ts3lib.getChannelIDFromChannelNames works now as expected</li>
+                <li>Iconpacks with duplicate entries are now loaded correctly</li>
+                <li>There was a typo in getClientVariable</li>
+                <li>Fixed some false documentation</li>
+            </ul>
+        </p>
+    </p>
+
+    <p>
         <h1>Version 1.2.2</h1>
         <p>
             <h2>New Features:</h2>
