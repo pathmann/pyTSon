@@ -16,6 +16,8 @@
 #else
   //mac + linux
   #define INTERPRETER "python"
+
+ #include <dlfcn.h>
 #endif
 
 PythonHost::PythonHost(): m_interpreter(NULL), m_trace(NULL), m_inited(false) {
@@ -262,6 +264,16 @@ bool PythonHost::init(const QDir& basedir, QString& error) {
     PyErr_Print();
     return false;
   }
+
+#ifdef Q_OS_UNIX
+  PyThreadState* tstate = PyThreadState_GET();
+  if (!tstate) {
+    error = QObject::tr("Error getting Threadstate");
+    return false;
+  }
+
+  tstate->interp->dlopenflags = tstate->interp->dlopenflags | RTLD_GLOBAL;
+#endif
 
   if (!setSysPath(error))
     return false;
