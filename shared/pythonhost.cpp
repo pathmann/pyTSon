@@ -252,6 +252,7 @@ bool PythonHost::init(const QDir& basedir, QString& error) {
   Py_IgnoreEnvironmentFlag = 1;
   Py_SetProgramName(m_interpreter);
   Py_NoUserSiteDirectory = 1;
+  Py_SetStandardStreamEncoding("utf-8", "surrogateescape");
 
   if (!setModuleSearchpath(error))
     return false;
