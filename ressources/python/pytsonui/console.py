@@ -9,7 +9,7 @@ from itertools import takewhile
 
 from PythonQt.QtCore import Qt
 from PythonQt.QtGui import (QFont, QFontMetrics, QPlainTextEdit, QPalette,
-                            QTextCursor, QApplication)
+                            QTextCursor, QApplication, QDialog, QHBoxLayout)
 
 import pytson
 
@@ -32,24 +32,39 @@ def defaultFont():
         return QFont("Monospace", 12)
 
 
-class PythonConsole(QPlainTextEdit, pytson.Translatable):
+class PythonConsoleDialog(QDialog):
     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
                  font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
                  width=800, height=600, startup="", silentStartup=False,
                  parent=None, *, catchstd=False):
+        super(QDialog, self).__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
+        self.hlayout = QHBoxLayout(self)
+        self.console = PythonConsole(tabcomplete, spaces, tabwidth, font,
+                                     bgcolor, textcolor, startup,
+                                     silentStartup, self, catchstd=catchstd,
+                                     closeAction=self.close)
+        self.hlayout.addWidget(self.console)
+
+        self.resize(width, height)
+
+
+class PythonConsole(QPlainTextEdit, pytson.Translatable):
+    def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
+                 font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
+                 startup="", silentStartup=False,
+                 parent=None, *, catchstd=False, closeAction):
         super(QPlainTextEdit, self).__init__(parent)
 
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
 
-        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle(self._tr("pyTSon Console"))
 
         self.tabcomplete = tabcomplete
         self.spaces = spaces
         self.tabwidth = tabwidth
         self.setFont(font)
-
-        self.resize(width, height)
 
         self.setContextMenuPolicy(Qt.PreventContextMenu)
 
@@ -75,6 +90,13 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
 
         self.norformat = self.currentCharFormat()
 
+        self.closeAction = closeAction
+
+        # we have to make sure, that this runs in the same context as
+        # commands run from the console
+        self.clearlocals = list(eval("dir()", self.globals))
+        self.connect("destroyed()", self._resetdir)
+
         if catchstd:
             self.redirector = StdRedirector(self.appendLine)
             self.stdout = sys.stdout
@@ -89,6 +111,15 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                 self.runCommand(f.read(), silentStartup)
 
         self.writePrompt(self.plainText != "")
+
+    def _resetdir(self):
+        curlocals = list(eval("dir()", self.globals))
+        for var in curlocals:
+            if var not in self.clearlocals:
+                try:
+                    exec("del %s" % var, self.globals)
+                except Exception as e:
+                    pass
 
     def _resetStdout(self):
         sys.stdout = self.stdout
@@ -212,7 +243,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
             self.textCursor().deletePreviousChar()
         elif self.textCursor() == self.promptCursor():
             # if no chars in cur command, close
-            self.close()
+            self.closeAction()
 
     def currentLine(self):
         return self.textCursor().block().text()[self.promptLength():]

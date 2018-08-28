@@ -13,7 +13,7 @@ import traceback
 import json
 
 from configparser import ConfigParser
-from pytsonui.console import PythonConsole
+from pytsonui.console import PythonConsoleDialog
 from pytsonui.config import ConfigurationDialog
 from PythonQt.QtGui import QFont, QColor, QMessageBox, QTextBrowser
 from PythonQt.QtCore import Qt, QUrl, QTimer, QTranslator, QCoreApplication
@@ -354,9 +354,10 @@ class PluginHost(pytson.Translatable):
             h = cls.cfg.getint("console", "height")
             startup = cls.cfg.get("console", "startup")
             silent = cls.cfg.getboolean("console", "silentStartup")
-            cls.shell = PythonConsole(tabcomp, spaces, tabwidth, font, bgcolor,
-                                      txtcolor, w, h, startup, silent)
-            cls.shell.connect("destroyed()", cls.scriptingConsoleDestroyed)
+            cls.shell = PythonConsoleDialog(tabcomp, spaces, tabwidth, font,
+                                            bgcolor, txtcolor, w, h, startup,
+                                            silent)
+            cls.shell.connect("finished()", cls.scriptingConsoleDestroyed)
         cls.shell.show()
 
     @classmethod
