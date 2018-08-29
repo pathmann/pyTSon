@@ -6664,16 +6664,24 @@ def startConnection(serverConnectionHandlerID, identity, ip, port, nickname, def
     return NULL;
 
   QString error;
-  char** defaultChannelArray;
-  if (!PYLIST_TO_ARRAY(char*, pydefaultChannelArray, error, &defaultChannelArray, true)) {
-    PyErr_SetString(PyExc_AttributeError, TRANS("Conversion failed with error \"%1\"").arg(error).toUtf8().data());
-    return NULL;
+  char** defaultChannelArray = NULL;
+  int defchansize = PyList_Size(pydefaultChannelArray);
+  if (defchansize != 0) {
+    if (!PYLIST_TO_ARRAY(char*, pydefaultChannelArray, error, &defaultChannelArray, true)) {
+      PyErr_SetString(PyExc_AttributeError, TRANS("Conversion failed with error \"%1\"").arg(error).toUtf8().data());
+      return NULL;
+    }
+
+    defaultChannelArray[defchansize] = (char*)malloc(2 * sizeof(char));
+    strcpy(defaultChannelArray[defchansize], "");
   }
 
   unsigned int res = ts3_funcs.startConnection((uint64)schid, identity, ip, port, nickname, (const char**)defaultChannelArray, defaultChannelPassword, serverPassword);
-  for (int i = 0; defaultChannelArray[i] != NULL; ++i)
-    free(defaultChannelArray[i]);
-  free(defaultChannelArray);
+  if (defchansize != 0) {
+    for (int i = 0; i <= defchansize; ++i)
+      free(defaultChannelArray[i]);
+    free(defaultChannelArray);
+  }
 
   return Py_BuildValue("I", res);
 }
