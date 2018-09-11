@@ -1353,8 +1353,8 @@ class ServerviewDelegate(QStyledItemDelegate):
 
         icon = index.data(Qt.DecorationRole)
         statusicons = index.data(ServerViewRoles.statusicons)
-        font = index.data(Qt.FontRole) or QApplication.font()
-        brush = index.data(Qt.ForegroundRole) or Qt.black
+        font = index.data(Qt.FontRole)
+        brush = index.data(Qt.ForegroundRole)
 
         if icon:
             iconsize = icon.actualSize(option.decorationSize)
@@ -1368,9 +1368,11 @@ class ServerviewDelegate(QStyledItemDelegate):
         painter.save()
 
         pen = painter.pen()
-        pen.setBrush(brush)
+        if brush is not None:
+            pen.setBrush(brush)
         painter.setPen(pen)
-        painter.setFont(font)
+        if font is not None:
+            painter.setFont(font)
 
         painter.drawText(headerRect, Qt.AlignLeft, index.data())
 
