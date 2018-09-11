@@ -157,7 +157,7 @@ class Channel(object):
     def _updateSpacer(self):
         done = False
         if self.isPermanent:
-            m = re.match(r'\[([clr\*])spacer\d*](.*)', self.name)
+            m = re.match(r'\[([clr\*])spacer.*](.*)', self.name)
             if m:
                 self.cache["isSpacer"] = True
 
