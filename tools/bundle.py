@@ -250,8 +250,8 @@ def main(root, pythondir, outdir, arches, buildbase, update):
                 sys.exit(1)
 
             # update pip: python -m pip install --update --target sitedir pip
-            p = subprocess.Popen([intpath, "-m", "pip", "install", "--upgrade",
-                                  "pip"],
+            p = subprocess.Popen([intpath, "-m", "pip", "install",
+                                  "--no-cache-dir", "--upgrade", "pip"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             out, err = p.communicate()
@@ -270,7 +270,7 @@ def main(root, pythondir, outdir, arches, buildbase, update):
             reqfile = os.path.join(root, "requirements.txt")
             if os.path.isfile(reqfile):
                 p = subprocess.Popen([intpath, "-m", "pip", "install",
-                                      "-r", reqfile],
+                                      "--no-cache-dir", "-r", reqfile],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
                 out, err = p.communicate()
