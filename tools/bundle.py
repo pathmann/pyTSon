@@ -255,13 +255,16 @@ def main(root, pythondir, outdir, arches, buildbase, update):
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             out, err = p.communicate()
-            if err:
+            if p.returncode != 0:
                 print("Error updating pip:")
                 print(err)
                 if out:
                     print(out)
                 sys.exit(1)
-            elif out:
+            if err:
+                print("Warnings generated updating pip:")
+                print(err)
+            if out:
                 print(out)
 
             reqfile = os.path.join(root, "requirements.txt")
