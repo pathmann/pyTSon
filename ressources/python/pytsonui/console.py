@@ -12,6 +12,7 @@ from PythonQt.QtGui import (QFont, QFontMetrics, QPlainTextEdit, QPalette,
                             QTextCursor, QApplication, QDialog, QHBoxLayout)
 
 import pytson
+import string
 
 
 class StdRedirector:
@@ -300,16 +301,25 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
             cmd = self.currentLine()
             tokens = list(filter(None, re.split("[, \t\-\+\*\[\]\{\}:\(\)]+",
                                  cmd)))
-            if tokens[-1] != "":
+            lasttoken = tokens[-1]
+            if lasttoken != "":
+                if lasttoken[-1] != cmd[-1]:
+                    # operators are filtered out (such as opening braces),
+                    # so append the last non-alphanumeric characters back
+                    # to the completion token
+                    lastalpha = max(cmd.rfind(i)
+                                    for i in string.letters + string.digits)
+                    lasttoken += cmd[- lastalpha + 1:]
+
                 state = 0
-                cur = self.comp.complete(tokens[-1], state)
+                cur = self.comp.complete(lasttoken, state)
 
                 if cur:
                     l = [cur]
 
                     while cur:
                         state += 1
-                        cur = self.comp.complete(tokens[-1], state)
+                        cur = self.comp.complete(lasttoken, state)
 
                         if cur:
                             l.append(cur)
@@ -317,11 +327,11 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                     if len(l) == 1:
                         self.removeCurrentLine()
                         self.writePrompt(False)
-                        before = cmd[:-len(tokens[-1])]
+                        before = cmd[:-len(lasttoken)]
                         if before == "":
                             self.textCursor().insertText(l[0])
                         else:
-                            self.textCursor().insertText(cmd[:-len(tokens[-1])]
+                            self.textCursor().insertText(cmd[:-len(lasttoken)]
                                                          + l[0])
                     else:
                         self.appendLine("\t\t".join(l))
@@ -330,7 +340,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                         prefix = ''.join(c[0] for c in takewhile(lambda x:
                                          all(x[0] == y for y in x), zip(*l)))
                         if prefix != '':
-                            self.textCursor().insertText(cmd[:-len(tokens[-1])]
+                            self.textCursor().insertText(cmd[:-len(lasttoken)]
                                                          + prefix)
                         else:
                             self.textCursor().insertText(cmd)
