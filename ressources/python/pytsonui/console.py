@@ -335,13 +335,12 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
                                                          + l[0])
                     else:
                         self.appendLine("\t\t".join(l))
-                        self.writePrompt(True)
 
                         prefix = ''.join(c[0] for c in takewhile(lambda x:
                                          all(x[0] == y for y in x), zip(*l)))
                         if prefix != '':
-                            self.textCursor().insertText(cmd[:-len(lasttoken)]
-                                                         + prefix)
+                            self.textCursor().insertText(prefix[len(lasttoken):
+                                                                ])
                         else:
                             self.textCursor().insertText(cmd)
         else:
