@@ -4337,6 +4337,9 @@ def requestClientAddPerm(serverConnectionHandlerID, clientDatabaseID, permission
   }
 
   unsigned int res = ts3_funcs.requestClientAddPerm((uint64)schid, (uint64)clientDatabaseID, permissionIDArray, permissionValueArray, permissionSkipArray, PyList_Size(pypermissionIDArray), returnCode);
+  free(permissionIDArray);
+  free(permissionValueArray);
+  free(permissionSkipArray);
 
   return Py_BuildValue("I", res);
 }
