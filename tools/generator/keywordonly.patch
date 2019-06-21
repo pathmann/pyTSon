@@ -1,9 +1,9 @@
 diff --git a/ressources/python/pytson.py b/ressources/python/pytson.py
-index f3dd4dd..3ad853b 100644
+index 3eed890..06e0940 100644
 --- a/ressources/python/pytson.py
 +++ b/ressources/python/pytson.py
 @@ -12,7 +12,7 @@ from PythonQt.QtGui import QApplication
- _PYTSON_VERSION = "1.2.2"
+ _PYTSON_VERSION = "1.2.3"
  
  
 -def tr(context, sourcetext, *, disambiguation="", n=-1):
@@ -43,20 +43,29 @@ index 28be23d..f1a4c04 100644
      """
      Loads a Qt designer file (.ui), creates the widgets defined in and adds
 diff --git a/ressources/python/pytsonui/console.py b/ressources/python/pytsonui/console.py
-index 0b55b9e..09633c2 100644
+index 580af9f..7402efa 100644
 --- a/ressources/python/pytsonui/console.py
 +++ b/ressources/python/pytsonui/console.py
-@@ -36,7 +36,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
+@@ -37,7 +37,7 @@ class PythonConsoleDialog(QDialog):
      def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
                   font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
                   width=800, height=600, startup="", silentStartup=False,
 -                 parent=None, *, catchstd=False):
 +                 parent=None, catchstd=False):
+         super(QDialog, self).__init__(parent)
+         self.setAttribute(Qt.WA_DeleteOnClose)
+ 
+@@ -55,7 +55,7 @@ class PythonConsole(QPlainTextEdit, pytson.Translatable):
+     def __init__(self, tabcomplete=True, spaces=True, tabwidth=2,
+                  font=defaultFont(), bgcolor=Qt.black, textcolor=Qt.white,
+                  startup="", silentStartup=False,
+-                 parent=None, *, catchstd=False, closeAction):
++                 parent=None, catchstd=False, closeAction):
          super(QPlainTextEdit, self).__init__(parent)
  
          self.setLineWrapMode(QPlainTextEdit.NoWrap)
 diff --git a/ressources/python/ts3client.py b/ressources/python/ts3client.py
-index 1c01e6f..063105d 100644
+index 7584e07..c47619e 100644
 --- a/ressources/python/ts3client.py
 +++ b/ressources/python/ts3client.py
 @@ -155,7 +155,7 @@ class IconPack(object):
@@ -69,7 +78,7 @@ index 1c01e6f..063105d 100644
          Instantiates a new IconPack object referenced by its name or the
          internal info string (an Exception is raised if the iconpack could
 diff --git a/ressources/python/ts3widgets/filetransfer.py b/ressources/python/ts3widgets/filetransfer.py
-index 972ee85..94bff4b 100644
+index 9addaaa..bc9ec3c 100644
 --- a/ressources/python/ts3widgets/filetransfer.py
 +++ b/ressources/python/ts3widgets/filetransfer.py
 @@ -123,7 +123,7 @@ class FileListModel(QAbstractItemModel, pytson.Translatable):
@@ -91,10 +100,10 @@ index 972ee85..94bff4b 100644
                   iconpack=None):
          """
 diff --git a/ressources/python/ts3widgets/serverview.py b/ressources/python/ts3widgets/serverview.py
-index 0b87d7f..346c5bb 100644
+index 829d6e5..6e5bc50 100644
 --- a/ressources/python/ts3widgets/serverview.py
 +++ b/ressources/python/ts3widgets/serverview.py
-@@ -1389,7 +1389,7 @@ class Serverview(QTreeView):
+@@ -1391,7 +1391,7 @@ class Serverview(QTreeView):
      A QTreeView widget to display the complete view on a TS3 Server.
      """
  
