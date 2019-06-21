@@ -1,6 +1,10 @@
 #ifndef TS3_FUNCTIONS_H
 #define TS3_FUNCTIONS_H
 
+#if !defined(WIN32) && !defined(__WIN32__) && !defined(_WIN32)
+#include <unistd.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
