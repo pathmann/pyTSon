@@ -3573,9 +3573,9 @@ def requestBanList(serverConnectionHandlerID, returnCode):
     Requests the banlist on a server. The event onBanListEvent will be triggered.
     @param serverConnectionHandlerID: the ID of the serverconnection
     @type serverConnectionHandlerID: int
-    @param start:
+    @param start: offset of the banlist
     @type start: int
-    @param duration:
+    @param duration: number of items requesting from the server
     @type duration: int
     @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
     @type returnCode: string

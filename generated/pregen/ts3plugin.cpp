@@ -1537,7 +1537,7 @@ void ts3plugin_onPlaybackShutdownCompleteEvent(uint64 serverConnectionHandlerID)
   }
 }
 
-void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity) {
+void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand, anyID invokerClientID, const char *invokerName, const char *invokerUniqueIdentity) {
   /*
     def onPluginCommandEvent(self, serverConnectionHandlerID, sender, pluginCommand):
         """

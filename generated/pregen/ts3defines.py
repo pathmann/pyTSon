@@ -60,414 +60,15 @@ TS3_MAX_SIZE_OFFLINE_MESSAGE_SUBJECT = 200
 TS3_MAX_SIZE_PLUGIN_COMMAND = 1024 * 8
 TS3_MAX_SIZE_VIRTUALSERVER_HOSTBANNER_GFX_URL = 2000
 
-ERROR_accounting_already_started = 0x0b0c
-
-ERROR_accounting_instance_check_error = 0x0b08
-
-ERROR_accounting_instance_duplicated = 0x0b0b
-
-ERROR_accounting_instance_limit_reached = 0x0b07
-
-ERROR_accounting_license_date_not_ok = 0x0b03
-
-ERROR_accounting_license_file_invalid = 0x0b09
-
-ERROR_accounting_license_file_not_found = 0x0b02
-
-ERROR_accounting_not_started = 0x0b0d
-
-ERROR_accounting_running_elsewhere = 0x0b0a
-
-ERROR_accounting_server_error = 0x0b06
-
-ERROR_accounting_slot_limit_reached = 0x0b01
-
-ERROR_accounting_to_many_starts = 0x0b0e
-
-ERROR_accounting_unable_to_connect_to_server = 0x0b04
-
-ERROR_accounting_unknown_error = 0x0b05
-
-ERROR_accounting_virtualserver_limit_reached = 0x0b00
-
-ERROR_ban_flooding = 0x0d03
-
-ERROR_ban_invalid_id = 0x0d00
-
-ERROR_channel_already_in = 0x0302
-
-ERROR_channel_can_not_delete_default = 0x0305
-
-ERROR_channel_default_require_permanent = 0x0306
-
-ERROR_channel_invalid_flags = 0x0307
-
-ERROR_channel_invalid_id = 0x0300
-
-ERROR_channel_invalid_order = 0x030b
-
-ERROR_channel_invalid_password = 0x030d
-
-ERROR_channel_invalid_security_hash = 0x030f
-
-ERROR_channel_is_private_channel = 0x030e
-
-ERROR_channel_maxclients_reached = 0x0309
-
-ERROR_channel_maxfamily_reached = 0x030a
-
-ERROR_channel_name_inuse = 0x0303
-
-ERROR_channel_no_filetransfer_supported = 0x030c
-
-ERROR_channel_not_empty = 0x0304
-
-ERROR_channel_parent_not_permanent = 0x0308
-
-ERROR_channel_protocol_limit_reached = 0x0301
-
-ERROR_client_already_subscribed = 0x0205
-
-ERROR_client_cannot_verify_now = 0x020e
-
-ERROR_client_could_not_validate_identity = 0x0207
-
-ERROR_client_hacked = 0x020d
-
-ERROR_client_invalid_id = 0x0200
-
-ERROR_client_invalid_password = 0x0208
-
-ERROR_client_invalid_type = 0x0204
-
-ERROR_client_is_flooding = 0x020c
-
-ERROR_client_is_online = 0x020b
-
-ERROR_client_login_not_permitted = 0x020f
-
-ERROR_client_nickname_inuse = 0x0201
-
-ERROR_client_not_logged_in = 0x0206
-
-ERROR_client_not_subscribed = 0x0210
-
-ERROR_client_protocol_limit_reached = 0x0203
-
-ERROR_client_too_many_clones_connected = 0x0209
-
-ERROR_client_version_outdated = 0x020a
-
-ERROR_clientlibrary_not_initialised = 0x0709
-
-ERROR_command_not_found = 0x0100
-
-ERROR_connect_failed_banned = 0x0d01
-
-ERROR_connection_ip_protocol_missing = 0x070d
-
-ERROR_connection_lost = 0x0701
-
-ERROR_could_not_initialise_input_manager = 0x0708
-
-ERROR_could_not_resolve_hostname = 0x0706
-
-ERROR_currently_not_possible = 0x0704
-
-ERROR_database = 0x0500
-
-ERROR_database_constraint = 0x0504
-
-ERROR_database_duplicate_entry = 0x0502
-
-ERROR_database_empty_result = 0x0501
-
-ERROR_database_no_modifications = 0x0503
-
-ERROR_database_reinvoke = 0x0505
-
-ERROR_dont_notify = 0x0004
-
-ERROR_failed_connection_initialisation = 0x0705
-
-ERROR_file_already_exists = 0x0802
-
-ERROR_file_already_in_use = 0x080a
-
-ERROR_file_connection_lost = 0x080f
-
-ERROR_file_could_not_open_connection = 0x080b
-
-ERROR_file_exceeds_file_system_maximum_size = 0x080d
-
-ERROR_file_exceeds_supplied_size = 0x0810
-
-ERROR_file_invalid_name = 0x0800
-
-ERROR_file_invalid_path = 0x0806
-
-ERROR_file_invalid_permissions = 0x0801
-
-ERROR_file_invalid_size = 0x0809
-
-ERROR_file_invalid_transfer_id = 0x0805
-
-ERROR_file_io_error = 0x0804
-
-ERROR_file_no_files_available = 0x0807
-
-ERROR_file_no_space_left_on_device = 0x080c
-
-ERROR_file_not_found = 0x0803
-
-ERROR_file_overwrite_excludes_resume = 0x0808
-
-ERROR_file_transfer_canceled = 0x0812
-
-ERROR_file_transfer_client_quota_exceeded = 0x0815
-
-ERROR_file_transfer_complete = 0x0811
-
-ERROR_file_transfer_connection_timeout = 0x080e
-
-ERROR_file_transfer_interrupted = 0x0813
-
-ERROR_file_transfer_limit_reached = 0x0817
-
-ERROR_file_transfer_reset = 0x0816
-
-ERROR_file_transfer_server_quota_exceeded = 0x0814
-
-ERROR_invalid_server_connection_handler_id = 0x0707
-
-ERROR_lib_time_limit_reached = 0x0005
-
-ERROR_message_invalid_id = 0x0c00
-
-ERROR_no_cached_connection_info = 0x0703
-
-ERROR_no_network_port_available = 0x0102
-
-ERROR_not_connected = 0x0702
-
-ERROR_not_implemented = 0x0002
-
-ERROR_ok = 0x0000
-
-ERROR_ok_no_update = 0x0003
-
-ERROR_parameter_checksum = 0x0607
-
-ERROR_parameter_convert = 0x0604
-
-ERROR_parameter_invalid = 0x0602
-
-ERROR_parameter_invalid_count = 0x0601
-
-ERROR_parameter_invalid_size = 0x0605
-
-ERROR_parameter_missing = 0x0606
-
-ERROR_parameter_not_found = 0x0603
-
-ERROR_parameter_quote = 0x0600
-
-ERROR_permission_default_group_forbidden = 0x0a04
-
-ERROR_permission_duplicate_entry = 0x0a01
-
-ERROR_permission_empty_result = 0x0a03
-
-ERROR_permission_invalid_group_id = 0x0a00
-
-ERROR_permission_invalid_perm_id = 0x0a02
-
-ERROR_permission_invalid_size = 0x0a05
-
-ERROR_permission_invalid_value = 0x0a06
-
-ERROR_permission_template_group_is_used = 0x0a0b
-
-ERROR_permissions = 0x0a0c
-
-ERROR_permissions_client_insufficient = 0x0a08
-
-ERROR_permissions_group_not_empty = 0x0a07
-
-ERROR_permissions_insufficient_group_power = 0x0a09
-
-ERROR_permissions_insufficient_permission_power = 0x0a0a
-
-ERROR_port_already_in_use = 0x0103
-
-ERROR_privilege_key_invalid = 0x0f00
-
-ERROR_provisioning_already_connected = 0x1115
-
-ERROR_provisioning_already_initialized = 0x1112
-
-ERROR_provisioning_auth_data_too_large = 0x1111
-
-ERROR_provisioning_auth_server_not_connected = 0x1110
-
-ERROR_provisioning_connecting = 0x1114
-
-ERROR_provisioning_could_not_connect = 0x1109
-
-ERROR_provisioning_internal_tries_exceeded = 0x1106
-
-ERROR_provisioning_invalid_password = 0x1100
-
-ERROR_provisioning_invalid_request = 0x1101
-
-ERROR_provisioning_invalid_timeout = 0x1118
-
-ERROR_provisioning_io_error = 0x1117
-
-ERROR_provisioning_no_permission = 0x111A
-
-ERROR_provisioning_no_slots_available = 0x1102
-
-ERROR_provisioning_not_connected = 0x1116
-
-ERROR_provisioning_not_initialized = 0x1113
-
-ERROR_provisioning_pool_missing = 0x1103
-
-ERROR_provisioning_pool_unknown = 0x1104
-
-ERROR_provisioning_too_many_reserved = 0x1108
-
-ERROR_provisioning_too_many_slots_requested = 0x1107
-
-ERROR_provisioning_ts3server_not_found = 0x1119
-
-ERROR_provisioning_unknown_ip_location = 0x1105
-
-ERROR_rename_failed_banned = 0x0d02
-
-ERROR_server_deployment_active = 0x0405
-
-ERROR_server_duplicate_running = 0x040e
-
-ERROR_server_invalid_id = 0x0400
-
-ERROR_server_invalid_password = 0x0404
-
-ERROR_server_is_booting = 0x040a
-
-ERROR_server_is_not_running = 0x0409
-
-ERROR_server_is_shutting_down = 0x0402
-
-ERROR_server_is_virtual = 0x0407
-
-ERROR_server_maxclients_reached = 0x0403
-
-ERROR_server_modal_quit = 0x040c
-
-ERROR_server_running = 0x0401
-
-ERROR_server_status_invalid = 0x040b
-
-ERROR_server_unable_to_stop_own_server = 0x0406
-
-ERROR_server_version_outdated = 0x040d
-
-ERROR_server_wrong_machineid = 0x0408
-
-ERROR_serverlibrary_not_initialised = 0x070a
-
-ERROR_sound_channel_mask_mismatch = 0x0918
-
-ERROR_sound_could_not_open_capture_device = 0x0906
-
-ERROR_sound_could_not_open_playback_device = 0x0907
-
-ERROR_sound_device_already_registerred = 0x0910
-
-ERROR_sound_device_busy = 0x0916
-
-ERROR_sound_device_in_use = 0x090f
-
-ERROR_sound_handler_has_device = 0x0908
-
-ERROR_sound_internal_capture = 0x090e
-
-ERROR_sound_internal_encoder = 0x0902
-
-ERROR_sound_internal_playback = 0x0903
-
-ERROR_sound_internal_preprocessor = 0x0901
-
-ERROR_sound_invalid_capture_device = 0x0909
-
-ERROR_sound_invalid_channel_count = 0x0913
-
-ERROR_sound_invalid_playback_device = 0x090a
-
-ERROR_sound_invalid_wave = 0x090b
-
-ERROR_sound_need_more_data = 0x0915
-
-ERROR_sound_no_capture_device_available = 0x0904
-
-ERROR_sound_no_data = 0x0917
-
-ERROR_sound_no_playback_device_available = 0x0905
-
-ERROR_sound_open_wave = 0x090d
-
-ERROR_sound_preprocessor_disabled = 0x0900
-
-ERROR_sound_read_wave = 0x0914
-
-ERROR_sound_unknown_device = 0x0911
-
-ERROR_sound_unsupported_frequency = 0x0912
-
-ERROR_sound_unsupported_wave = 0x090c
-
-ERROR_tts_unable_to_initialize = 0x0e00
-
-ERROR_unable_to_bind_network_port = 0x0101
-
-ERROR_undefined = 0x0001
-
-ERROR_voip_already_initialized = 0x1001
-
-ERROR_voip_cannot_answer_initiated_call = 0x1006
-
-ERROR_voip_internal_error = 0x1004
-
-ERROR_voip_invalid_account = 0x1003
-
-ERROR_voip_invalid_connectionId = 0x1005
-
-ERROR_voip_not_initialized = 0x1007
-
-ERROR_voip_pjsua = 0x1000
-
-ERROR_voip_too_many_accounts = 0x1002
-
-ERROR_vs_critical = 0x0700
-
-ERROR_whisper_no_targets = 0x070c
-
-ERROR_whisper_too_many_targets = 0x070b
-
-
 
 class ACLType(object):
     ACL_NONE = 0
     ACL_WHITE_LIST = 1
     ACL_BLACK_LIST = 2
 
-
 class AwayStatus(object):
     AWAY_NONE = 0
     AWAY_ZZZ = 1
-
 
 class BBCodeTags(object):
     BBCodeTag_B = 0x00000001
@@ -498,7 +99,6 @@ class BBCodeTags(object):
     BBCodeTag_def_simple_Img = BBCodeTag_def_simple | BBCodeTag_IMAGE
     BBCodeTag_def_extended = (((((BBCodeTag_group_text | BBCodeTag_group_align) | BBCodeTag_URL) | BBCodeTag_IMAGE) | BBCodeTag_HR) | BBCodeTag_group_list) | BBCodeTag_group_table
 
-
 class ChannelProperties(object):
     CHANNEL_NAME = 0
     CHANNEL_TOPIC = 1
@@ -519,7 +119,6 @@ class ChannelProperties(object):
     CHANNEL_DELETE_DELAY = 16
     CHANNEL_ENDMARKER = 17
 
-
 class ChannelPropertiesRare(object):
     CHANNEL_DUMMY_2 = 17
     CHANNEL_DUMMY_3 = 18
@@ -536,9 +135,10 @@ class ChannelPropertiesRare(object):
     CHANNEL_FORCED_SILENCE = 29
     CHANNEL_NAME_PHONETIC = 30
     CHANNEL_ICON_ID = 31
-    CHANNEL_FLAG_PRIVATE = 32
-    CHANNEL_ENDMARKER_RARE = 33
-
+    CHANNEL_BANNER_GFX_URL = 32
+    CHANNEL_BANNER_MODE = 33
+    CHANNEL_ENDMARKER_RARE = 34
+    CHANNEL_DELETE_DELAY_DEADLINE = 127
 
 class ClientCommand(object):
     CLIENT_COMMAND_requestConnectionInfo = 0
@@ -555,7 +155,6 @@ class ClientCommand(object):
     CLIENT_COMMAND_requestSendXXXTextMsg = 11
     CLIENT_COMMAND_filetransfers = 12
     CLIENT_COMMAND_ENDMARKER = 13
-
 
 class ClientProperties(object):
     CLIENT_UNIQUE_IDENTIFIER = 0
@@ -579,11 +178,10 @@ class ClientProperties(object):
     CLIENT_VOLUME_MODIFICATOR = 18
     CLIENT_VERSION_SIGN = 19
     CLIENT_SECURITY_HASH = 20
-    CLIENT_ENDMARKER = 21
-
+    CLIENT_ENCRYPTION_CIPHERS = 21
+    CLIENT_ENDMARKER = 22
 
 class ClientPropertiesRare(object):
-    CLIENT_DUMMY_3 = 21
     CLIENT_DUMMY_4 = 22
     CLIENT_DUMMY_5 = 23
     CLIENT_DUMMY_6 = 24
@@ -623,19 +221,22 @@ class ClientPropertiesRare(object):
     CLIENT_COUNTRY = 58
     CLIENT_CHANNEL_GROUP_INHERITED_CHANNEL_ID = 59
     CLIENT_BADGES = 60
-    CLIENT_ENDMARKER_RARE = 61
-
+    CLIENT_MYTEAMSPEAK_ID = 61
+    CLIENT_INTEGRATIONS = 62
+    CLIENT_ACTIVE_INTEGRATIONS_INFO = 63
+    CLIENT_MYTS_AVATAR = 64
+    CLIENT_SIGNED_BADGES = 65
+    CLIENT_ENDMARKER_RARE = 66
+    CLIENT_HW_ID = 127
 
 class ClientType(object):
     ClientType_NORMAL = 0
     ClientType_SERVERQUERY = 1
 
-
 class CodecEncryptionMode(object):
     CODEC_ENCRYPTION_PER_CHANNEL = 0
     CODEC_ENCRYPTION_FORCED_OFF = 1
     CODEC_ENCRYPTION_FORCED_ON = 2
-
 
 class CodecType(object):
     CODEC_SPEEX_NARROWBAND = 0
@@ -645,11 +246,9 @@ class CodecType(object):
     CODEC_OPUS_VOICE = 4
     CODEC_OPUS_MUSIC = 5
 
-
 class CommandLinePropertiesRare(object):
     COMMANDLINE_NOTHING = 0
     COMMANDLINE_ENDMARKER_RARE = 1
-
 
 class ConnectionProperties(object):
     CONNECTION_PING = 0
@@ -706,7 +305,6 @@ class ConnectionProperties(object):
     CONNECTION_BANDWIDTH_RECEIVED_LAST_MINUTE_TOTAL = 51
     CONNECTION_ENDMARKER = 52
 
-
 class ConnectionPropertiesRare(object):
     CONNECTION_DUMMY_0 = 52
     CONNECTION_DUMMY_1 = 53
@@ -724,7 +322,6 @@ class ConnectionPropertiesRare(object):
     CONNECTION_FILETRANSFER_BYTES_SENT_TOTAL = 65
     CONNECTION_ENDMARKER_RARE = 66
 
-
 class ConnectStatus(object):
     STATUS_DISCONNECTED = 0
     STATUS_CONNECTING = 1
@@ -732,17 +329,14 @@ class ConnectStatus(object):
     STATUS_CONNECTION_ESTABLISHING = 3
     STATUS_CONNECTION_ESTABLISHED = 4
 
-
 class FileListType(object):
     FileListType_Directory = 0
     FileListType_File = 1
-
 
 class FileTransferState(object):
     FILETRANSFER_INITIALISING = 0
     FILETRANSFER_ACTIVE = 1
     FILETRANSFER_FINISHED = 2
-
 
 class FTAction(object):
     FT_INIT_SERVER = 0
@@ -755,12 +349,10 @@ class FTAction(object):
     FT_FILELIST = 7
     FT_FILEINFO = 8
 
-
 class GroupShowNameTreeMode(object):
     GroupShowNameTreeMode_NONE = 0
     GroupShowNameTreeMode_BEFORE = 1
     GroupShowNameTreeMode_BEHIND = 2
-
 
 class GroupWhisperTargetMode(object):
     GROUPWHISPERTARGETMODE_ALL = 0
@@ -772,7 +364,6 @@ class GroupWhisperTargetMode(object):
     GROUPWHISPERTARGETMODE_SUBCHANNELS = 6
     GROUPWHISPERTARGETMODE_ENDMARKER = 7
 
-
 class GroupWhisperType(object):
     GROUPWHISPERTYPE_SERVERGROUP = 0
     GROUPWHISPERTYPE_CHANNELGROUP = 1
@@ -780,22 +371,18 @@ class GroupWhisperType(object):
     GROUPWHISPERTYPE_ALLCLIENTS = 3
     GROUPWHISPERTYPE_ENDMARKER = 4
 
-
 class HardwareInputStatus(object):
     HARDWAREINPUT_DISABLED = 0
     HARDWAREINPUT_ENABLED = 1
-
 
 class HardwareOutputStatus(object):
     HARDWAREOUTPUT_DISABLED = 0
     HARDWAREOUTPUT_ENABLED = 1
 
-
 class HostBannerMode(object):
     HostBannerMode_NO_ADJUST = 0
     HostBannerMode_ADJUST_IGNORE_ASPECT = 1
     HostBannerMode_ADJUST_KEEP_ASPECT = 2
-
 
 class HostMessageMode(object):
     HostMessageMode_NONE = 0
@@ -803,23 +390,18 @@ class HostMessageMode(object):
     HostMessageMode_MODAL = 2
     HostMessageMode_MODALQUIT = 3
 
-
 class InputDeactivationStatus(object):
     INPUT_ACTIVE = 0
     INPUT_DEACTIVATED = 1
 
-
-class LicenseViolationType(object):
-    NO_VIOLATION = 0
-    SLOT_VIOLATION = 1
-    SLOT_SUSPICION = 2
-
+class LicenseIssue(object):
+    Blacklisted = 0
+    Greylisted = 1
 
 class LocalTestMode(object):
     TEST_MODE_OFF = 0
     TEST_MODE_VOICE_LOCAL_ONLY = 1
     TEST_MODE_VOICE_LOCAL_AND_REMOTE = 2
-
 
 class LogLevel(object):
     LogLevel_CRITICAL = 0
@@ -828,7 +410,6 @@ class LogLevel(object):
     LogLevel_DEBUG = 3
     LogLevel_INFO = 4
     LogLevel_DEVEL = 5
-
 
 class LogTypes(object):
     LogType_NONE = 0x0000
@@ -839,34 +420,34 @@ class LogTypes(object):
     LogType_DATABASE = 0x0010
     LogType_SYSLOG = 0x0020
 
-
 class MonoSoundDestination(object):
     MONO_SOUND_DESTINATION_ALL = 0
     MONO_SOUND_DESTINATION_FRONT_CENTER = 1
     MONO_SOUND_DESTINATION_FRONT_LEFT_AND_RIGHT = 2
 
-
 class MuteInputStatus(object):
     MUTEINPUT_NONE = 0
     MUTEINPUT_MUTED = 1
-
 
 class MuteOutputStatus(object):
     MUTEOUTPUT_NONE = 0
     MUTEOUTPUT_MUTED = 1
 
+class MytsDataUnsetFlags(object):
+    MytsDataUnsetFlag_None = 0
+    MytsDataUnsetFlag_Badges = 1
+    MytsDataUnsetFlag_Avatar = 1 << 1
+    MytsDataUnsetFlag_All = MytsDataUnsetFlag_Badges | MytsDataUnsetFlag_Avatar
 
 class PluginConfigureOffer(object):
     PLUGIN_OFFERS_NO_CONFIGURE = 0
     PLUGIN_OFFERS_CONFIGURE_NEW_THREAD = 1
     PLUGIN_OFFERS_CONFIGURE_QT_THREAD = 2
 
-
 class PluginConnectTab(object):
     PLUGIN_CONNECT_TAB_NEW = 0
     PLUGIN_CONNECT_TAB_CURRENT = 1
     PLUGIN_CONNECT_TAB_NEW_IF_CURRENT_CONNECTED = 2
-
 
 class PluginGuiProfile(object):
     PLUGIN_GUI_SOUND_CAPTURE = 0
@@ -875,23 +456,19 @@ class PluginGuiProfile(object):
     PLUGIN_GUI_SOUNDPACK = 3
     PLUGIN_GUI_IDENTITY = 4
 
-
 class PluginItemType(object):
     PLUGIN_SERVER = 0
     PLUGIN_CHANNEL = 1
     PLUGIN_CLIENT = 2
-
 
 class PluginMenuType(object):
     PLUGIN_MENU_TYPE_GLOBAL = 0
     PLUGIN_MENU_TYPE_CHANNEL = 1
     PLUGIN_MENU_TYPE_CLIENT = 2
 
-
 class PluginMessageTarget(object):
     PLUGIN_MESSAGE_TARGET_SERVER = 0
     PLUGIN_MESSAGE_TARGET_CHANNEL = 1
-
 
 class PluginTargetMode(object):
     PluginCommandTarget_CURRENT_CHANNEL = 0
@@ -899,7 +476,6 @@ class PluginTargetMode(object):
     PluginCommandTarget_CLIENT = 2
     PluginCommandTarget_CURRENT_CHANNEL_SUBSCRIBED_CLIENTS = 3
     PluginCommandTarget_MAX = 4
-
 
 class ReasonIdentifier(object):
     REASON_NONE = 0
@@ -915,17 +491,14 @@ class ReasonIdentifier(object):
     REASON_CHANNELEDIT = 10
     REASON_CLIENTDISCONNECT_SERVER_SHUTDOWN = 11
 
-
 class SecuritySaltOptions(object):
     SECURITY_SALT_CHECK_NICKNAME = 1
     SECURITY_SALT_CHECK_META_DATA = 2
-
 
 class SERVER_BINDING(object):
     SERVER_BINDING_VIRTUALSERVER = 0
     SERVER_BINDING_SERVERQUERY = 1
     SERVER_BINDING_FILETRANSFER = 2
-
 
 class ServerInstancePropertiesRare(object):
     SERVERINSTANCE_DATABASE_VERSION = 0
@@ -944,14 +517,13 @@ class ServerInstancePropertiesRare(object):
     SERVERINSTANCE_TEMPLATE_CHANNELDEFAULT_GROUP = 13
     SERVERINSTANCE_PERMISSIONS_VERSION = 14
     SERVERINSTANCE_PENDING_CONNECTIONS_PER_IP = 15
-    SERVERINSTANCE_ENDMARKER_RARE = 16
-
+    SERVERINSTANCE_SERVERQUERY_MAX_CONNECTIONS_PER_IP = 16
+    SERVERINSTANCE_ENDMARKER_RARE = 17
 
 class TalkStatus(object):
     STATUS_NOT_TALKING = 0
     STATUS_TALKING = 1
     STATUS_TALKING_WHILE_DISABLED = 2
-
 
 class TextMessageTargetMode(object):
     TextMessageTarget_CLIENT = 1
@@ -959,6 +531,231 @@ class TextMessageTargetMode(object):
     TextMessageTarget_SERVER = 3
     TextMessageTarget_MAX = 4
 
+ERROR_ok = 0x0000
+ERROR_undefined = 0x0001
+ERROR_not_implemented = 0x0002
+ERROR_ok_no_update = 0x0003
+ERROR_dont_notify = 0x0004
+ERROR_lib_time_limit_reached = 0x0005
+ERROR_out_of_memory = 0x0006
+ERROR_canceled = 0x0007
+ERROR_command_not_found = 0x0100
+ERROR_unable_to_bind_network_port = 0x0101
+ERROR_no_network_port_available = 0x0102
+ERROR_port_already_in_use = 0x0103
+ERROR_client_invalid_id = 0x0200
+ERROR_client_nickname_inuse = 0x0201
+ERROR_client_protocol_limit_reached = 0x0203
+ERROR_client_invalid_type = 0x0204
+ERROR_client_already_subscribed = 0x0205
+ERROR_client_not_logged_in = 0x0206
+ERROR_client_could_not_validate_identity = 0x0207
+ERROR_client_version_outdated = 0x020a
+ERROR_client_is_flooding = 0x020c
+ERROR_client_hacked = 0x020d
+ERROR_client_cannot_verify_now = 0x020e
+ERROR_client_login_not_permitted = 0x020f
+ERROR_client_not_subscribed = 0x0210
+ERROR_channel_invalid_id = 0x0300
+ERROR_channel_protocol_limit_reached = 0x0301
+ERROR_channel_already_in = 0x0302
+ERROR_channel_name_inuse = 0x0303
+ERROR_channel_not_empty = 0x0304
+ERROR_channel_can_not_delete_default = 0x0305
+ERROR_channel_default_require_permanent = 0x0306
+ERROR_channel_invalid_flags = 0x0307
+ERROR_channel_parent_not_permanent = 0x0308
+ERROR_channel_maxclients_reached = 0x0309
+ERROR_channel_maxfamily_reached = 0x030a
+ERROR_channel_invalid_order = 0x030b
+ERROR_channel_no_filetransfer_supported = 0x030c
+ERROR_channel_invalid_password = 0x030d
+ERROR_channel_invalid_security_hash = 0x030f
+ERROR_server_invalid_id = 0x0400
+ERROR_server_running = 0x0401
+ERROR_server_is_shutting_down = 0x0402
+ERROR_server_maxclients_reached = 0x0403
+ERROR_server_invalid_password = 0x0404
+ERROR_server_is_virtual = 0x0407
+ERROR_server_is_not_running = 0x0409
+ERROR_server_is_booting = 0x040a
+ERROR_server_status_invalid = 0x040b
+ERROR_server_version_outdated = 0x040d
+ERROR_server_duplicate_running = 0x040e
+ERROR_parameter_quote = 0x0600
+ERROR_parameter_invalid_count = 0x0601
+ERROR_parameter_invalid = 0x0602
+ERROR_parameter_not_found = 0x0603
+ERROR_parameter_convert = 0x0604
+ERROR_parameter_invalid_size = 0x0605
+ERROR_parameter_missing = 0x0606
+ERROR_parameter_checksum = 0x0607
+ERROR_vs_critical = 0x0700
+ERROR_connection_lost = 0x0701
+ERROR_not_connected = 0x0702
+ERROR_no_cached_connection_info = 0x0703
+ERROR_currently_not_possible = 0x0704
+ERROR_failed_connection_initialisation = 0x0705
+ERROR_could_not_resolve_hostname = 0x0706
+ERROR_invalid_server_connection_handler_id = 0x0707
+ERROR_could_not_initialise_input_manager = 0x0708
+ERROR_clientlibrary_not_initialised = 0x0709
+ERROR_serverlibrary_not_initialised = 0x070a
+ERROR_whisper_too_many_targets = 0x070b
+ERROR_whisper_no_targets = 0x070c
+ERROR_connection_ip_protocol_missing = 0x070d
+ERROR_illegal_server_license = 0x070f
+ERROR_file_invalid_name = 0x0800
+ERROR_file_invalid_permissions = 0x0801
+ERROR_file_already_exists = 0x0802
+ERROR_file_not_found = 0x0803
+ERROR_file_io_error = 0x0804
+ERROR_file_invalid_transfer_id = 0x0805
+ERROR_file_invalid_path = 0x0806
+ERROR_file_no_files_available = 0x0807
+ERROR_file_overwrite_excludes_resume = 0x0808
+ERROR_file_invalid_size = 0x0809
+ERROR_file_already_in_use = 0x080a
+ERROR_file_could_not_open_connection = 0x080b
+ERROR_file_no_space_left_on_device = 0x080c
+ERROR_file_exceeds_file_system_maximum_size = 0x080d
+ERROR_file_transfer_connection_timeout = 0x080e
+ERROR_file_connection_lost = 0x080f
+ERROR_file_exceeds_supplied_size = 0x0810
+ERROR_file_transfer_complete = 0x0811
+ERROR_file_transfer_canceled = 0x0812
+ERROR_file_transfer_interrupted = 0x0813
+ERROR_file_transfer_server_quota_exceeded = 0x0814
+ERROR_file_transfer_client_quota_exceeded = 0x0815
+ERROR_file_transfer_reset = 0x0816
+ERROR_file_transfer_limit_reached = 0x0817
+ERROR_sound_preprocessor_disabled = 0x0900
+ERROR_sound_internal_preprocessor = 0x0901
+ERROR_sound_internal_encoder = 0x0902
+ERROR_sound_internal_playback = 0x0903
+ERROR_sound_no_capture_device_available = 0x0904
+ERROR_sound_no_playback_device_available = 0x0905
+ERROR_sound_could_not_open_capture_device = 0x0906
+ERROR_sound_could_not_open_playback_device = 0x0907
+ERROR_sound_handler_has_device = 0x0908
+ERROR_sound_invalid_capture_device = 0x0909
+ERROR_sound_invalid_playback_device = 0x090a
+ERROR_sound_invalid_wave = 0x090b
+ERROR_sound_unsupported_wave = 0x090c
+ERROR_sound_open_wave = 0x090d
+ERROR_sound_internal_capture = 0x090e
+ERROR_sound_device_in_use = 0x090f
+ERROR_sound_device_already_registerred = 0x0910
+ERROR_sound_unknown_device = 0x0911
+ERROR_sound_unsupported_frequency = 0x0912
+ERROR_sound_invalid_channel_count = 0x0913
+ERROR_sound_read_wave = 0x0914
+ERROR_sound_need_more_data = 0x0915
+ERROR_sound_device_busy = 0x0916
+ERROR_sound_no_data = 0x0917
+ERROR_sound_channel_mask_mismatch = 0x0918
+ERROR_permissions_client_insufficient = 0x0a08
+ERROR_permissions = 0x0a0c
+ERROR_accounting_virtualserver_limit_reached = 0x0b00
+ERROR_accounting_slot_limit_reached = 0x0b01
+ERROR_accounting_license_file_not_found = 0x0b02
+ERROR_accounting_license_date_not_ok = 0x0b03
+ERROR_accounting_unable_to_connect_to_server = 0x0b04
+ERROR_accounting_unknown_error = 0x0b05
+ERROR_accounting_server_error = 0x0b06
+ERROR_accounting_instance_limit_reached = 0x0b07
+ERROR_accounting_instance_check_error = 0x0b08
+ERROR_accounting_license_file_invalid = 0x0b09
+ERROR_accounting_running_elsewhere = 0x0b0a
+ERROR_accounting_instance_duplicated = 0x0b0b
+ERROR_accounting_already_started = 0x0b0c
+ERROR_accounting_not_started = 0x0b0d
+ERROR_accounting_to_many_starts = 0x0b0e
+ERROR_provisioning_invalid_password = 0x1100
+ERROR_provisioning_invalid_request = 0x1101
+ERROR_provisioning_no_slots_available = 0x1102
+ERROR_provisioning_pool_missing = 0x1103
+ERROR_provisioning_pool_unknown = 0x1104
+ERROR_provisioning_unknown_ip_location = 0x1105
+ERROR_provisioning_internal_tries_exceeded = 0x1106
+ERROR_provisioning_too_many_slots_requested = 0x1107
+ERROR_provisioning_too_many_reserved = 0x1108
+ERROR_provisioning_could_not_connect = 0x1109
+ERROR_provisioning_auth_server_not_connected = 0x1110
+ERROR_provisioning_auth_data_too_large = 0x1111
+ERROR_provisioning_already_initialized = 0x1112
+ERROR_provisioning_not_initialized = 0x1113
+ERROR_provisioning_connecting = 0x1114
+ERROR_provisioning_already_connected = 0x1115
+ERROR_provisioning_not_connected = 0x1116
+ERROR_provisioning_io_error = 0x1117
+ERROR_provisioning_invalid_timeout = 0x1118
+ERROR_provisioning_ts3server_not_found = 0x1119
+ERROR_provisioning_no_permission = 0x111A
+
+ERROR_client_invalid_password = 0x0208
+ERROR_client_too_many_clones_connected = 0x0209
+ERROR_client_is_online = 0x020b
+ERROR_channel_is_private_channel = 0x030e
+ERROR_database = 0x0500
+ERROR_database_empty_result = 0x0501
+ERROR_database_duplicate_entry = 0x0502
+ERROR_database_no_modifications = 0x0503
+ERROR_database_constraint = 0x0504
+ERROR_database_reinvoke = 0x0505
+ERROR_permission_invalid_group_id = 0x0a00
+ERROR_permission_duplicate_entry = 0x0a01
+ERROR_permission_invalid_perm_id = 0x0a02
+ERROR_permission_empty_result = 0x0a03
+ERROR_permission_default_group_forbidden = 0x0a04
+ERROR_permission_invalid_size = 0x0a05
+ERROR_permission_invalid_value = 0x0a06
+ERROR_permissions_group_not_empty = 0x0a07
+ERROR_permissions_insufficient_group_power = 0x0a09
+ERROR_permissions_insufficient_permission_power = 0x0a0a
+ERROR_permission_template_group_is_used = 0x0a0b
+ERROR_permission_used_by_integration = 0x0a0d
+ERROR_server_deployment_active = 0x0405
+ERROR_server_unable_to_stop_own_server = 0x0406
+ERROR_server_wrong_machineid = 0x0408
+ERROR_server_modal_quit = 0x040c
+ERROR_server_time_difference_too_large = 0x040f
+ERROR_server_blacklisted = 0x0410
+ERROR_message_invalid_id = 0x0c00
+ERROR_ban_invalid_id = 0x0d00
+ERROR_connect_failed_banned = 0x0d01
+ERROR_rename_failed_banned = 0x0d02
+ERROR_ban_flooding = 0x0d03
+ERROR_tts_unable_to_initialize = 0x0e00
+ERROR_privilege_key_invalid = 0x0f00
+ERROR_voip_pjsua = 0x1000
+ERROR_voip_already_initialized = 0x1001
+ERROR_voip_too_many_accounts = 0x1002
+ERROR_voip_invalid_account = 0x1003
+ERROR_voip_internal_error = 0x1004
+ERROR_voip_invalid_connectionId = 0x1005
+ERROR_voip_cannot_answer_initiated_call = 0x1006
+ERROR_voip_not_initialized = 0x1007
+ERROR_ed25519_rng_fail = 0x1300
+ERROR_ed25519_signature_invalid = 0x1301
+ERROR_ed25519_invalid_key = 0x1302
+ERROR_ed25519_unable_to_create_valid_key = 0x1303
+ERROR_ed25519_out_of_memory = 0x1304
+ERROR_ed25519_exists = 0x1305
+ERROR_ed25519_read_beyond_eof = 0x1306
+ERROR_ed25519_write_beyond_eof = 0x1307
+ERROR_ed25519_version = 0x1308
+ERROR_ed25519_invalid = 0x1309
+ERROR_ed25519_invalid_date = 0x130A
+ERROR_ed25519_unauthorized = 0x130B
+ERROR_ed25519_invalid_type = 0x130C
+ERROR_ed25519_address_nomatch = 0x130D
+ERROR_ed25519_not_valid_yet = 0x130E
+ERROR_ed25519_expired = 0x130F
+ERROR_ed25519_index_out_of_range = 0x1310
+ERROR_ed25519_invalid_size = 0x1311
+ERROR_invalid_mytsid_data = 0x1200
+ERROR_invalid_integration = 0x1201
 
 class VirtualServerProperties(object):
     VIRTUALSERVER_UNIQUE_IDENTIFIER = 0
@@ -973,11 +770,10 @@ class VirtualServerProperties(object):
     VIRTUALSERVER_CREATED = 9
     VIRTUALSERVER_UPTIME = 10
     VIRTUALSERVER_CODEC_ENCRYPTION_MODE = 11
-    VIRTUALSERVER_ENDMARKER = 12
-
+    VIRTUALSERVER_ENCRYPTION_CIPHERS = 12
+    VIRTUALSERVER_ENDMARKER = 13
 
 class VirtualServerPropertiesRare(object):
-    VIRTUALSERVER_DUMMY_0 = 12
     VIRTUALSERVER_DUMMY_1 = 13
     VIRTUALSERVER_DUMMY_2 = 14
     VIRTUALSERVER_DUMMY_3 = 15
@@ -1048,8 +844,11 @@ class VirtualServerPropertiesRare(object):
     VIRTUALSERVER_MIN_ANDROID_VERSION = 80
     VIRTUALSERVER_MIN_IOS_VERSION = 81
     VIRTUALSERVER_MIN_WINPHONE_VERSION = 82
-    VIRTUALSERVER_ENDMARKER_RARE = 83
-
+    VIRTUALSERVER_NICKNAME = 83
+    VIRTUALSERVER_ACCOUNTING_TOKEN = 84
+    VIRTUALSERVER_PROTOCOL_VERIFY_KEYPAIR = 85
+    VIRTUALSERVER_ANTIFLOOD_POINTS_NEEDED_PLUGIN_BLOCK = 86
+    VIRTUALSERVER_ENDMARKER_RARE = 87
 
 class Visibility(object):
     ENTER_VISIBILITY = 0
