@@ -66,10 +66,15 @@ TS3_MAX_SIZE_VIRTUALSERVER_HOSTBANNER_GFX_URL = 2000
 {% endfor %}
 {% for name, e in enums|dictsort %}
 
-
+{% if name in ("Ts3ErrorType", "Ts3RareErrorType") %}
+{% for (n, v) in e %}
+{{n}} = {{v}}
+{% endfor %}
+{% else %}
 class {{name}}(object):
     {% for (n, v) in e %}
     {{n}} = {{v}}
     {% endfor %}
+{% endif %}
 
 {%- endfor -%}
