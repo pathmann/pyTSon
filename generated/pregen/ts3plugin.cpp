@@ -267,7 +267,7 @@ void ts3plugin_onAvatarUpdated(uint64 serverConnectionHandlerID, anyID clientID,
   }
 }
 
-void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, const char *ip, const char *name, const char *uid, uint64 creationTime, uint64 durationTime, const char *invokerName, uint64 invokercldbid, const char *invokeruid, const char *reason, int numberOfEnforcements, const char *lastNickName) {
+void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, const char *ip, const char *name, const char *uid, const char *mytsid, uint64 creationTime, uint64 durationTime, const char *invokerName, uint64 invokercldbid, const char *invokeruid, const char *reason, int numberOfEnforcements, const char *lastNickName) {
   /*
     def onBanListEvent(self, serverConnectionHandlerID, banid, ip, name, uid, creationTime, durationTime, invokerName, invokercldbid, invokeruid, reason, numberOfEnforcements, lastNickName):
         """
@@ -282,6 +282,8 @@ void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, co
         @type name: str
         @param uid: the banned uid or an empty string
         @type uid: str
+        @param mytsid: the banned myTeamSpeak ID or an empty string
+        @type mytsid: str
         @param creationTime: time the ban was created as unix timestamp
         @type creationTime: int
         @param durationTime: duration of the ban in seconds
@@ -301,7 +303,7 @@ void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, co
         """
   */
   QString callerror;
-  if (!PLUGIN_HOST_CALL(NULL, callerror, "(sKKsssKKsKssis)", "onBanListEvent", (unsigned long long) serverConnectionHandlerID, (unsigned long long) banid,  ip,  name,  uid, (unsigned long long) creationTime, (unsigned long long) durationTime,  invokerName, (unsigned long long) invokercldbid,  invokeruid,  reason,  numberOfEnforcements,  lastNickName)) {
+  if (!PLUGIN_HOST_CALL(NULL, callerror, "(sKKssssKKsKssis)", "onBanListEvent", (unsigned long long) serverConnectionHandlerID, (unsigned long long) banid,  ip,  name,  uid, mytsid, (unsigned long long) creationTime, (unsigned long long) durationTime,  invokerName, (unsigned long long) invokercldbid,  invokeruid,  reason,  numberOfEnforcements,  lastNickName)) {
     LOG_ADD(QSTR("Calling onBanListEvent failed with error \"%1\"").arg(callerror), LogLevel_ERROR, serverConnectionHandlerID);
   }
 }
@@ -1535,21 +1537,25 @@ void ts3plugin_onPlaybackShutdownCompleteEvent(uint64 serverConnectionHandlerID)
   }
 }
 
-void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand) {
+void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity) {
   /*
     def onPluginCommandEvent(self, serverConnectionHandlerID, sender, pluginCommand):
         """
         This is called whenever pyTSon receives a plugincommand from another client. All pyTSon plugins will receive this callback. pyTSon recommends to prefix plugincommands with the pluginname.
         @param serverConnectionHandlerID: the ID of the serverconnection
         @type serverConnectionHandlerID: int
-        @param sender: the id of the sending client
-        @type sender: int
         @param pluginCommand: the command
         @type pluginCommand: str
+        @param invokerClientID: the id of the sending client
+        @type invokerClientID: int
+        @param invokerName: the nick of the adding client
+        @type invokerName: str
+        @param invokerUniqueIdentity: the uid of the adding client
+        @type invokerUniqueIdentity: str
         """
   */
   QString callerror;
-  if (!PLUGIN_HOST_CALL(NULL, callerror, "(sKss)", "onPluginCommandEvent", (unsigned long long) serverConnectionHandlerID,  pluginName,  pluginCommand)) {
+  if (!PLUGIN_HOST_CALL(NULL, callerror, "(sKssIss)", "onPluginCommandEvent", (unsigned long long) serverConnectionHandlerID,  pluginName,  pluginCommand, (unsigned int)invokerClientID, invokerName, invokerUniqueIdentity)) {
     LOG_ADD(QSTR("Calling onPluginCommandEvent failed with error \"%1\"").arg(callerror), LogLevel_ERROR, serverConnectionHandlerID);
   }
 }

@@ -19,7 +19,7 @@ extern "C" {
 
 EXPORT_SYMBOL void ts3plugin_currentServerConnectionChanged(uint64 serverConnectionHandlerID);
 EXPORT_SYMBOL void ts3plugin_onAvatarUpdated(uint64 serverConnectionHandlerID, anyID clientID, const char *avatarPath);
-EXPORT_SYMBOL void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, const char *ip, const char *name, const char *uid, uint64 creationTime, uint64 durationTime, const char *invokerName, uint64 invokercldbid, const char *invokeruid, const char *reason, int numberOfEnforcements, const char *lastNickName);
+EXPORT_SYMBOL void ts3plugin_onBanListEvent(uint64 serverConnectionHandlerID, uint64 banid, const char *ip, const char *name, const char *uid, const char *mytsid, uint64 creationTime, uint64 durationTime, const char *invokerName, uint64 invokercldbid, const char *invokeruid, const char *reason, int numberOfEnforcements, const char *lastNickName);
 EXPORT_SYMBOL void ts3plugin_onChannelClientPermListEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 clientDatabaseID, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip);
 EXPORT_SYMBOL void ts3plugin_onChannelClientPermListFinishedEvent(uint64 serverConnectionHandlerID, uint64 channelID, uint64 clientDatabaseID);
 EXPORT_SYMBOL void ts3plugin_onChannelDescriptionUpdateEvent(uint64 serverConnectionHandlerID, uint64 channelID);
@@ -78,7 +78,7 @@ EXPORT_SYMBOL void ts3plugin_onPermissionListGroupEndIDEvent(uint64 serverConnec
 EXPORT_SYMBOL void ts3plugin_onPermissionOverviewEvent(uint64 serverConnectionHandlerID, uint64 clientDatabaseID, uint64 channelID, int overviewType, uint64 overviewID1, uint64 overviewID2, unsigned int permissionID, int permissionValue, int permissionNegated, int permissionSkip);
 EXPORT_SYMBOL void ts3plugin_onPermissionOverviewFinishedEvent(uint64 serverConnectionHandlerID);
 EXPORT_SYMBOL void ts3plugin_onPlaybackShutdownCompleteEvent(uint64 serverConnectionHandlerID);
-EXPORT_SYMBOL void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand);
+EXPORT_SYMBOL void ts3plugin_onPluginCommandEvent(uint64 serverConnectionHandlerID, const char *pluginName, const char *pluginCommand, anyID invokerClientID, const char* invokerName, const char* invokerUniqueIdentity);
 EXPORT_SYMBOL void ts3plugin_onServerConnectionInfoEvent(uint64 serverConnectionHandlerID);
 EXPORT_SYMBOL void ts3plugin_onServerEditedEvent(uint64 serverConnectionHandlerID, anyID editerID, const char *editerName, const char *editerUniqueIdentifier);
 EXPORT_SYMBOL void ts3plugin_onServerGroupByClientIDEvent(uint64 serverConnectionHandlerID, const char *name, uint64 serverGroupList, uint64 clientDatabaseID);

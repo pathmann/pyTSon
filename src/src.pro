@@ -11,7 +11,7 @@ MOC_DIR = build
 RCC_DIR = build
 UI_DIR = build
 
-INCLUDEPATH += ../includes/pluginsdk/21/include
+INCLUDEPATH += ../includes/pluginsdk/23/include
 
 SOURCES += pytson.cpp \
     pytsonhost.cpp \

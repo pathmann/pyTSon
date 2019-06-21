@@ -352,9 +352,9 @@ def activateCaptureDevice(serverConnectionHandlerID):
 }
 
 PyObject* banadd(PyObject* /*self*/, PyObject* args) {
-  //unsigned int banadd(uint64 serverConnectionHandlerID, const char *ipRegExp, const char *nameRegexp, const char *uniqueIdentity, uint64 timeInSeconds, const char *banReason, const char *returnCode)
+  //unsigned int banadd(uint64 serverConnectionHandlerID, const char *ipRegExp, const char *nameRegexp, const char *uniqueIdentity, const char *mytsID, uint64 timeInSeconds, const char *banReason, const char *returnCode)
   /*
-def banadd(serverConnectionHandlerID, ipRegExp, nameRegexp, uniqueIdentity, timeInSeconds, banReason, returnCode):
+def banadd(serverConnectionHandlerID, ipRegExp, nameRegexp, uniqueIdentity,  mytsID, timeInSeconds, banReason, returnCode):
     """
     Adds a new ban.
     @param serverConnectionHandlerID: the ID of the serverconnection
@@ -365,6 +365,8 @@ def banadd(serverConnectionHandlerID, ipRegExp, nameRegexp, uniqueIdentity, time
     @type nameRegexp: string
     @param uniqueIdentity: client UID to ban, pass an empty string to ignore UIDs
     @type uniqueIdentity: string
+    @param mytsID: myTeamSpeak ID to ban, pass an empty string to ignore
+    @type mytsID: string
     @param timeInSeconds: the time, the client should be banned for, pass 0 to add a permanent ban
     @type timeInSeconds: int
     @param banReason: the reason for the ban
@@ -379,14 +381,15 @@ def banadd(serverConnectionHandlerID, ipRegExp, nameRegexp, uniqueIdentity, time
   char* ipRegExp;
   char* nameRegexp;
   char* uniqueIdentity;
+  char* mytsid;
   unsigned long long timeInSeconds;
   char* banReason;
   char* returnCode = NULL;
 
-  if (!PyArg_ParseTuple(args, "KsssKs|s", &schid, &ipRegExp, &nameRegexp, &uniqueIdentity, &timeInSeconds, &banReason, &returnCode))
+  if (!PyArg_ParseTuple(args, "KssssKs|s", &schid, &ipRegExp, &nameRegexp, &uniqueIdentity, &mytsid, &timeInSeconds, &banReason, &returnCode))
     return NULL;
 
-  unsigned int res = ts3_funcs.banadd((uint64)schid, ipRegExp, nameRegexp, uniqueIdentity, (uint64)timeInSeconds, banReason, returnCode);
+  unsigned int res = ts3_funcs.banadd((uint64)schid, ipRegExp, nameRegexp, uniqueIdentity, mytsid, (uint64)timeInSeconds, banReason, returnCode);
 
   return Py_BuildValue("I", res);
 }
@@ -3563,13 +3566,17 @@ def registerCustomDevice(deviceID, deviceDisplayName, capFrequency, capChannels,
 }
 
 PyObject* requestBanList(PyObject* /*self*/, PyObject* args) {
-  //unsigned int requestBanList(uint64 serverConnectionHandlerID, const char *returnCode)
+  //unsigned int requestBanList(uint64 serverConnectionHandlerID, uint64 start, unsigned int duration, const char *returnCode)
   /*
 def requestBanList(serverConnectionHandlerID, returnCode):
     """
     Requests the banlist on a server. The event onBanListEvent will be triggered.
     @param serverConnectionHandlerID: the ID of the serverconnection
     @type serverConnectionHandlerID: int
+    @param start:
+    @type start: int
+    @param duration:
+    @type duration: int
     @param returnCode: returnCode passed to onServerErrorEvent or onServerPermissionErrorEvent. Optional.
     @type returnCode: string
     @return: the errorcode
@@ -3577,12 +3584,14 @@ def requestBanList(serverConnectionHandlerID, returnCode):
     """
   */
   unsigned long long schid;
+  unsigned long long start;
+  unsigned int duration;
   char* returnCode = NULL;
 
-  if (!PyArg_ParseTuple(args, "K|s", &schid, &returnCode))
+  if (!PyArg_ParseTuple(args, "KKI|s", &schid, &start, &duration, &returnCode))
     return NULL;
 
-  unsigned int res = ts3_funcs.requestBanList((uint64)schid, returnCode);
+  unsigned int res = ts3_funcs.requestBanList((uint64)schid, (uint64)start, duration, returnCode);
 
   return Py_BuildValue("I", res);
 }
