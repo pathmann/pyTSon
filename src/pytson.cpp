@@ -82,7 +82,7 @@ const char* ts3plugin_version() {
 }
 
 int ts3plugin_apiVersion() {
-  return 21;
+  return 23;
 }
 
 const char* ts3plugin_author() {
