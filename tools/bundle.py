@@ -46,9 +46,7 @@ FILES = [("ressources/octicons", "plugins/pyTSon/ressources/octicons"),
          ("tools/pylupdate.py", "plugins/pyTSon/include/pylupdate.py"),
          ("LICENSE", "plugins/pyTSon/LICENSE.txt"),
          ("VERSION", "plugins/pyTSon/VERSION"),
-         ("ressources/python/ts3lib.py", "plugins/pyTSon/include/ts3lib.py"),
-         ("ressources/python/_plugincmd.py",
-          "plugins/pyTSon/include/_plugincmd.py")]
+         ("ressources/python/ts3lib.py", "plugins/pyTSon/include/ts3lib.py")]
 
 ARCHFILES = {'win32': [("build/pyTSon.dll", "plugins/pyTSon_win32.dll"),
                        ("build/python.exe", "plugins/pyTSon/python.exe")],

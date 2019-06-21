@@ -1,4 +1,6 @@
 """
+This file is obsolete, api version 23 added a sender parameter
+
 Because the plugin sdk does not emit the sender of a plugin command, we
 have to bypass it with some PublicKey infrastructure to add sender
 integrity to plugincmds.

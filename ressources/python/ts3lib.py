@@ -5,7 +5,6 @@ from ts3defines import (ClientProperties, ClientPropertiesRare,
                         VirtualServerProperties, VirtualServerPropertiesRare,
                         ConnectionProperties, ConnectionPropertiesRare)
 
-from _plugincmd import _PluginCommandHandler
 
 def getChannelVariable(schid, channelID, flag):
     if flag in [ChannelProperties.CHANNEL_CODEC,
@@ -258,12 +257,6 @@ def getConnectionVariable(schid, clientID, flag):
         return _ts3lib.getConnectionVariableAsUInt64(schid, clientID, flag)
     else:
         return _ts3lib.getConnectionVariableAsString(schid, clientID, flag)
-
-
-
-def sendPluginCommand(schid, command, targetMode, targetIDs, *returnCode):
-    _PluginCommandHandler.sendPluginCommand(schid, command, targetMode,
-                                            targetIDs, *returnCode)
 
 
 for func in dir(_ts3lib):

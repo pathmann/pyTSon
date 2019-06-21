@@ -3,7 +3,6 @@ import os
 import glob
 
 import ts3lib
-from _plugincmd import _PluginCommandHandler
 import ts3defines
 import pytson
 import ts3client
@@ -88,8 +87,6 @@ class PluginHost(pytson.Translatable):
         cls.setupTranslator()
 
         cls.verboseLog(cls._tr("Starting up"), "pyTSon.PluginHost.init")
-
-        cls.registerCallbackProxy(_PluginCommandHandler)
 
         cls.reload()
         cls.start()
@@ -488,16 +485,6 @@ class PluginHost(pytson.Translatable):
                              "pyTSon.PluginHost.infoData")
 
         return ret
-
-    @classmethod
-    def onPluginCommandEvent(cls, schid, pluginName, pluginCommand):
-        # pluginName is always 'pyTSon', so we ignore it completely
-        fire, sender, cmds = _PluginCommandHandler.handlePluginCommand(schid,
-                                                                       pluginCommand)
-
-        if fire:
-            for cmd in cmds:
-                cls.invokePlugins("onPluginCommandEvent", schid, sender, cmd)
 
     @classmethod
     def parseUpdateReply(cls, repstr):
