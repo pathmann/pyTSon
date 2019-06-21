@@ -28,7 +28,7 @@ Generating Documentation
 
 Building
 --------
-* [Qt 5.6.1](https://download.qt.io/archive/qt/5.6/5.6.1/) (which is the version, the TeamSpeak 3 client is currently using)
+* [Qt 5.12.1](https://download.qt.io/archive/qt/5.12/5.12.1/) (which is the version, the TeamSpeak 3 client is currently using)
 * [Python 3.5.2](https://www.python.org/downloads/release/python-352/#Files) (configure with --enable-shared)
 * [PythonQt](https://github.com/pathmann/PythonQt)
 * [patchelf](http://nixos.org/patchelf.html) (linux; Version >= 0.9)
