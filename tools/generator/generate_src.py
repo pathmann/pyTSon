@@ -28,7 +28,7 @@ PYPLUGIN_CALLBACK_BLACKLIST = ["ts3plugin_freeMemory", "ts3plugin_registerPlugin
                                "ts3plugin_onCustom3dRolloffCalculationWaveEvent", "ts3plugin_onFileTransferStatusEvent",
                                "ts3plugin_keyDeviceName", "ts3plugin_displayKeyText", "ts3plugin_keyPrefix"]
 
-MODULE_FUNCTION_BLACKLIST = ["freeMemory"]
+MODULE_FUNCTION_BLACKLIST = ["freeMemory", "notifyKeyEvent"]
 
 
 log = None
