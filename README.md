@@ -76,7 +76,7 @@ class testplugin(ts3plugin):
     name = "test"
     requestAutoload = False
     version = "1.0"
-    apiVersion = 21
+    apiVersion = 23
     author = "Thomas \"PLuS\" Pathmann"
     description = "This is a testplugin"
     offersConfigure = True
