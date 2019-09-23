@@ -61,7 +61,7 @@ class ts3plugin(object):
     """The name of the plugin. Use meaningful names. It has to be unique in the list of plugins."""
     version = "1.0"
     """Version string of the plugin. pyTSon will use this string to determine, if a new version is available in an online repository."""
-    apiVersion = 21
+    apiVersion = 23
     """apiVersion the plugin was developed for."""
     author = "Thomas \"PLuS\" Pathmann"
     """Let the world know who made the plugin."""
