@@ -23,7 +23,7 @@ from ts3plugin import ts3plugin
 
 class %s(ts3plugin):
     name = "%s"
-    apiVersion = 21
+    apiVersion = 23
     version = "1.0.0"
     author = ""
     description = ""
