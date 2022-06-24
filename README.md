@@ -1,3 +1,6 @@
+# This repository is archived. pyTSon will not work with your up-to-date TeamSpeak 3 client.
+Feel free to fork this repository.
+
 # pyTSon
 pyTSon is a plugin for the TeamSpeak 3 client, it offers a python3 interface for the plugin sdk.
 pyTSon has a minimum C/C++ part, so that the main plugin runs in embedded python.
