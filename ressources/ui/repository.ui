@@ -273,7 +273,7 @@ p, li { white-space: pre-wrap; }
            <string notr="true"/>
           </property>
           <property name="text">
-           <string notr="true">21</string>
+           <string notr="true">23</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>

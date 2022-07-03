@@ -145,4 +145,4 @@ def getCurrentApiVersion():
     @return: the apiVersion
     @rtype: str
     """
-    return 21
+    return 23
